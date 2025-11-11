@@ -20,6 +20,7 @@ import { Insights } from "@/pages/Insights";
 import { Goals } from "@/pages/Goals";
 import { Financing } from "@/pages/Financing";
 import { Settings } from "@/pages/Settings";
+import { Profile } from "@/pages/Profile";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -127,6 +128,7 @@ const Dashboard = () => {
               <Route path="insights" element={<Insights userId={user?.id} currency={preferredCurrency} />} />
               <Route path="categories" element={<Categories userId={user?.id} />} />
               <Route path="financing" element={<Financing currency={preferredCurrency} />} />
+              <Route path="profile" element={<Profile userId={user?.id} />} />
               <Route path="settings" element={<Settings userId={user?.id} />} />
             </Routes>
           </main>

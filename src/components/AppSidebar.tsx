@@ -1,4 +1,4 @@
-import { BarChart3, Receipt, TrendingUp, Tags, LogOut, ArrowDownCircle, ArrowUpCircle, Lightbulb, Target, Calculator, Settings } from "lucide-react";
+import { BarChart3, Receipt, TrendingUp, Tags, LogOut, ArrowDownCircle, ArrowUpCircle, Lightbulb, Target, Calculator, Settings, User } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -24,6 +24,7 @@ const menuItems = [
   { title: "Financiamento Inteligente", url: "/dashboard/financing", icon: Calculator },
   { title: "Análises e Insights", url: "/dashboard/insights", icon: Lightbulb },
   { title: "Categorias", url: "/dashboard/categories", icon: Tags },
+  { title: "Perfil", url: "/dashboard/profile", icon: User },
   { title: "Configurações", url: "/dashboard/settings", icon: Settings },
 ];
 
