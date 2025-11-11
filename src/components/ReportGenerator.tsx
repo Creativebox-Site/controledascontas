@@ -81,8 +81,20 @@ export const ReportGenerator = ({ userId, currency }: ReportGeneratorProps) => {
   const loadFinancialData = async () => {
     if (!userId) return;
 
+    const formatCurrency = (value: number) => {
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: currency,
+      }).format(value);
+    };
+
     const { data: transactions } = await sb
       .from("transactions")
+      .select("*, categories(name, color)")
+      .eq("user_id", userId);
+
+    const { data: goals } = await sb
+      .from("goals")
       .select("*")
       .eq("user_id", userId);
 
@@ -99,11 +111,112 @@ export const ReportGenerator = ({ userId, currency }: ReportGeneratorProps) => {
         .filter((t) => t.type === "investment")
         .reduce((sum, t) => sum + Number(t.amount), 0);
 
+      // Despesas por categoria
+      const categoryMap = new Map<string, { total: number; color: string }>();
+      transactions
+        .filter((t) => t.type === "expense")
+        .forEach((t) => {
+          const name = t.categories?.name || "Sem categoria";
+          const color = t.categories?.color || "#888888";
+          if (categoryMap.has(name)) {
+            categoryMap.get(name)!.total += Number(t.amount);
+          } else {
+            categoryMap.set(name, { total: Number(t.amount), color });
+          }
+        });
+
+      const categoryExpenses = Array.from(categoryMap.entries())
+        .map(([name, data]) => ({
+          name,
+          total: data.total,
+          percentage: expense > 0 ? (data.total / expense) * 100 : 0,
+          color: data.color,
+        }))
+        .sort((a, b) => b.total - a.total);
+
+      // Dados mensais
+      const monthlyMap = new Map<string, { income: number; expense: number; investment: number }>();
+      transactions.forEach((t) => {
+        const month = t.date.substring(0, 7);
+        if (!monthlyMap.has(month)) {
+          monthlyMap.set(month, { income: 0, expense: 0, investment: 0 });
+        }
+        const data = monthlyMap.get(month)!;
+        if (t.type === "income") data.income += Number(t.amount);
+        else if (t.type === "expense") data.expense += Number(t.amount);
+        else if (t.type === "investment") data.investment += Number(t.amount);
+      });
+
+      const monthlyData = Array.from(monthlyMap.entries())
+        .map(([month, data]) => ({ month, ...data }))
+        .sort((a, b) => a.month.localeCompare(b.month))
+        .slice(-6);
+
+      // Preparar dados de transações
+      const transactionData = transactions.slice(0, 50).map((t) => ({
+        id: t.id,
+        date: t.date,
+        description: t.description,
+        amount: Number(t.amount),
+        type: t.type,
+        category: t.categories?.name,
+      }));
+
+      // Preparar dados de metas
+      const goalsData = goals?.map((g) => ({
+        name: g.name,
+        target_amount: Number(g.target_amount),
+        current_amount: Number(g.current_amount),
+        target_date: g.target_date,
+        icon: g.icon,
+        progress: Math.min((Number(g.current_amount) / Number(g.target_amount)) * 100, 100),
+      })) || [];
+
+      // Gerar insights
+      const insights: string[] = [];
+      
+      if (income > expense) {
+        const savings = income - expense;
+        const savingsRate = ((savings / income) * 100).toFixed(1);
+        insights.push(`Você economizou ${savingsRate}% da sua renda este período. Excelente controle financeiro!`);
+      } else if (expense > income) {
+        const deficit = expense - income;
+        insights.push(`Suas despesas superaram suas receitas em ${formatCurrency(deficit)}. Revise seus gastos para equilibrar o orçamento.`);
+      }
+
+      if (categoryExpenses.length > 0 && categoryExpenses[0].percentage > 40) {
+        insights.push(`A categoria "${categoryExpenses[0].name}" representa ${categoryExpenses[0].percentage.toFixed(1)}% das suas despesas. Considere revisar esse gasto.`);
+      }
+
+      if (investments > 0) {
+        const investmentRate = ((investments / income) * 100).toFixed(1);
+        insights.push(`Você investiu ${investmentRate}% da sua renda. ${parseFloat(investmentRate) >= 10 ? "Ótimo trabalho!" : "Tente aumentar gradualmente essa porcentagem."}`);
+      } else {
+        insights.push("Você ainda não tem investimentos registrados. Considere começar a investir para construir seu patrimônio.");
+      }
+
+      if (goalsData.length > 0) {
+        const completedGoals = goalsData.filter((g) => g.progress >= 100).length;
+        if (completedGoals > 0) {
+          insights.push(`Parabéns! Você completou ${completedGoals} ${completedGoals === 1 ? "meta" : "metas"}!`);
+        }
+        const activeGoals = goalsData.filter((g) => g.progress < 100);
+        if (activeGoals.length > 0) {
+          const avgProgress = activeGoals.reduce((sum, g) => sum + g.progress, 0) / activeGoals.length;
+          insights.push(`Progresso médio das suas metas: ${avgProgress.toFixed(1)}%. Continue focado!`);
+        }
+      }
+
       setFinancialData({
         totalIncome: income,
         totalExpense: expense,
         totalInvestments: investments,
         balance: income - expense,
+        transactions: transactionData,
+        categoryExpenses,
+        monthlyData,
+        goals: goalsData,
+        insights,
       });
     }
   };
@@ -128,11 +241,16 @@ export const ReportGenerator = ({ userId, currency }: ReportGeneratorProps) => {
         totalInvestments: financialData.totalInvestments,
         currency,
         sections,
+        transactions: financialData.transactions,
+        goals: financialData.goals,
+        categoryExpenses: financialData.categoryExpenses,
+        monthlyData: financialData.monthlyData,
+        insights: financialData.insights,
       });
 
       setPdfBlob(blob);
       setDeliveryTab("delivery");
-      toast.success("Relatório gerado com sucesso!");
+      toast.success("Relatório completo gerado com sucesso!");
     } catch (error) {
       console.error("Erro ao gerar relatório:", error);
       toast.error("Erro ao gerar relatório");
