@@ -113,14 +113,13 @@ const Auth = () => {
       return;
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    setLoading(false);
-
     if (error) {
+      setLoading(false);
       if (error.message.includes("Invalid login credentials")) {
         toast.error("Email ou senha incorretos. Verifique seus dados e tente novamente.");
       } else {
@@ -129,7 +128,24 @@ const Auth = () => {
       return;
     }
 
-    toast.success("Login realizado com sucesso! Bem-vindo de volta.");
+    // Verificar se o usuário tem categorias
+    if (data.user) {
+      const { data: categories, error: categoriesError } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('user_id', data.user.id)
+        .limit(1);
+
+      // Se não tiver nenhuma categoria, adicionar as padrão
+      if (!categoriesError && (!categories || categories.length === 0)) {
+        await supabase.rpc('create_default_categories', { p_user_id: data.user.id });
+        toast.success("Login realizado! Categorias padrão adicionadas à sua conta.");
+      } else {
+        toast.success("Login realizado com sucesso! Bem-vindo de volta.");
+      }
+    }
+
+    setLoading(false);
     navigate("/");
   };
 
