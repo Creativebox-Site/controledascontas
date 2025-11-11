@@ -162,6 +162,39 @@ export type Database = {
         }
         Relationships: []
       }
+      reports_sent: {
+        Row: {
+          created_at: string
+          delivery_method: string
+          file_size: number | null
+          id: string
+          recipient: string | null
+          report_date: string
+          sections_included: string[]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_method: string
+          file_size?: number | null
+          id?: string
+          recipient?: string | null
+          report_date?: string
+          sections_included: string[]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delivery_method?: string
+          file_size?: number | null
+          id?: string
+          recipient?: string | null
+          report_date?: string
+          sections_included?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
