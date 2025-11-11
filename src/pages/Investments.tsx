@@ -28,30 +28,25 @@ interface Investment {
   category_name: string;
 }
 
-const INVESTMENT_CATEGORIES = [
-  "Reserva de Emergência",
-  "Renda Fixa",
-  "Ações",
-  "Fundos Imobiliários",
-  "Criptomoedas",
-  "Tesouro Direto",
-  "CDB",
-  "LCI/LCA",
-  "Previdência Privada",
-];
+interface InvestmentCategory {
+  id: string;
+  name: string;
+  color: string;
+}
 
 export const Investments = ({ userId, currency }: InvestmentsProps) => {
   const [investments, setInvestments] = useState<Investment[]>([]);
+  const [categories, setCategories] = useState<InvestmentCategory[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isRecurring, setIsRecurring] = useState(false);
   const [formData, setFormData] = useState({
-    category: "Reserva de Emergência",
-    amount: "",
+    category_id: "",
     description: "",
     date: new Date().toISOString().split("T")[0],
   });
+  const [displayValue, setDisplayValue] = useState("");
   const [recurringData, setRecurringData] = useState({
     frequency: "monthly",
     repetitions: 12,
@@ -59,9 +54,29 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
 
   useEffect(() => {
     if (userId) {
-      createInvestmentCategories();
+      loadCategories();
+      loadInvestments();
     }
   }, [userId]);
+
+  const loadCategories = async () => {
+    const { data, error } = await sb
+      .from("categories")
+      .select("id, name, color")
+      .eq("user_id", userId)
+      .eq("type", "investment")
+      .order("name");
+
+    if (error) {
+      toast.error("Erro ao carregar categorias");
+      return;
+    }
+
+    setCategories(data || []);
+    if (data && data.length > 0) {
+      setFormData(prev => ({ ...prev, category_id: data[0].id }));
+    }
+  };
 
   useEffect(() => {
     if (!userId) return;
@@ -97,45 +112,19 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
     };
   }, [userId]);
 
-  const createInvestmentCategories = async () => {
-    // Check and create investment categories if they don't exist
-    for (const categoryName of INVESTMENT_CATEGORIES) {
-      const { data: existing } = await sb
-        .from("categories")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("name", categoryName)
-        .eq("type", "investment")
-        .maybeSingle();
-
-      if (!existing) {
-        await sb.from("categories").insert({
-          user_id: userId,
-          name: categoryName,
-          type: "investment",
-          is_essential: false,
-          color: categoryName === "Reserva de Emergência" ? "#10b981" : "#3b82f6",
-        });
-      }
-    }
-
-    loadInvestments();
-  };
 
   const loadInvestments = async () => {
     setLoading(true);
 
-    // Get investment categories
-    const { data: categories } = await sb
+    const { data: investmentCategories } = await sb
       .from("categories")
       .select("id, name")
       .eq("user_id", userId)
-      .eq("type", "investment")
-      .in("name", INVESTMENT_CATEGORIES);
+      .eq("type", "investment");
 
-    if (categories) {
-      const categoryIds = categories.map((c) => c.id);
-      const categoryMap = Object.fromEntries(categories.map((c) => [c.id, c.name]));
+    if (investmentCategories) {
+      const categoryIds = investmentCategories.map((c) => c.id);
+      const categoryMap = Object.fromEntries(investmentCategories.map((c) => [c.id, c.name]));
 
       const { data: transactions } = await sb
         .from("transactions")
@@ -160,24 +149,27 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
     setLoading(false);
   };
 
+  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/\D/g, "");
+    setDisplayValue(rawValue);
+  };
+
+  const formatDisplayValue = (value: string) => {
+    if (!value) return "";
+    const numericValue = Number(value) / 100;
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: currency,
+    }).format(numericValue);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.amount) {
-      toast.error("Preencha o valor do investimento");
-      return;
-    }
+    const amount = Number(displayValue) / 100;
 
-    // Get category ID
-    const { data: category } = await sb
-      .from("categories")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("name", formData.category)
-      .single();
-
-    if (!category) {
-      toast.error("Categoria não encontrada");
+    if (!amount || !formData.category_id) {
+      toast.error("Preencha o valor e a categoria");
       return;
     }
 
@@ -203,8 +195,8 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
         
         investments.push({
           user_id: userId,
-          category_id: category.id,
-          amount: parseFloat(formData.amount),
+          category_id: formData.category_id,
+          amount: amount,
           description: formData.description,
           date: investmentDate.toISOString().split('T')[0],
           currency: currency,
@@ -224,11 +216,11 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
         toast.success(`${investments.length} investimentos recorrentes criados!`);
         setTimeout(() => {
           setFormData({
-            category: "Reserva de Emergência",
-            amount: "",
+            category_id: categories[0]?.id || "",
             description: "",
             date: new Date().toISOString().split("T")[0],
           });
+          setDisplayValue("");
           setIsRecurring(false);
           setShowForm(false);
           loadInvestments();
@@ -239,8 +231,8 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
       
       const { error } = await sb.from("transactions").insert({
         user_id: userId,
-        category_id: category.id,
-        amount: parseFloat(formData.amount),
+        category_id: formData.category_id,
+        amount: amount,
         description: formData.description,
         date: formData.date,
         currency: currency,
@@ -255,11 +247,11 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
         toast.success("Investimento adicionado!");
         setTimeout(() => {
           setFormData({
-            category: "Reserva de Emergência",
-            amount: "",
+            category_id: categories[0]?.id || "",
             description: "",
             date: new Date().toISOString().split("T")[0],
           });
+          setDisplayValue("");
           setShowForm(false);
           loadInvestments();
         }, 500);
@@ -354,18 +346,18 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
                 <div className="space-y-2">
                   <Label>Categoria</Label>
                   <Select
-                    value={formData.category}
+                    value={formData.category_id}
                     onValueChange={(value) =>
-                      setFormData({ ...formData, category: value })
+                      setFormData({ ...formData, category_id: value })
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Selecione uma categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      {INVESTMENT_CATEGORIES.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat}
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -375,13 +367,10 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
                 <div className="space-y-2">
                   <Label>Valor</Label>
                   <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.amount}
-                    onChange={(e) =>
-                      setFormData({ ...formData, amount: e.target.value })
-                    }
-                    placeholder="0.00"
+                    type="text"
+                    value={formatDisplayValue(displayValue)}
+                    onChange={handleValueChange}
+                    placeholder={formatCurrency(0, currency)}
                   />
                 </div>
               </div>

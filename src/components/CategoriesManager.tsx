@@ -154,6 +154,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
 
   const incomeCategories = categories.filter((c) => c.type === "income");
   const expenseCategories = categories.filter((c) => c.type === "expense");
+  const investmentCategories = categories.filter((c) => c.type === "investment");
 
   return (
     <div className="space-y-6">
@@ -212,6 +213,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
                     <SelectContent>
                       <SelectItem value="income">Receita</SelectItem>
                       <SelectItem value="expense">Despesa</SelectItem>
+                      <SelectItem value="investment">Investimento</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -262,7 +264,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
         </Card>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="text-success">Receitas</CardTitle>
@@ -298,6 +300,11 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
                 </div>
               </div>
             ))}
+            {incomeCategories.length === 0 && (
+              <p className="text-center text-muted-foreground py-4">
+                Nenhuma categoria de receita
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -341,6 +348,54 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
                 </div>
               </div>
             ))}
+            {expenseCategories.length === 0 && (
+              <p className="text-center text-muted-foreground py-4">
+                Nenhuma categoria de despesa
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-primary">Investimentos</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {investmentCategories.map((category) => (
+              <div
+                key={category.id}
+                className="flex items-center justify-between p-3 rounded-lg border"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-8 h-8 rounded-full"
+                    style={{ backgroundColor: category.color }}
+                  />
+                  <span className="font-medium">{category.name}</span>
+                </div>
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleEdit(category)}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDelete(category.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+            {investmentCategories.length === 0 && (
+              <p className="text-center text-muted-foreground py-4">
+                Nenhuma categoria de investimento
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
