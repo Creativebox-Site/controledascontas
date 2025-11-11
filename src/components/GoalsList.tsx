@@ -57,6 +57,29 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
     icon: "🎯",
   });
 
+  const formatCurrencyInput = (value: string): string => {
+    // Remove tudo que não é número
+    const numbers = value.replace(/\D/g, "");
+    
+    if (!numbers) return "";
+    
+    // Converte para número e divide por 100 para ter os centavos
+    const amount = parseInt(numbers) / 100;
+    
+    // Formata como moeda brasileira
+    return amount.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
+  const parseCurrencyInput = (value: string): string => {
+    // Remove formatação e converte para número
+    const numbers = value.replace(/\D/g, "");
+    if (!numbers) return "0";
+    return (parseInt(numbers) / 100).toString();
+  };
+
   useEffect(() => {
     if (userId) {
       loadGoals();
@@ -96,8 +119,8 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
       user_id: userId,
       name: formData.name,
       description: formData.description || null,
-      target_amount: parseFloat(formData.target_amount),
-      current_amount: parseFloat(formData.current_amount),
+      target_amount: parseFloat(parseCurrencyInput(formData.target_amount)),
+      current_amount: parseFloat(parseCurrencyInput(formData.current_amount)),
       target_date: formData.target_date,
       goal_type: formData.goal_type,
       icon: formData.icon,
@@ -166,8 +189,8 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
     setFormData({
       name: goal.name,
       description: goal.description || "",
-      target_amount: goal.target_amount.toString(),
-      current_amount: goal.current_amount.toString(),
+      target_amount: formatCurrencyInput((goal.target_amount * 100).toString()),
+      current_amount: formatCurrencyInput((goal.current_amount * 100).toString()),
       target_date: goal.target_date,
       goal_type: goal.goal_type,
       icon: goal.icon,
@@ -242,11 +265,11 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
     <div className="space-y-4">
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogTrigger asChild>
-          <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
-            <CardContent className="py-6">
-              <div className="flex items-center justify-center gap-3">
-                <Plus className="w-5 h-5" />
-                <span className="font-semibold">Adicionar Nova Meta</span>
+          <Card className="cursor-pointer bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg border-primary">
+            <CardContent className="py-8">
+              <div className="flex items-center justify-center gap-3 text-primary-foreground">
+                <Plus className="w-6 h-6" />
+                <span className="text-lg font-bold">Adicionar Nova Meta</span>
               </div>
             </CardContent>
           </Card>
@@ -306,25 +329,41 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
 
             <div>
               <Label>Valor Alvo *</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={formData.target_amount}
-                onChange={(e) => setFormData({ ...formData, target_amount: e.target.value })}
-                placeholder="0.00"
-                required
-              />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  R$
+                </span>
+                <Input
+                  type="text"
+                  value={formData.target_amount}
+                  onChange={(e) => {
+                    const formatted = formatCurrencyInput(e.target.value);
+                    setFormData({ ...formData, target_amount: formatted });
+                  }}
+                  placeholder="0,00"
+                  className="pl-10"
+                  required
+                />
+              </div>
             </div>
 
             <div>
               <Label>Valor Já Economizado</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={formData.current_amount}
-                onChange={(e) => setFormData({ ...formData, current_amount: e.target.value })}
-                placeholder="0.00"
-              />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  R$
+                </span>
+                <Input
+                  type="text"
+                  value={formData.current_amount}
+                  onChange={(e) => {
+                    const formatted = formatCurrencyInput(e.target.value);
+                    setFormData({ ...formData, current_amount: formatted });
+                  }}
+                  placeholder="0,00"
+                  className="pl-10"
+                />
+              </div>
             </div>
 
             <div>

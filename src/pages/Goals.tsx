@@ -17,9 +17,9 @@ export const Goals = ({ userId, currency }: GoalsProps) => {
         </p>
       </div>
 
+      <GoalsList userId={userId} currency={currency} />
       <GoalsInsights userId={userId} currency={currency} />
       <GoalsInvestmentComparison userId={userId} currency={currency} />
-      <GoalsList userId={userId} currency={currency} />
     </div>
   );
 };
