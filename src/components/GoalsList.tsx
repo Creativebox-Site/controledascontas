@@ -239,143 +239,145 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Target className="w-5 h-5" />
-            Minhas Metas
-          </CardTitle>
-          <Dialog open={showForm} onOpenChange={setShowForm}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { setEditingGoal(null); resetForm(); }}>
-                <Plus className="w-4 h-4 mr-2" />
-                Nova Meta
+    <div className="space-y-4">
+      <Dialog open={showForm} onOpenChange={setShowForm}>
+        <DialogTrigger asChild>
+          <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
+            <CardContent className="py-6">
+              <div className="flex items-center justify-center gap-3">
+                <Plus className="w-5 h-5" />
+                <span className="font-semibold">Adicionar Nova Meta</span>
+              </div>
+            </CardContent>
+          </Card>
+        </DialogTrigger>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingGoal ? "Editar Meta" : "Criar Nova Meta"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label>Tipo de Meta</Label>
+              <Select
+                value={formData.goal_type}
+                onValueChange={(value) => {
+                  const type = goalTypes.find((t) => t.value === value);
+                  setFormData({
+                    ...formData,
+                    goal_type: value,
+                    icon: type?.icon || "🎯",
+                  });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {goalTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.icon} {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Nome da Meta *</Label>
+              <Input
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Ex: Comprar casa própria"
+                required
+              />
+            </div>
+
+            <div>
+              <Label>Descrição</Label>
+              <Textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Descreva seu sonho..."
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <Label>Valor Alvo *</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={formData.target_amount}
+                onChange={(e) => setFormData({ ...formData, target_amount: e.target.value })}
+                placeholder="0.00"
+                required
+              />
+            </div>
+
+            <div>
+              <Label>Valor Já Economizado</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={formData.current_amount}
+                onChange={(e) => setFormData({ ...formData, current_amount: e.target.value })}
+                placeholder="0.00"
+              />
+            </div>
+
+            <div>
+              <Label>Data Alvo *</Label>
+              <Input
+                type="date"
+                value={formData.target_date}
+                onChange={(e) => setFormData({ ...formData, target_date: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button type="submit" className="flex-1">
+                {editingGoal ? "Atualizar" : "Criar"} Meta
               </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingGoal ? "Editar Meta" : "Criar Nova Meta"}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label>Tipo de Meta</Label>
-                  <Select
-                    value={formData.goal_type}
-                    onValueChange={(value) => {
-                      const type = goalTypes.find((t) => t.value === value);
-                      setFormData({
-                        ...formData,
-                        goal_type: value,
-                        icon: type?.icon || "🎯",
-                      });
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {goalTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.icon} {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingGoal(null);
+                  resetForm();
+                }}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-                <div>
-                  <Label>Nome da Meta *</Label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Ex: Comprar casa própria"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label>Descrição</Label>
-                  <Textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Descreva seu sonho..."
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <Label>Valor Alvo *</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.target_amount}
-                    onChange={(e) => setFormData({ ...formData, target_amount: e.target.value })}
-                    placeholder="0.00"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label>Valor Já Economizado</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.current_amount}
-                    onChange={(e) => setFormData({ ...formData, current_amount: e.target.value })}
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div>
-                  <Label>Data Alvo *</Label>
-                  <Input
-                    type="date"
-                    value={formData.target_date}
-                    onChange={(e) => setFormData({ ...formData, target_date: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button type="submit" className="flex-1">
-                    {editingGoal ? "Atualizar" : "Criar"} Meta
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setShowForm(false);
-                      setEditingGoal(null);
-                      resetForm();
-                    }}
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {goals.length === 0 ? (
-          <div className="text-center py-12">
+      {goals.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
             <Target className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Nenhuma meta cadastrada</h3>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground">
               Comece definindo seus objetivos financeiros e acompanhe seu progresso!
             </p>
-            <Button onClick={() => setShowForm(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Criar Primeira Meta
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {goals.map((goal) => {
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5" />
+              Minhas Metas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {goals.map((goal) => {
               const progress = getProgressPercentage(goal.current_amount, goal.target_amount);
               const monthsRemaining = getMonthsRemaining(goal.target_date);
 
@@ -478,8 +480,9 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
               );
             })}
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      )}
+    </div>
   );
 };
