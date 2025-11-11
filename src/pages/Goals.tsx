@@ -1,5 +1,6 @@
 import { GoalsList } from "@/components/GoalsList";
 import { GoalsInsights } from "@/components/GoalsInsights";
+import { GoalsInvestmentComparison } from "@/components/GoalsInvestmentComparison";
 
 interface GoalsProps {
   userId?: string;
@@ -17,6 +18,7 @@ export const Goals = ({ userId, currency }: GoalsProps) => {
       </div>
 
       <GoalsInsights userId={userId} currency={currency} />
+      <GoalsInvestmentComparison userId={userId} currency={currency} />
       <GoalsList userId={userId} currency={currency} />
     </div>
   );
