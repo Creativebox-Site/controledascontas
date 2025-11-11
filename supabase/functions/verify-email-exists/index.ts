@@ -19,6 +19,8 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { email }: VerifyEmailRequest = await req.json();
 
+    console.log("Received email verification request for:", email);
+
     if (!email || !email.trim()) {
       return new Response(
         JSON.stringify({ error: "Email é obrigatório" }),
@@ -29,7 +31,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Criar cliente Supabase com service role key para acessar auth.users
+    // Criar cliente Supabase com service role key
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -41,8 +43,8 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
 
-    // Verificar se o email existe na tabela auth.users
-    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    // Verificar se o usuário existe consultando a lista de usuários
+    const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
 
     if (listError) {
       console.error("Error listing users:", listError);
@@ -55,12 +57,11 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Verificar se o email existe
-    const userExists = users.users.some(
-      (user) => user.email?.toLowerCase() === email.toLowerCase()
-    );
+    // Verificar se o email existe na lista
+    const userExists = users.some(user => user.email?.toLowerCase() === email.toLowerCase());
 
     if (!userExists) {
+      console.log("User not found:", email);
       return new Response(
         JSON.stringify({ 
           exists: false, 
@@ -72,6 +73,8 @@ const handler = async (req: Request): Promise<Response> => {
         }
       );
     }
+
+    console.log("User found, sending password reset email");
 
     // Se o email existe, enviar email de recuperação
     const { error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(
@@ -92,6 +95,8 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    console.log("Password reset email sent successfully");
+
     return new Response(
       JSON.stringify({ 
         exists: true, 
@@ -105,7 +110,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in verify-email-exists function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || "Erro desconhecido" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
