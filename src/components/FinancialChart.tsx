@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { sb } from "@/lib/sb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import { TrendingUp, TrendingDown, Wallet, PiggyBank, Coins } from "lucide-react";
-
-const sb = supabase as any;
-
-const sb = supabase as any;
 
 interface Transaction {
   amount: number;

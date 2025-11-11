@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { sb } from "@/lib/sb";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Lightbulb, Target, TrendingUp, PiggyBank } from "lucide-react";
 import { startOfMonth, endOfMonth, format, addMonths } from "date-fns";
-
-const sb = supabase as any;
-
-const sb = supabase as any;
 
 interface FinancialTipsProps {
   userId?: string;

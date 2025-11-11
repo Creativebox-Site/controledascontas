@@ -9,7 +9,7 @@ import { Download, Trash2, AlertTriangle, FileSpreadsheet, FileJson } from "luci
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
 
-const sb = supabase as any;
+import { sb } from "@/lib/sb";
 
 interface AccountDeletionProps {
   userId?: string;

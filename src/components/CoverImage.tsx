@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,10 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Image } from "lucide-react";
 import { toast } from "sonner";
-
-const sb = supabase as any;
-
-const sb = supabase as any;
+import { sb } from "@/lib/sb";
 
 interface CoverImageProps {
   userId?: string;

@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { sb } from "@/lib/sb";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ShieldCheck } from "lucide-react";
-
-const sb = supabase as any;
-
-const sb = supabase as any;
 
 interface EmergencyFundProps {
   userId?: string;

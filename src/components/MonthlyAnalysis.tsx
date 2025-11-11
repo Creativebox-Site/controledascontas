@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { sb } from "@/lib/sb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InsightCard } from "@/components/InsightCard";
 import { startOfMonth, endOfMonth, startOfMonth as startOfLastMonth, endOfMonth as endOfLastMonth, subMonths, format } from "date-fns";
@@ -50,7 +50,7 @@ export const MonthlyAnalysis = ({ userId, currency }: MonthlyAnalysisProps) => {
     const lastEnd = endOfLastMonth(lastMonthDate);
 
     // Buscar transações do mês atual
-    const { data: currentTransactions } = await supabase
+    const { data: currentTransactions } = await sb
       .from("transactions")
       .select("*, categories(name, color)")
       .eq("user_id", userId)
@@ -59,7 +59,7 @@ export const MonthlyAnalysis = ({ userId, currency }: MonthlyAnalysisProps) => {
       .lte("date", format(currentEnd, "yyyy-MM-dd"));
 
     // Buscar transações do mês passado
-    const { data: lastTransactions } = await supabase
+    const { data: lastTransactions } = await sb
       .from("transactions")
       .select("*, categories(name, color)")
       .eq("user_id", userId)

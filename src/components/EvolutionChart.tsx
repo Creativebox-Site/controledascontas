@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { sb } from "@/lib/sb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,10 +10,6 @@ import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-const sb = supabase as any;
-
-const sb = supabase as any;
 
 interface Transaction {
   amount: number;
@@ -224,7 +220,7 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
               key={name} 
               type="monotone" 
               dataKey={name} 
-              stroke={category?.color || "#888"} 
+              stroke={category?.color || "hsl(var(--muted-foreground))"} 
               name={name} 
               strokeWidth={2} 
             />
@@ -233,14 +229,14 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
       } else {
         const category = categories.find(c => c.id === selectedCategory);
         return [
-          <Line 
-            key={category?.name} 
-            type="monotone" 
-            dataKey={category?.name || "Categoria"} 
-            stroke={category?.color || "#888"} 
-            name={category?.name || "Categoria"} 
-            strokeWidth={2} 
-          />
+            <Line 
+              key={category?.name} 
+              type="monotone" 
+              dataKey={category?.name || "Categoria"} 
+              stroke={category?.color || "hsl(var(--muted-foreground))"} 
+              name={category?.name || "Categoria"} 
+              strokeWidth={2} 
+            />
         ];
       }
     }

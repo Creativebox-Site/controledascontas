@@ -1,13 +1,9 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { sb } from "@/lib/sb";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { startOfMonth, endOfMonth, subMonths, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-const sb = supabase as any;
-
-const sb = supabase as any;
 
 interface CategoryVariationChartProps {
   userId?: string;
@@ -80,9 +76,9 @@ export const CategoryVariationChart = ({ userId, currency }: CategoryVariationCh
           return acc;
         }, {} as Record<string, number>);
 
-      const categoryData: CategoryData[] = Object.entries(currentCategories)
+      const categoryData: CategoryData[] = Object.entries(currentCategories as Record<string, { amount: number; color: string }>)
         .map(([name, { amount, color }]) => {
-          const lastAmount = lastCategories[name] || 0;
+          const lastAmount = (lastCategories as Record<string, number>)[name] || 0;
           const variation = lastAmount > 0 ? ((amount - lastAmount) / lastAmount) * 100 : 0;
           return {
             name,

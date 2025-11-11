@@ -1,11 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-const sb = supabase as any;
-
-const sb = supabase as any;
-
+import { sb } from "@/lib/sb";
 interface CurrencySelectorProps {
   value: string;
   onChange: (value: string) => void;

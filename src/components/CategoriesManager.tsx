@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { sb } from "@/lib/sb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,10 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Edit, Trash2, Plus, Upload } from "lucide-react";
 import { BulkImport } from "@/components/BulkImport";
-
-const sb = supabase as any;
-
-const sb = supabase as any;
 
 interface Category {
   id: string;

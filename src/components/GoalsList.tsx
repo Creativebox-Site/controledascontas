@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { sb } from "@/lib/sb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -66,7 +66,7 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
   const loadGoals = async () => {
     if (!userId) return;
 
-    const { data, error } = await supabase
+    const { data, error } = await sb
       .from("goals")
       .select("*")
       .eq("user_id", userId)
@@ -104,7 +104,7 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
     };
 
     if (editingGoal) {
-      const { error } = await supabase
+      const { error } = await sb
         .from("goals")
         .update(goalData)
         .eq("id", editingGoal.id);
@@ -119,7 +119,7 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
         loadGoals();
       }
     } else {
-      const { error } = await supabase.from("goals").insert([goalData]);
+      const { error } = await sb.from("goals").insert([goalData]);
 
       if (error) {
         toast.error("Erro ao criar meta");
@@ -135,7 +135,7 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
   const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir esta meta?")) return;
 
-    const { error } = await supabase.from("goals").delete().eq("id", id);
+    const { error } = await sb.from("goals").delete().eq("id", id);
 
     if (error) {
       toast.error("Erro ao excluir meta");
@@ -146,7 +146,7 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
   };
 
   const handleToggleComplete = async (goal: Goal) => {
-    const { error } = await supabase
+    const { error } = await sb
       .from("goals")
       .update({ is_completed: !goal.is_completed })
       .eq("id", goal.id);
