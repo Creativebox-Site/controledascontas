@@ -1,3 +1,4 @@
+import React from "react";
 import { FinancialChart } from "@/components/FinancialChart";
 import { EmergencyFund } from "@/components/EmergencyFund";
 import { EvolutionChart } from "@/components/EvolutionChart";
