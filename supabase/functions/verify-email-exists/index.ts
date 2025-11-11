@@ -68,7 +68,7 @@ const handler = async (req: Request): Promise<Response> => {
           message: "Não encontramos o seu email. Favor revisar se digitou corretamente ou se a conta foi removida." 
         }),
         {
-          status: 404,
+          status: 200,
           headers: { "Content-Type": "application/json", ...corsHeaders },
         }
       );
