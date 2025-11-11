@@ -11,6 +11,10 @@ import {
 import { Image } from "lucide-react";
 import { toast } from "sonner";
 
+const sb = supabase as any;
+
+const sb = supabase as any;
+
 interface CoverImageProps {
   userId?: string;
 }
@@ -36,7 +40,7 @@ export const CoverImage = ({ userId }: CoverImageProps) => {
   const loadCover = async () => {
     if (!userId) return;
 
-    const { data, error } = await supabase
+    const { data, error } = await sb
       .from("profiles")
       .select("cover_image")
       .eq("id", userId)
@@ -55,7 +59,7 @@ export const CoverImage = ({ userId }: CoverImageProps) => {
   const handleSelectCover = async (gradientId: string) => {
     if (!userId) return;
 
-    const { error } = await supabase
+    const { error } = await sb
       .from("profiles")
       .update({ cover_image: gradientId })
       .eq("id", userId);

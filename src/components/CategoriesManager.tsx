@@ -10,6 +10,10 @@ import { toast } from "sonner";
 import { Edit, Trash2, Plus, Upload } from "lucide-react";
 import { BulkImport } from "@/components/BulkImport";
 
+const sb = supabase as any;
+
+const sb = supabase as any;
+
 interface Category {
   id: string;
   name: string;
@@ -41,7 +45,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
   }, [userId]);
 
   const loadCategories = async () => {
-    const { data, error } = await supabase
+    const { data, error } = await sb
       .from("categories")
       .select("*")
       .eq("user_id", userId)
@@ -65,7 +69,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
     }
 
     if (editingId) {
-      const { error } = await supabase
+      const { error } = await sb
         .from("categories")
         .update(formData)
         .eq("id", editingId);
@@ -78,7 +82,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
         loadCategories();
       }
     } else {
-      const { error } = await supabase.from("categories").insert([
+      const { error } = await sb.from("categories").insert([
         {
           ...formData,
           user_id: userId,
@@ -120,7 +124,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
   const handleDelete = async (id: string) => {
     if (!confirm("Deseja realmente excluir esta categoria?")) return;
 
-    const { error } = await supabase.from("categories").delete().eq("id", id);
+    const { error } = await sb.from("categories").delete().eq("id", id);
 
     if (error) {
       toast.error("Erro ao excluir categoria");
@@ -141,7 +145,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
       color: row.cor || "#6b7280"
     }));
 
-    const { error } = await supabase
+    const { error } = await sb
       .from("categories")
       .insert(categoriesToInsert);
 

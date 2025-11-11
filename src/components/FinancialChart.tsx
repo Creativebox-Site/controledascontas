@@ -4,6 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import { TrendingUp, TrendingDown, Wallet, PiggyBank, Coins } from "lucide-react";
 
+const sb = supabase as any;
+
+const sb = supabase as any;
+
 interface Transaction {
   amount: number;
   type: string;
@@ -61,7 +65,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   };
 
   const loadTransactions = async () => {
-    const { data, error } = await supabase
+    const { data, error } = await sb
       .from("transactions")
       .select("*, categories(name, color)")
       .eq("user_id", userId);

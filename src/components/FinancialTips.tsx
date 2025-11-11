@@ -4,6 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Lightbulb, Target, TrendingUp, PiggyBank } from "lucide-react";
 import { startOfMonth, endOfMonth, format, addMonths } from "date-fns";
 
+const sb = supabase as any;
+
+const sb = supabase as any;
+
 interface FinancialTipsProps {
   userId?: string;
   currency: string;
@@ -26,7 +30,7 @@ export const FinancialTips = ({ userId, currency }: FinancialTipsProps) => {
     const currentEnd = endOfMonth(new Date());
 
     // Buscar dados do mês atual
-    const { data: transactions } = await supabase
+    const { data: transactions } = await sb
       .from("transactions")
       .select("*, categories(name, is_essential)")
       .eq("user_id", userId)
@@ -35,7 +39,7 @@ export const FinancialTips = ({ userId, currency }: FinancialTipsProps) => {
       .lte("date", format(currentEnd, "yyyy-MM-dd"));
 
     // Buscar metas ativas
-    const { data: goals } = await supabase
+    const { data: goals } = await sb
       .from("goals")
       .select("*")
       .eq("user_id", userId)

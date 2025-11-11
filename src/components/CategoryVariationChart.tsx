@@ -5,6 +5,10 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { startOfMonth, endOfMonth, subMonths, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+const sb = supabase as any;
+
+const sb = supabase as any;
+
 interface CategoryVariationChartProps {
   userId?: string;
   currency: string;
@@ -38,7 +42,7 @@ export const CategoryVariationChart = ({ userId, currency }: CategoryVariationCh
     const lastEnd = endOfMonth(lastMonthDate);
 
     // Buscar transações dos dois meses
-    const { data: currentTransactions } = await supabase
+    const { data: currentTransactions } = await sb
       .from("transactions")
       .select("*, categories(name, color)")
       .eq("user_id", userId)
@@ -47,7 +51,7 @@ export const CategoryVariationChart = ({ userId, currency }: CategoryVariationCh
       .gte("date", format(currentStart, "yyyy-MM-dd"))
       .lte("date", format(currentEnd, "yyyy-MM-dd"));
 
-    const { data: lastTransactions } = await supabase
+    const { data: lastTransactions } = await sb
       .from("transactions")
       .select("*, categories(name, color)")
       .eq("user_id", userId)

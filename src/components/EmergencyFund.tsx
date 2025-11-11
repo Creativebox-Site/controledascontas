@@ -4,6 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { ShieldCheck } from "lucide-react";
 
+const sb = supabase as any;
+
+const sb = supabase as any;
+
 interface EmergencyFundProps {
   userId?: string;
   currency: string;
@@ -24,7 +28,7 @@ export const EmergencyFund = ({ userId, currency }: EmergencyFundProps) => {
     setLoading(true);
 
     // Get essential categories
-    const { data: categories } = await supabase
+    const { data: categories } = await sb
       .from("categories")
       .select("id")
       .eq("user_id", userId)
@@ -38,7 +42,7 @@ export const EmergencyFund = ({ userId, currency }: EmergencyFundProps) => {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const { data: expenses } = await supabase
+      const { data: expenses } = await sb
         .from("transactions")
         .select("amount")
         .eq("user_id", userId)
@@ -56,7 +60,7 @@ export const EmergencyFund = ({ userId, currency }: EmergencyFundProps) => {
     }
 
     // Get investment category for emergency fund
-    const { data: investmentCategory } = await supabase
+    const { data: investmentCategory } = await sb
       .from("categories")
       .select("id")
       .eq("user_id", userId)
@@ -65,7 +69,7 @@ export const EmergencyFund = ({ userId, currency }: EmergencyFundProps) => {
       .maybeSingle();
 
     if (investmentCategory) {
-      const { data: reserves } = await supabase
+      const { data: reserves } = await sb
         .from("transactions")
         .select("amount")
         .eq("user_id", userId)

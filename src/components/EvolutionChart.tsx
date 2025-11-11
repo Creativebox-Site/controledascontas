@@ -11,6 +11,10 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+const sb = supabase as any;
+
+const sb = supabase as any;
+
 interface Transaction {
   amount: number;
   type: string;
@@ -82,7 +86,7 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
   };
 
   const loadCategories = async () => {
-    const { data } = await supabase
+    const { data } = await sb
       .from("categories")
       .select("id, name, color")
       .eq("user_id", userId)
@@ -94,7 +98,7 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
   };
 
   const loadTransactions = async () => {
-    const { data, error } = await supabase
+    const { data, error } = await sb
       .from("transactions")
       .select("*, categories(name, color)")
       .eq("user_id", userId)
