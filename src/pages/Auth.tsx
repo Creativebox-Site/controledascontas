@@ -144,22 +144,42 @@ const Auth = () => {
       return;
     }
 
-    // Enviar email de reset (Supabase não retorna erro se email não existe por segurança)
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/`,
-    });
-
-    setResetLoading(false);
-
-    if (error) {
-      toast.error("Erro ao enviar email: " + error.message);
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Por favor, digite um email válido");
+      setResetLoading(false);
       return;
     }
 
-    // Como o Supabase não retorna erro para emails não cadastrados (por segurança),
-    // sempre mostraremos mensagem de sucesso
-    toast.success("Se o email estiver cadastrado, você receberá instruções para redefinir sua senha.");
-    setResetDialogOpen(false);
+    try {
+      // Chamar edge function para verificar se email existe e enviar reset
+      const { data, error } = await supabase.functions.invoke("verify-email-exists", {
+        body: { email },
+      });
+
+      setResetLoading(false);
+
+      if (error) {
+        toast.error("Erro ao processar solicitação: " + error.message);
+        return;
+      }
+
+      if (!data.exists) {
+        toast.error(data.message);
+        return;
+      }
+
+      toast.success(data.message);
+      setResetDialogOpen(false);
+      
+      // Limpar o formulário
+      (e.target as HTMLFormElement).reset();
+    } catch (error: any) {
+      setResetLoading(false);
+      toast.error("Erro ao processar solicitação. Tente novamente.");
+      console.error("Error in password reset:", error);
+    }
   };
 
   const handleUpdatePassword = async (e: React.FormEvent<HTMLFormElement>) => {
