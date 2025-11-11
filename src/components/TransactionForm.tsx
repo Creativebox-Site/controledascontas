@@ -252,6 +252,26 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
     setFormData({ ...formData, amount });
   };
 
+  const getEndDate = () => {
+    if (!isRecurring && !convertToRecurring) return null;
+    
+    const startDate = new Date(formData.date);
+    const lastIndex = recurringData.repetitions - 1;
+    
+    let endDate = new Date(startDate);
+    if (recurringData.frequency === "daily") {
+      endDate = addDays(startDate, lastIndex);
+    } else if (recurringData.frequency === "weekly") {
+      endDate = addWeeks(startDate, lastIndex);
+    } else if (recurringData.frequency === "monthly") {
+      endDate = addMonths(startDate, lastIndex);
+    } else if (recurringData.frequency === "yearly") {
+      endDate = addYears(startDate, lastIndex);
+    }
+    
+    return endDate.toLocaleDateString('pt-BR');
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
           {!defaultType && (
@@ -296,17 +316,6 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label>Descrição</Label>
-            <Input
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              placeholder="Ex: Salário, Supermercado..."
-            />
-          </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Valor</Label>
@@ -345,7 +354,18 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
           </div>
 
           <div className="space-y-2">
-            <Label>Data</Label>
+            <Label>Descrição</Label>
+            <Input
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              placeholder="Ex: Salário, Supermercado..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Data de Início</Label>
             <Input
               type="date"
               value={formData.date}
@@ -372,39 +392,47 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
             </div>
 
             {((!transaction && isRecurring) || (transaction && convertToRecurring)) && (
-              <div className="grid grid-cols-2 gap-4 pl-6">
-                <div className="space-y-2">
-                  <Label>Frequência</Label>
-                  <Select
-                    value={recurringData.frequency}
-                    onValueChange={(value) =>
-                      setRecurringData({ ...recurringData, frequency: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="daily">Diária</SelectItem>
-                      <SelectItem value="weekly">Semanal</SelectItem>
-                      <SelectItem value="monthly">Mensal</SelectItem>
-                      <SelectItem value="yearly">Anual</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-4 pl-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Frequência</Label>
+                    <Select
+                      value={recurringData.frequency}
+                      onValueChange={(value) =>
+                        setRecurringData({ ...recurringData, frequency: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Diária</SelectItem>
+                        <SelectItem value="weekly">Semanal</SelectItem>
+                        <SelectItem value="monthly">Mensal</SelectItem>
+                        <SelectItem value="yearly">Anual</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label>Repetições</Label>
-                  <Input
-                    type="number"
-                    min="2"
-                    max="120"
-                    value={recurringData.repetitions}
-                    onChange={(e) =>
-                      setRecurringData({ ...recurringData, repetitions: parseInt(e.target.value) })
-                    }
-                  />
+                  <div className="space-y-2">
+                    <Label>Repetições</Label>
+                    <Input
+                      type="number"
+                      min="2"
+                      max="120"
+                      value={recurringData.repetitions}
+                      onChange={(e) =>
+                        setRecurringData({ ...recurringData, repetitions: parseInt(e.target.value) })
+                      }
+                    />
+                  </div>
                 </div>
+                
+                {getEndDate() && (
+                  <p className="text-sm text-muted-foreground">
+                    Data fim: {getEndDate()}
+                  </p>
+                )}
               </div>
             )}
           </div>

@@ -13,7 +13,15 @@ export const Profile = ({ userId }: ProfileProps) => {
   const [profile, setProfile] = useState({
     full_name: "",
     avatar_url: "🐷",
-    document: "",
+    birth_date: "",
+    phone: "",
+    zip_code: "",
+    street: "",
+    number: "",
+    complement: "",
+    neighborhood: "",
+    city: "",
+    state: "",
   });
   const [loading, setLoading] = useState(true);
 
@@ -28,7 +36,7 @@ export const Profile = ({ userId }: ProfileProps) => {
 
     const { data, error } = await sb
       .from("profiles")
-      .select("full_name, avatar_url, document")
+      .select("full_name, avatar_url, birth_date, phone, zip_code, street, number, complement, neighborhood, city, state")
       .eq("id", userId)
       .single();
 
@@ -43,7 +51,15 @@ export const Profile = ({ userId }: ProfileProps) => {
       setProfile({
         full_name: data.full_name || "",
         avatar_url: data.avatar_url || "🐷",
-        document: data.document || "",
+        birth_date: data.birth_date || "",
+        phone: data.phone || "",
+        zip_code: data.zip_code || "",
+        street: data.street || "",
+        number: data.number || "",
+        complement: data.complement || "",
+        neighborhood: data.neighborhood || "",
+        city: data.city || "",
+        state: data.state || "",
       });
     }
   };
@@ -81,8 +97,23 @@ export const Profile = ({ userId }: ProfileProps) => {
 
             <div className="text-center space-y-2 w-full">
               <h3 className="text-2xl font-bold">{profile.full_name || "Sem nome"}</h3>
-              {profile.document && (
-                <p className="text-muted-foreground">Documento: {profile.document}</p>
+              {profile.birth_date && (
+                <p className="text-muted-foreground">
+                  Data de Nascimento: {new Date(profile.birth_date).toLocaleDateString('pt-BR')}
+                </p>
+              )}
+              {profile.phone && (
+                <p className="text-muted-foreground">Celular: {profile.phone}</p>
+              )}
+              {profile.street && (
+                <p className="text-muted-foreground">
+                  Endereço: {profile.street}, {profile.number}
+                  {profile.complement && ` - ${profile.complement}`}
+                  {profile.neighborhood && ` - ${profile.neighborhood}`}
+                  {profile.city && ` - ${profile.city}`}
+                  {profile.state && `/${profile.state}`}
+                  {profile.zip_code && ` - CEP: ${profile.zip_code}`}
+                </p>
               )}
             </div>
 
