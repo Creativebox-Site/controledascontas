@@ -18,6 +18,7 @@ import { Investments } from "@/pages/Investments";
 import { Categories } from "@/pages/Categories";
 import { Insights } from "@/pages/Insights";
 import { Goals } from "@/pages/Goals";
+import { Financing } from "@/pages/Financing";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -124,6 +125,7 @@ const Dashboard = () => {
               <Route path="goals" element={<Goals userId={user?.id} currency={preferredCurrency} />} />
               <Route path="insights" element={<Insights userId={user?.id} currency={preferredCurrency} />} />
               <Route path="categories" element={<Categories userId={user?.id} />} />
+              <Route path="financing" element={<Financing currency={preferredCurrency} />} />
             </Routes>
           </main>
         </div>
