@@ -1,1 +1,13 @@
 project_id = "bmcpznzahqahiujyfkuj"
+
+[functions.send-report-email]
+verify_jwt = false
+
+[functions.upload-report]
+verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false
+
+[functions.verify-email-exists]
+verify_jwt = false

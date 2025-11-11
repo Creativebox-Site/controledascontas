@@ -446,9 +446,19 @@ export const printPDF = (blob: Blob) => {
   };
 };
 
-export const shareViaWhatsApp = (phoneNumber: string, message: string) => {
+export const shareViaWhatsApp = async (phoneNumber: string, message: string, pdfBlob?: Blob, fileName?: string): Promise<string | null> => {
   const formattedPhone = phoneNumber.replace(/\D/g, "");
-  const encodedMessage = encodeURIComponent(message);
+  let encodedMessage = encodeURIComponent(message);
+  
+  if (pdfBlob && fileName) {
+    // Se tiver PDF, adiciona informação sobre o arquivo
+    encodedMessage = encodeURIComponent(
+      `${message}\n\n📎 Arquivo: ${fileName}\n🔗 Link para download: (será adicionado automaticamente)`
+    );
+  }
+  
   const url = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
   window.open(url, "_blank");
+  
+  return url;
 };

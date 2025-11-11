@@ -302,20 +302,73 @@ export const ReportGenerator = ({ userId, currency }: ReportGeneratorProps) => {
   const handleWhatsAppShare = async () => {
     if (!pdfBlob || !userId) return;
 
-    const phone = useRegisteredPhone ? phoneInput : phoneInput;
-    const message = `Olá! Aqui está meu relatório financeiro gerado em ${new Date().toLocaleDateString("pt-BR")}. 📊💰`;
+    setLoading(true);
+    try {
+      const phone = useRegisteredPhone ? phoneInput : phoneInput;
+      
+      // Converter PDF para base64
+      const reader = new FileReader();
+      reader.readAsDataURL(pdfBlob);
+      
+      reader.onloadend = async () => {
+        const base64data = reader.result?.toString().split(",")[1];
+        
+        if (!base64data) {
+          toast.error("Erro ao processar o arquivo");
+          setLoading(false);
+          return;
+        }
 
-    await sb.from("reports_sent").insert({
-      user_id: userId,
-      sections_included: sections.filter((s) => s.selected).map((s) => s.id),
-      delivery_method: "whatsapp",
-      recipient: phone,
-      file_size: pdfBlob.size,
-    });
+        // Fazer upload do PDF para o storage
+        const fileName = `relatorio-financeiro-${new Date().toISOString().split("T")[0]}.pdf`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.functions.invoke(
+          "upload-report",
+          {
+            body: {
+              pdfBase64: base64data,
+              fileName,
+              userId,
+            },
+          }
+        );
 
-    shareViaWhatsApp(phone, message);
-    toast.success("Abrindo WhatsApp... 📱");
-    setOpen(false);
+        if (uploadError || !uploadData?.publicUrl) {
+          console.error("Erro ao fazer upload:", uploadError);
+          toast.error("Erro ao preparar arquivo para envio");
+          setLoading(false);
+          return;
+        }
+
+        // Registrar no histórico
+        await sb.from("reports_sent").insert({
+          user_id: userId,
+          sections_included: sections.filter((s) => s.selected).map((s) => s.id),
+          delivery_method: "whatsapp",
+          recipient: phone,
+          file_size: pdfBlob.size,
+        });
+
+        // Criar mensagem com o link do PDF
+        const message = `📊 *Relatório Financeiro*\n\nOlá! Aqui está meu relatório financeiro gerado em ${new Date().toLocaleDateString("pt-BR")}.\n\n📥 *Download do PDF:*\n${uploadData.publicUrl}\n\n💡 O link é válido por 1 hora.`;
+
+        // Abrir WhatsApp com a mensagem
+        await shareViaWhatsApp(phone, message, pdfBlob, fileName);
+        
+        toast.success("WhatsApp aberto com link do relatório! 📱");
+        setOpen(false);
+      };
+
+      reader.onerror = () => {
+        toast.error("Erro ao processar o arquivo");
+        setLoading(false);
+      };
+    } catch (error) {
+      console.error("Erro ao compartilhar via WhatsApp:", error);
+      toast.error("Erro ao compartilhar via WhatsApp");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePrint = async () => {
