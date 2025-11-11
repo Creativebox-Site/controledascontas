@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { sb } from "@/lib/sb";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -99,7 +100,7 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
   const createInvestmentCategories = async () => {
     // Check and create investment categories if they don't exist
     for (const categoryName of INVESTMENT_CATEGORIES) {
-      const { data: existing } = await supabase
+      const { data: existing } = await sb
         .from("categories")
         .select("id")
         .eq("user_id", userId)
@@ -108,7 +109,7 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
         .maybeSingle();
 
       if (!existing) {
-        await supabase.from("categories").insert({
+        await sb.from("categories").insert({
           user_id: userId,
           name: categoryName,
           type: "investment",
@@ -125,7 +126,7 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
     setLoading(true);
 
     // Get investment categories
-    const { data: categories } = await supabase
+    const { data: categories } = await sb
       .from("categories")
       .select("id, name")
       .eq("user_id", userId)
@@ -136,7 +137,7 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
       const categoryIds = categories.map((c) => c.id);
       const categoryMap = Object.fromEntries(categories.map((c) => [c.id, c.name]));
 
-      const { data: transactions } = await supabase
+      const { data: transactions } = await sb
         .from("transactions")
         .select("*")
         .eq("user_id", userId)
@@ -168,7 +169,7 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
     }
 
     // Get category ID
-    const { data: category } = await supabase
+    const { data: category } = await sb
       .from("categories")
       .select("id")
       .eq("user_id", userId)
@@ -211,7 +212,7 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
         });
       }
       
-      const { error } = await supabase
+      const { error } = await sb
         .from("transactions")
         .insert(investments);
 
@@ -236,7 +237,7 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
     } else {
       const loadingToast = toast.loading("Inserindo o investimento...");
       
-      const { error } = await supabase.from("transactions").insert({
+      const { error } = await sb.from("transactions").insert({
         user_id: userId,
         category_id: category.id,
         amount: parseFloat(formData.amount),
@@ -272,7 +273,7 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
     // Para cada investimento, precisamos criar uma transação
     for (const row of data) {
       // Buscar a categoria
-      const { data: category } = await supabase
+      const { data: category } = await sb
         .from("categories")
         .select("id")
         .eq("user_id", userId)
@@ -280,7 +281,7 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
         .maybeSingle();
 
       if (category) {
-        await supabase.from("transactions").insert({
+        await sb.from("transactions").insert({
           user_id: userId,
           category_id: category.id,
           amount: row.valor,

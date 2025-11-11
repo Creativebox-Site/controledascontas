@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { TransactionList } from "@/components/TransactionList";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { sb } from "@/lib/sb";
 
 interface TransactionsProps {
   userId?: string;
@@ -16,7 +16,7 @@ export const Transactions = ({ userId, currency }: TransactionsProps) => {
       return;
     }
 
-    const { error } = await supabase
+    const { error } = await sb
       .from('transactions')
       .delete()
       .eq('user_id', userId);

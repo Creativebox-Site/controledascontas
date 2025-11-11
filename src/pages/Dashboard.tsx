@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Routes, Route } from "react-router-dom";
+import { sb } from "@/lib/sb";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import { Wallet } from "lucide-react";
@@ -63,7 +64,7 @@ const Dashboard = () => {
   const loadUserPreferences = async () => {
     if (!user) return;
     
-    const { data } = await supabase
+    const { data } = await sb
       .from('profiles')
       .select('preferred_currency')
       .eq('id', user.id)

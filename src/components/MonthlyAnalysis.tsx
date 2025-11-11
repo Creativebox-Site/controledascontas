@@ -104,7 +104,7 @@ export const MonthlyAnalysis = ({ userId, currency }: MonthlyAnalysisProps) => {
           return acc;
         }, {} as Record<string, number>);
 
-      const categoryChanges = Object.entries(currentCategories)
+      const categoryChanges = Object.entries(currentCategories as Record<string, { amount: number; color: string }>)
         .map(([name, { amount, color }]) => {
           const lastAmount = lastCategories[name] || 0;
           const percentChange = lastAmount > 0
