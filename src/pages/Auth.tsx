@@ -92,9 +92,18 @@ const Auth = () => {
     }
 
     if (data.user) {
+      // Aguardar um momento para garantir que o perfil foi criado pelo trigger
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       // Create default categories
-      await supabase.rpc('create_default_categories', { p_user_id: data.user.id });
-      toast.success("Conta criada com sucesso! Bem-vindo ao Controle Financeiro.");
+      const { error: categoriesError } = await supabase.rpc('create_default_categories', { p_user_id: data.user.id });
+      
+      if (categoriesError) {
+        console.error("Erro ao criar categorias:", categoriesError);
+        toast.warning("Conta criada, mas houve um problema ao criar as categorias padrão.");
+      } else {
+        toast.success("Conta criada com sucesso! Bem-vindo ao Controle Financeiro.");
+      }
       navigate("/");
     }
   };
@@ -138,8 +147,14 @@ const Auth = () => {
 
       // Se não tiver nenhuma categoria, adicionar as padrão
       if (!categoriesError && (!categories || categories.length === 0)) {
-        await supabase.rpc('create_default_categories', { p_user_id: data.user.id });
-        toast.success("Login realizado! Categorias padrão adicionadas à sua conta.");
+        const { error: createCategoriesError } = await supabase.rpc('create_default_categories', { p_user_id: data.user.id });
+        
+        if (createCategoriesError) {
+          console.error("Erro ao criar categorias:", createCategoriesError);
+          toast.success("Login realizado com sucesso! Use o menu Categorias para adicionar suas categorias.");
+        } else {
+          toast.success("Login realizado! Categorias padrão adicionadas à sua conta.");
+        }
       } else {
         toast.success("Login realizado com sucesso! Bem-vindo de volta.");
       }
