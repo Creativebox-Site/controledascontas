@@ -57,50 +57,37 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Verificar se o email existe na lista
+    // ===== CORREÇÃO: PREVENIR ENUMERAÇÃO DE EMAIL =====
+    // SEMPRE enviar email de reset, mesmo que o usuário não exista
+    // Isso previne que atacantes descubram quais emails estão cadastrados
+    
     const userExists = users.some(user => user.email?.toLowerCase() === email.toLowerCase());
 
-    if (!userExists) {
-      console.log("User not found:", email);
-      return new Response(
-        JSON.stringify({ 
-          exists: false, 
-          message: "Não encontramos o seu email. Favor revisar se digitou corretamente ou se a conta foi removida." 
-        }),
+    // Enviar email de recuperação apenas se o usuário realmente existir
+    if (userExists) {
+      console.log("User found, sending password reset email");
+      
+      const { error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(
+        email,
         {
-          status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
+          redirectTo: `${req.headers.get("origin")}/`,
         }
       );
-    }
 
-    console.log("User found, sending password reset email");
-
-    // Se o email existe, enviar email de recuperação
-    const { error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(
-      email,
-      {
-        redirectTo: `${req.headers.get("origin")}/`,
+      if (resetError) {
+        console.error("Error sending reset email:", resetError);
+        // Não revelar o erro específico ao cliente
       }
-    );
-
-    if (resetError) {
-      console.error("Error sending reset email:", resetError);
-      return new Response(
-        JSON.stringify({ error: "Erro ao enviar email de recuperação" }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
+    } else {
+      console.log("User not found, but returning success message to prevent enumeration");
     }
 
-    console.log("Password reset email sent successfully");
-
+    // SEMPRE retornar a mesma mensagem, independente de o email existir ou não
+    // Isso impede que atacantes descubram quais emails estão cadastrados
     return new Response(
       JSON.stringify({ 
-        exists: true, 
-        message: "Email de recuperação enviado com sucesso! Verifique sua caixa de entrada." 
+        success: true, 
+        message: "Se o email estiver cadastrado, você receberá um link de recuperação. Verifique sua caixa de entrada e spam." 
       }),
       {
         status: 200,

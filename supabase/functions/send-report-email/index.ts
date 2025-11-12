@@ -22,11 +22,75 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // ===== VALIDAÇÃO DE AUTENTICAÇÃO =====
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Token de autenticação não fornecido" }),
+        { 
+          status: 401, 
+          headers: { "Content-Type": "application/json", ...corsHeaders } 
+        }
+      );
+    }
+
+    // Criar cliente Supabase
+    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      {
+        global: {
+          headers: { authorization: authHeader },
+        },
+      }
+    );
+
+    // Verificar se o token é válido
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      console.error("Erro de autenticação:", authError);
+      return new Response(
+        JSON.stringify({ error: "Token inválido ou expirado" }),
+        { 
+          status: 401, 
+          headers: { "Content-Type": "application/json", ...corsHeaders } 
+        }
+      );
+    }
+
     const { to, userName, pdfBase64, fileName }: SendReportEmailRequest = await req.json();
 
     if (!to || !pdfBase64 || !fileName) {
-      throw new Error("Parâmetros obrigatórios ausentes");
+      return new Response(
+        JSON.stringify({ error: "Parâmetros obrigatórios ausentes" }),
+        { 
+          status: 400, 
+          headers: { "Content-Type": "application/json", ...corsHeaders } 
+        }
+      );
     }
+
+    // ===== VALIDAÇÃO DE EMAIL =====
+    // Verificar que o email pertence ao usuário autenticado
+    if (to.toLowerCase() !== user.email?.toLowerCase()) {
+      console.warn(`Tentativa de envio não autorizado: user ${user.email} tentou enviar para ${to}`);
+      return new Response(
+        JSON.stringify({ error: "Você só pode enviar emails para seu próprio endereço" }),
+        { 
+          status: 403, 
+          headers: { "Content-Type": "application/json", ...corsHeaders } 
+        }
+      );
+    }
+
+    // ===== SANITIZAÇÃO DE INPUTS =====
+    // Sanitizar o nome do usuário para prevenir HTML injection
+    const sanitizedUserName = userName ? userName.replace(/[<>\"'&]/g, '') : '';
+    const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_').substring(0, 100);
+
+    console.log(`Email autorizado para usuário: ${user.email}`);
 
     const emailResponse = await resend.emails.send({
       from: "Controle Financeiro <onboarding@resend.dev>",
@@ -52,7 +116,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <h1>📊 Relatório Financeiro</h1>
               </div>
               <div class="content">
-                <h2>Olá${userName ? `, ${userName}` : ''}! 👋</h2>
+                <h2>Olá${sanitizedUserName ? `, ${sanitizedUserName}` : ''}! 👋</h2>
                 <p>Seu relatório financeiro foi gerado com sucesso e está anexado a este e-mail.</p>
                 
                 <p><strong>Este relatório contém:</strong></p>
@@ -80,7 +144,7 @@ const handler = async (req: Request): Promise<Response> => {
       `,
       attachments: [
         {
-          filename: fileName,
+          filename: sanitizedFileName,
           content: pdfBase64,
         },
       ],

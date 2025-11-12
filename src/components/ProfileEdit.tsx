@@ -117,21 +117,39 @@ export const ProfileEdit = ({ userId }: ProfileEditProps) => {
       setLoadingCep(true);
       try {
         const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+        
+        // ===== VALIDAÇÃO DE RESPOSTA DA API =====
+        if (!response.ok) {
+          throw new Error("Erro ao consultar CEP");
+        }
+        
         const data = await response.json();
+        
+        // Validar estrutura da resposta
+        if (typeof data !== 'object' || data === null) {
+          throw new Error("Resposta inválida da API");
+        }
         
         if (data.erro) {
           toast.error("CEP não encontrado");
         } else {
+          // Validar e sanitizar cada campo antes de usar
+          const sanitizeString = (str: any): string => {
+            if (typeof str !== 'string') return '';
+            return str.trim().substring(0, 255); // Limitar tamanho
+          };
+          
           setProfile(prev => ({
             ...prev,
-            street: data.logradouro || "",
-            neighborhood: data.bairro || "",
-            city: data.localidade || "",
-            state: data.uf || "",
+            street: sanitizeString(data.logradouro),
+            neighborhood: sanitizeString(data.bairro),
+            city: sanitizeString(data.localidade),
+            state: sanitizeString(data.uf).substring(0, 2).toUpperCase(),
           }));
           toast.success("Endereço encontrado!");
         }
       } catch (error) {
+        console.error("Erro ao buscar CEP:", error);
         toast.error("Erro ao buscar CEP");
       } finally {
         setLoadingCep(false);
