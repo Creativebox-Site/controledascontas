@@ -11,18 +11,24 @@ import { passwordSchema } from "@/lib/passwordValidation";
 
 export const PasswordChange = () => {
   const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
 
   const handleChangePassword = async () => {
-    if (!passwordData.newPassword || !passwordData.confirmPassword) {
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
       toast.error("Preencha todos os campos de senha");
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast.error("As senhas não coincidem");
+      return;
+    }
+
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      toast.error("A nova senha deve ser diferente da senha atual");
       return;
     }
 
@@ -35,6 +41,26 @@ export const PasswordChange = () => {
       return;
     }
 
+    // Primeiro, validar a senha atual tentando fazer login novamente
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user?.email) {
+      toast.error("Erro ao validar usuário");
+      return;
+    }
+
+    // Validar senha atual fazendo um signIn
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: passwordData.currentPassword,
+    });
+
+    if (signInError) {
+      toast.error("Senha atual incorreta");
+      return;
+    }
+
+    // Se a senha atual está correta, prosseguir com a atualização
     const { error } = await supabase.auth.updateUser({
       password: passwordData.newPassword,
     });
@@ -46,6 +72,7 @@ export const PasswordChange = () => {
 
     toast.success("Senha alterada com sucesso!");
     setPasswordData({
+      currentPassword: "",
       newPassword: "",
       confirmPassword: "",
     });
@@ -67,6 +94,17 @@ export const PasswordChange = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="currentPassword">Senha Atual</Label>
+          <Input
+            id="currentPassword"
+            type="password"
+            value={passwordData.currentPassword}
+            onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+            placeholder="Digite sua senha atual"
+          />
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="newPassword">Nova Senha</Label>
           <Input
