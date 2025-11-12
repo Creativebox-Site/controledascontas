@@ -232,10 +232,18 @@ export const ProfileEdit = ({ userId }: ProfileEditProps) => {
   return (
     <div className="space-y-6">
       <Card>
-        <div className="relative">
+        <CardHeader>
+          <CardTitle>Capa do Perfil</CardTitle>
+          <CardDescription>
+            Personalize a capa do seu perfil
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <CoverImage userId={userId} />
-        </div>
-        
+        </CardContent>
+      </Card>
+
+      <Card>
         <CardHeader>
           <CardTitle>Foto de Perfil</CardTitle>
           <CardDescription>
