@@ -5,6 +5,27 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// ===== RATE LIMITING =====
+// In-memory rate limiting to prevent abuse and DoS attacks
+const attempts = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(ip: string, maxAttempts = 3, windowMs = 3600000): boolean {
+  const now = Date.now();
+  const record = attempts.get(ip);
+  
+  if (!record || now > record.resetAt) {
+    attempts.set(ip, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  
+  if (record.count >= maxAttempts) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -12,6 +33,29 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // ===== RATE LIMITING CHECK =====
+    // Limit to 3 requests per hour per IP (stricter for account deletion)
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
+               req.headers.get('x-real-ip') || 
+               'unknown';
+    
+    if (!checkRateLimit(ip, 3, 3600000)) {
+      console.log(`Rate limit exceeded for IP: ${ip}`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Muitas tentativas. Por favor, tente novamente mais tarde.',
+          retryAfter: '1 hour'
+        }),
+        {
+          status: 429,
+          headers: { 
+            'Content-Type': 'application/json',
+            'Retry-After': '3600',
+            ...corsHeaders 
+          },
+        }
+      );
+    }
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',

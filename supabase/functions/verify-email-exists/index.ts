@@ -11,12 +11,56 @@ interface VerifyEmailRequest {
   email: string;
 }
 
+// ===== RATE LIMITING =====
+// In-memory rate limiting to prevent abuse and DoS attacks
+const attempts = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(ip: string, maxAttempts = 5, windowMs = 3600000): boolean {
+  const now = Date.now();
+  const record = attempts.get(ip);
+  
+  if (!record || now > record.resetAt) {
+    attempts.set(ip, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  
+  if (record.count >= maxAttempts) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // ===== RATE LIMITING CHECK =====
+    // Limit to 5 requests per hour per IP
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || 
+               req.headers.get("x-real-ip") || 
+               "unknown";
+    
+    if (!checkRateLimit(ip, 5, 3600000)) {
+      console.log(`Rate limit exceeded for IP: ${ip}`);
+      return new Response(
+        JSON.stringify({ 
+          error: "Muitas tentativas. Por favor, tente novamente mais tarde.",
+          retryAfter: "1 hour"
+        }),
+        {
+          status: 429,
+          headers: { 
+            "Content-Type": "application/json",
+            "Retry-After": "3600",
+            ...corsHeaders 
+          },
+        }
+      );
+    }
     const { email }: VerifyEmailRequest = await req.json();
 
     console.log("Received email verification request for:", email);
