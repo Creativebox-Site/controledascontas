@@ -182,6 +182,20 @@ export const ProfileEdit = ({ userId }: ProfileEditProps) => {
     if (!e.target.files || !e.target.files[0] || !userId) return;
 
     const file = e.target.files[0];
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Apenas imagens JPG, PNG ou WebP são permitidas');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('A imagem deve ter no máximo 5MB');
+      return;
+    }
+
     const imageUrl = URL.createObjectURL(file);
     setTempImageUrl(imageUrl);
     setImageEditorOpen(true);
