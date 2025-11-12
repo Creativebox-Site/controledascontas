@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "lucide-react";
-import { CoverImage } from "@/components/CoverImage";
 
 interface ProfileProps {
   userId?: string;
@@ -82,13 +81,9 @@ export const Profile = ({ userId }: ProfileProps) => {
       </div>
 
       <Card className="max-w-2xl">
-        <div className="relative">
-          <CoverImage userId={userId} />
-        </div>
-        
         <CardContent className="pt-6">
           <div className="flex flex-col items-center gap-6">
-            <Avatar className="w-32 h-32 border-4 border-background -mt-20 shadow-lg">
+            <Avatar className="w-32 h-32 border-4 border-background shadow-lg">
               <AvatarImage src={profile.avatar_url.startsWith("http") ? profile.avatar_url : undefined} />
               <AvatarFallback className="text-5xl bg-primary/10">
                 {profile.avatar_url.startsWith("http") ? <User className="w-16 h-16" /> : profile.avatar_url}
