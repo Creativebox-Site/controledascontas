@@ -9,7 +9,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { AvatarImageEditor } from "./AvatarImageEditor";
 import { EmojiPickerDialog } from "./EmojiPickerDialog";
-import { CoverImage } from "./CoverImage";
 
 interface ProfileEditProps {
   userId?: string;
@@ -231,18 +230,6 @@ export const ProfileEdit = ({ userId }: ProfileEditProps) => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Capa do Perfil</CardTitle>
-          <CardDescription>
-            Personalize a capa do seu perfil
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <CoverImage userId={userId} />
-        </CardContent>
-      </Card>
-
       <Card>
         <CardHeader>
           <CardTitle>Foto de Perfil</CardTitle>
