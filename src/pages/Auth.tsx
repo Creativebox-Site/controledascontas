@@ -31,16 +31,23 @@ const Auth = () => {
 
   useEffect(() => {
     // Detectar se o usuário veio de um link de recuperação de senha
-    const checkRecoverySession = async () => {
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const type = hashParams.get('type');
-      
-      if (type === 'recovery') {
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const type = hashParams.get('type');
+    
+    if (type === 'recovery') {
+      setUpdatePasswordDialogOpen(true);
+    }
+
+    // Ouvir eventos do Supabase para detectar PASSWORD_RECOVERY (mais robusto)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
         setUpdatePasswordDialogOpen(true);
       }
-    };
+    });
 
-    checkRecoverySession();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -136,7 +143,7 @@ const Auth = () => {
     setResetLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get("reset-email") as string;
+    const email = (formData.get("reset-email") as string || "").trim();
 
     if (!email) {
       toast.error("Email é obrigatório");
@@ -153,32 +160,28 @@ const Auth = () => {
     }
 
     try {
-      // Chamar edge function para verificar se email existe e enviar reset
-      const { data, error } = await supabase.functions.invoke("verify-email-exists", {
-        body: { email },
+      // Chamada direta ao Supabase para enviar e-mail de recuperação
+      // Não revela se o e-mail existe para prevenir enumeration attacks
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
       });
 
       setResetLoading(false);
 
+      // Mensagem genérica independente de erro para segurança
       if (error) {
-        toast.error("Erro ao processar solicitação: " + error.message);
-        return;
+        console.error("resetPasswordForEmail error:", error);
       }
 
-      if (!data.exists) {
-        toast.error(data.message);
-        return;
-      }
-
-      toast.success(data.message);
+      toast.success("Se este e-mail estiver cadastrado, você receberá um link de recuperação. Verifique sua caixa de entrada e spam.");
       setResetDialogOpen(false);
       
       // Limpar o formulário
       (e.target as HTMLFormElement).reset();
     } catch (error: any) {
       setResetLoading(false);
-      toast.error("Erro ao processar solicitação. Tente novamente.");
       console.error("Error in password reset:", error);
+      toast.error("Erro ao processar solicitação. Tente novamente mais tarde.");
     }
   };
 
@@ -313,8 +316,9 @@ const Auth = () => {
                         <Alert>
                           <ShieldCheck className="h-4 w-4" />
                           <AlertDescription className="text-xs">
-                            Por segurança, se o email existir em nossa base, você receberá 
-                            um link para redefinir sua senha. O link expira em 1 hora.
+                            Se este e-mail estiver cadastrado, você receberá um link para 
+                            redefinir sua senha. Verifique sua caixa de entrada e spam. 
+                            O link expira em 1 hora.
                           </AlertDescription>
                         </Alert>
                         <Button type="submit" className="w-full" disabled={resetLoading}>
