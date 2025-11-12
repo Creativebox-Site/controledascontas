@@ -43,51 +43,33 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
 
-    // Verificar se o usuário existe consultando a lista de usuários
-    const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-
-    if (listError) {
-      console.error("Error listing users:", listError);
-      return new Response(
-        JSON.stringify({ error: "Erro ao verificar email" }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
-    }
-
-    // ===== CORREÇÃO: PREVENIR ENUMERAÇÃO DE EMAIL =====
-    // SEMPRE enviar email de reset, mesmo que o usuário não exista
-    // Isso previne que atacantes descubram quais emails estão cadastrados
+    // ===== SECURITY: PREVENT EMAIL ENUMERATION =====
+    // Always attempt to send reset email - Supabase handles non-existent emails silently
+    // This prevents timing attacks and information disclosure
+    console.log("Processing password reset request");
     
-    const userExists = users.some(user => user.email?.toLowerCase() === email.toLowerCase());
-
-    // Enviar email de recuperação apenas se o usuário realmente existir
-    if (userExists) {
-      console.log("User found, sending password reset email");
-      
-      const { error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(
-        email,
-        {
-          redirectTo: `${req.headers.get("origin")}/`,
-        }
-      );
-
-      if (resetError) {
-        console.error("Error sending reset email:", resetError);
-        // Não revelar o erro específico ao cliente
+    const { error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo: `${req.headers.get("origin")}/`,
       }
-    } else {
-      console.log("User not found, but returning success message to prevent enumeration");
+    );
+
+    // Never reveal if email exists or not - log errors internally only
+    if (resetError) {
+      console.error("Password reset error:", resetError);
     }
 
-    // SEMPRE retornar a mesma mensagem, independente de o email existir ou não
-    // Isso impede que atacantes descubram quais emails estão cadastrados
+    // Add constant delay to prevent timing attacks (even if email doesn't exist)
+    await new Promise(resolve => setTimeout(resolve, 150));
+
+    // ALWAYS return identical response regardless of email existence
+    const message = "Se este email estiver cadastrado, você receberá um link de recuperação. Verifique sua caixa de entrada e spam.";
+    
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Se o email estiver cadastrado, você receberá um link de recuperação. Verifique sua caixa de entrada e spam." 
+        message 
       }),
       {
         status: 200,
