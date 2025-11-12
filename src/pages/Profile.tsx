@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sb } from "@/lib/sb";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "lucide-react";
@@ -34,7 +34,7 @@ export const Profile = ({ userId }: ProfileProps) => {
   const loadProfile = async () => {
     if (!userId) return;
 
-    const { data, error } = await sb
+    const { data, error } = await supabase
       .from("profiles")
       .select("full_name, avatar_url, birth_date, phone, zip_code, street, number, complement, neighborhood, city, state")
       .eq("id", userId)

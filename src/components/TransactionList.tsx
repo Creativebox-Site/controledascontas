@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { sb } from "@/lib/sb";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -113,7 +112,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
   };
 
   const loadCategories = async () => {
-    const { data, error } = await sb
+    const { data, error } = await supabase
       .from("categories")
       .select("id, name")
       .eq("user_id", userId);
@@ -124,7 +123,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
   };
 
   const loadTransactions = async () => {
-    let query = sb
+    let query = supabase
       .from("transactions")
       .select("*, categories(id, name, color)")
       .eq("user_id", userId);
@@ -193,7 +192,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
   const handleDelete = async (id: string) => {
     if (!confirm("Deseja realmente excluir esta transação?")) return;
 
-    const { error } = await sb
+    const { error } = await supabase
       .from("transactions")
       .delete()
       .eq("id", id);
@@ -210,7 +209,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
   const handleDeleteSeries = async (seriesId: string) => {
     if (!confirm("Deseja realmente excluir toda a série de transações repetidas?")) return;
 
-    const { error } = await sb
+    const { error } = await supabase
       .from("transactions")
       .delete()
       .eq("series_id", seriesId);
@@ -232,7 +231,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
 
     if (!confirm(`Deseja realmente excluir ${selectedIds.size} transação(ões)?`)) return;
 
-    const { error } = await sb
+    const { error } = await supabase
       .from("transactions")
       .delete()
       .in("id", Array.from(selectedIds));

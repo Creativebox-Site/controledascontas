@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sb } from "@/lib/sb";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -49,7 +49,7 @@ export const InvestmentComparison = ({ userId, currency }: InvestmentComparisonP
 
     try {
       // Get all investment transactions
-      const { data: transactions } = await sb
+      const { data: transactions } = await supabase
         .from("transactions")
         .select("date, amount")
         .eq("user_id", userId)

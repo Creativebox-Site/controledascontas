@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sb } from "@/lib/sb";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { TrendingUp, TrendingDown, DollarSign } from "lucide-react";
@@ -40,7 +40,7 @@ export const WeeklySummary = ({ userId, currency }: WeeklySummaryProps) => {
     const weekEnd = endOfWeek(new Date(), { locale: ptBR });
 
     // Buscar transações da semana
-    const { data: transactions } = await sb
+    const { data: transactions } = await supabase
       .from("transactions")
       .select("*, categories(name, color)")
       .eq("user_id", userId)

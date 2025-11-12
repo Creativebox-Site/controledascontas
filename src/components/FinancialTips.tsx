@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sb } from "@/lib/sb";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Lightbulb, Target, TrendingUp, PiggyBank } from "lucide-react";
 import { startOfMonth, endOfMonth, format, addMonths } from "date-fns";
@@ -26,7 +26,7 @@ export const FinancialTips = ({ userId, currency }: FinancialTipsProps) => {
     const currentEnd = endOfMonth(new Date());
 
     // Buscar dados do mês atual
-    const { data: transactions } = await sb
+    const { data: transactions } = await supabase
       .from("transactions")
       .select("*, categories(name, is_essential)")
       .eq("user_id", userId)
@@ -35,7 +35,7 @@ export const FinancialTips = ({ userId, currency }: FinancialTipsProps) => {
       .lte("date", format(currentEnd, "yyyy-MM-dd"));
 
     // Buscar metas ativas
-    const { data: goals } = await sb
+    const { data: goals } = await supabase
       .from("goals")
       .select("*")
       .eq("user_id", userId)

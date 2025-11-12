@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sb } from "@/lib/sb";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Calendar, DollarSign, Sparkles } from "lucide-react";
@@ -48,7 +48,7 @@ export const GoalsInvestmentComparison = ({
     if (!userId) return;
 
     // Buscar metas ativas
-    const { data: goalsData } = await sb
+    const { data: goalsData } = await supabase
       .from("goals")
       .select("*")
       .eq("user_id", userId)
@@ -60,7 +60,7 @@ export const GoalsInvestmentComparison = ({
     const threeMonthsAgo = new Date();
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-    const { data: transactions } = await sb
+    const { data: transactions } = await supabase
       .from("transactions")
       .select("*")
       .eq("user_id", userId)

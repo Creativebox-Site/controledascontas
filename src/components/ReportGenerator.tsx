@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { sb } from "@/lib/sb";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -61,7 +60,7 @@ export const ReportGenerator = ({ userId, currency }: ReportGeneratorProps) => {
   const loadUserData = async () => {
     if (!userId) return;
 
-    const { data: profile } = await sb
+    const { data: profile } = await supabase
       .from("profiles")
       .select("full_name, phone")
       .eq("id", userId)
@@ -88,12 +87,12 @@ export const ReportGenerator = ({ userId, currency }: ReportGeneratorProps) => {
       }).format(value);
     };
 
-    const { data: transactions } = await sb
+    const { data: transactions } = await supabase
       .from("transactions")
       .select("*, categories(name, color)")
       .eq("user_id", userId);
 
-    const { data: goals } = await sb
+    const { data: goals } = await supabase
       .from("goals")
       .select("*")
       .eq("user_id", userId);
@@ -280,7 +279,7 @@ export const ReportGenerator = ({ userId, currency }: ReportGeneratorProps) => {
 
         if (error) throw error;
 
-        await sb.from("reports_sent").insert({
+        await supabase.from("reports_sent").insert({
           user_id: userId,
           sections_included: sections.filter((s) => s.selected).map((s) => s.id),
           delivery_method: "email",
@@ -341,7 +340,7 @@ export const ReportGenerator = ({ userId, currency }: ReportGeneratorProps) => {
         }
 
         // Registrar no histórico
-        await sb.from("reports_sent").insert({
+        await supabase.from("reports_sent").insert({
           user_id: userId,
           sections_included: sections.filter((s) => s.selected).map((s) => s.id),
           delivery_method: "whatsapp",
@@ -374,7 +373,7 @@ export const ReportGenerator = ({ userId, currency }: ReportGeneratorProps) => {
   const handlePrint = async () => {
     if (!pdfBlob || !userId) return;
 
-    await sb.from("reports_sent").insert({
+    await supabase.from("reports_sent").insert({
       user_id: userId,
       sections_included: sections.filter((s) => s.selected).map((s) => s.id),
       delivery_method: "print",
@@ -388,7 +387,7 @@ export const ReportGenerator = ({ userId, currency }: ReportGeneratorProps) => {
   const handleDownload = async () => {
     if (!pdfBlob || !userId) return;
 
-    await sb.from("reports_sent").insert({
+    await supabase.from("reports_sent").insert({
       user_id: userId,
       sections_included: sections.filter((s) => s.selected).map((s) => s.id),
       delivery_method: "download",

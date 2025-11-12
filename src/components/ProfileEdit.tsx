@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { User, Image as ImageIcon, Smile } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { sb } from "@/lib/sb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -45,7 +44,7 @@ export const ProfileEdit = ({ userId }: ProfileEditProps) => {
   const loadProfile = async () => {
     if (!userId) return;
 
-    const { data, error } = await sb
+    const { data, error} = await supabase
       .from("profiles")
       .select("full_name, avatar_url, birth_date, phone, zip_code, street, number, complement, neighborhood, city, state")
       .eq("id", userId)
@@ -76,7 +75,7 @@ export const ProfileEdit = ({ userId }: ProfileEditProps) => {
   const handleSave = async () => {
     if (!userId) return;
 
-    const { error } = await sb
+    const { error } = await supabase
       .from("profiles")
       .update({
         full_name: profile.full_name,

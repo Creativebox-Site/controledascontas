@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sb } from "@/lib/sb";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InsightCard } from "@/components/InsightCard";
 import { startOfMonth, endOfMonth, startOfMonth as startOfLastMonth, endOfMonth as endOfLastMonth, subMonths, format } from "date-fns";
@@ -50,7 +50,7 @@ export const MonthlyAnalysis = ({ userId, currency }: MonthlyAnalysisProps) => {
     const lastEnd = endOfLastMonth(lastMonthDate);
 
     // Buscar transações do mês atual
-    const { data: currentTransactions } = await sb
+    const { data: currentTransactions } = await supabase
       .from("transactions")
       .select("*, categories(name, color)")
       .eq("user_id", userId)
@@ -59,13 +59,13 @@ export const MonthlyAnalysis = ({ userId, currency }: MonthlyAnalysisProps) => {
       .lte("date", format(currentEnd, "yyyy-MM-dd"));
 
     // Buscar transações do mês passado
-    const { data: lastTransactions } = await sb
+    const { data: lastTransactions } = await supabase
       .from("transactions")
       .select("*, categories(name, color)")
       .eq("user_id", userId)
       .eq("currency", currency)
       .gte("date", format(lastStart, "yyyy-MM-dd"))
-      .lte("date", format(lastEnd, "yyyy-MM-dd"));
+      .lte("date", format(lastEnd, "yyyy-mm-dd"));
 
     if (currentTransactions && lastTransactions) {
       const currentIncome = currentTransactions

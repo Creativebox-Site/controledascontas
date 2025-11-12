@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sb } from "@/lib/sb";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, Target, Calendar, Sparkles } from "lucide-react";
 import { startOfMonth, endOfMonth, format, differenceInMonths } from "date-fns";
@@ -36,7 +36,7 @@ export const GoalsInsights = ({ userId, currency }: GoalsInsightsProps) => {
     const threeMonthsAgo = new Date();
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-    const { data: transactions } = await sb
+    const { data: transactions } = await supabase
       .from("transactions")
       .select("*")
       .eq("user_id", userId)
@@ -44,7 +44,7 @@ export const GoalsInsights = ({ userId, currency }: GoalsInsightsProps) => {
       .gte("date", format(threeMonthsAgo, "yyyy-MM-dd"));
 
     // Buscar metas ativas
-    const { data: goals } = await sb
+    const { data: goals } = await supabase
       .from("goals")
       .select("*")
       .eq("user_id", userId)

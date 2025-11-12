@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { sb } from "@/lib/sb";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -41,7 +41,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
   }, [userId]);
 
   const loadCategories = async () => {
-    const { data, error } = await sb
+    const { data, error } = await supabase
       .from("categories")
       .select("*")
       .eq("user_id", userId)
@@ -65,7 +65,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
     }
 
     if (editingId) {
-      const { error } = await sb
+      const { error } = await supabase
         .from("categories")
         .update(formData)
         .eq("id", editingId);
@@ -78,7 +78,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
         loadCategories();
       }
     } else {
-      const { error } = await sb.from("categories").insert([
+      const { error } = await supabase.from("categories").insert([
         {
           ...formData,
           user_id: userId,
@@ -120,7 +120,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
   const handleDelete = async (id: string) => {
     if (!confirm("Deseja realmente excluir esta categoria?")) return;
 
-    const { error } = await sb.from("categories").delete().eq("id", id);
+    const { error } = await supabase.from("categories").delete().eq("id", id);
 
     if (error) {
       toast.error("Erro ao excluir categoria");
@@ -141,7 +141,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
       color: row.cor || "#6b7280"
     }));
 
-    const { error } = await sb
+    const { error } = await supabase
       .from("categories")
       .insert(categoriesToInsert);
 

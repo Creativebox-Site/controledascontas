@@ -9,8 +9,6 @@ import { Download, Trash2, AlertTriangle, FileSpreadsheet, FileJson } from "luci
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
 
-import { sb } from "@/lib/sb";
-
 interface AccountDeletionProps {
   userId?: string;
 }
@@ -28,10 +26,10 @@ export const AccountDeletion = ({ userId }: AccountDeletionProps) => {
     try {
       // Fetch all user data
       const [transactionsRes, categoriesRes, goalsRes, profileRes] = await Promise.all([
-        sb.from('transactions').select('*').eq('user_id', userId),
-        sb.from('categories').select('*').eq('user_id', userId),
-        sb.from('goals').select('*').eq('user_id', userId),
-        sb.from('profiles').select('*').eq('id', userId).single(),
+        supabase.from('transactions').select('*').eq('user_id', userId),
+        supabase.from('categories').select('*').eq('user_id', userId),
+        supabase.from('goals').select('*').eq('user_id', userId),
+        supabase.from('profiles').select('*').eq('id', userId).single(),
       ]);
 
       // Create workbook
@@ -78,10 +76,10 @@ export const AccountDeletion = ({ userId }: AccountDeletionProps) => {
     try {
       // Fetch all user data
       const [transactionsRes, categoriesRes, goalsRes, profileRes] = await Promise.all([
-        sb.from('transactions').select('*').eq('user_id', userId),
-        sb.from('categories').select('*').eq('user_id', userId),
-        sb.from('goals').select('*').eq('user_id', userId),
-        sb.from('profiles').select('*').eq('id', userId).single(),
+        supabase.from('transactions').select('*').eq('user_id', userId),
+        supabase.from('categories').select('*').eq('user_id', userId),
+        supabase.from('goals').select('*').eq('user_id', userId),
+        supabase.from('profiles').select('*').eq('id', userId).single(),
       ]);
 
       const exportData = {

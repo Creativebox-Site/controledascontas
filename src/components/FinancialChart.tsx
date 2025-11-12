@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { sb } from "@/lib/sb";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
@@ -92,7 +92,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   };
 
   const loadTransactions = async () => {
-    const { data, error } = await sb
+    const { data, error } = await supabase
       .from("transactions")
       .select("*, categories(name, color)")
       .eq("user_id", userId);

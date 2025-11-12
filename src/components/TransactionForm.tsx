@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { sb } from "@/lib/sb";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,7 +59,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
   }, [formData.type]);
 
   const loadCategories = async () => {
-    const { data, error } = await sb
+    const { data, error } = await supabase
       .from("categories")
       .select("*")
       .eq("user_id", userId)
@@ -95,7 +95,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
         const seriesId = crypto.randomUUID();
         
         // Deletar a transação original
-        const { error: deleteError } = await sb
+        const { error: deleteError } = await supabase
           .from("transactions")
           .delete()
           .eq("id", transaction.id);
@@ -130,7 +130,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
           });
         }
         
-        const { error } = await sb
+        const { error } = await supabase
           .from("transactions")
           .insert(transactions);
 
@@ -149,7 +149,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
         // Atualização normal (única)
         const loadingToast = toast.loading("Atualizando transação...");
         
-        const { error } = await sb
+        const { error } = await supabase
           .from("transactions")
           .update(dataToSave)
           .eq("id", transaction.id);
@@ -197,7 +197,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
           });
         }
         
-        const { error } = await sb
+        const { error } = await supabase
           .from("transactions")
           .insert(transactions);
 
@@ -215,7 +215,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
       } else {
         const loadingToast = toast.loading("Inserindo a transação...");
         
-        const { error } = await sb
+        const { error } = await supabase
           .from("transactions")
           .insert([dataToSave]);
 

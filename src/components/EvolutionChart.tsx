@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sb } from "@/lib/sb";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -82,7 +82,7 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
   };
 
   const loadCategories = async () => {
-    const { data } = await sb
+    const { data } = await supabase
       .from("categories")
       .select("id, name, color")
       .eq("user_id", userId)
@@ -94,7 +94,7 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
   };
 
   const loadTransactions = async () => {
-    const { data, error } = await sb
+    const { data, error } = await supabase
       .from("transactions")
       .select("*, categories(name, color)")
       .eq("user_id", userId)

@@ -1,6 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { sb } from "@/lib/sb";
+import { supabase } from "@/integrations/supabase/client";
 interface CurrencySelectorProps {
   value: string;
   onChange: (value: string) => void;
@@ -12,7 +12,7 @@ export const CurrencySelector = ({ value, onChange, userId }: CurrencySelectorPr
     onChange(newCurrency);
     
     if (userId) {
-      const { error } = await sb
+      const { error } = await supabase
         .from('profiles')
         .update({ preferred_currency: newCurrency })
         .eq('id', userId);

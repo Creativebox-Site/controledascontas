@@ -1,5 +1,5 @@
 import { BulkImport } from "@/components/BulkImport";
-import { sb } from "@/lib/sb";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TransactionBulkImportProps {
   userId?: string;
@@ -19,7 +19,7 @@ export const TransactionBulkImport = ({
     if (!userId) return;
 
     // Buscar categorias do usuário para fazer o match
-    const { data: categories } = await sb
+    const { data: categories } = await supabase
       .from("categories")
       .select("*")
       .eq("user_id", userId);
@@ -41,7 +41,7 @@ export const TransactionBulkImport = ({
       };
     });
 
-    const { error } = await sb
+    const { error } = await supabase
       .from("transactions")
       .insert(transactionsToInsert);
 

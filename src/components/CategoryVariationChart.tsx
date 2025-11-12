@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sb } from "@/lib/sb";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { startOfMonth, endOfMonth, subMonths, format } from "date-fns";
@@ -38,7 +38,7 @@ export const CategoryVariationChart = ({ userId, currency }: CategoryVariationCh
     const lastEnd = endOfMonth(lastMonthDate);
 
     // Buscar transações dos dois meses
-    const { data: currentTransactions } = await sb
+    const { data: currentTransactions } = await supabase
       .from("transactions")
       .select("*, categories(name, color)")
       .eq("user_id", userId)
@@ -47,7 +47,7 @@ export const CategoryVariationChart = ({ userId, currency }: CategoryVariationCh
       .gte("date", format(currentStart, "yyyy-MM-dd"))
       .lte("date", format(currentEnd, "yyyy-MM-dd"));
 
-    const { data: lastTransactions } = await sb
+    const { data: lastTransactions } = await supabase
       .from("transactions")
       .select("*, categories(name, color)")
       .eq("user_id", userId)

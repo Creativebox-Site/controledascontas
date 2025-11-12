@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { User, Camera, Smile, Image as ImageIcon, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { sb } from "@/lib/sb";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -49,7 +48,7 @@ export const ProfileMenu = ({ userId }: ProfileMenuProps) => {
   const loadProfile = async () => {
     if (!userId) return;
 
-    const { data, error } = await sb
+    const { data, error } = await supabase
       .from("profiles")
       .select("full_name, avatar_url")
       .eq("id", userId)
@@ -71,7 +70,7 @@ export const ProfileMenu = ({ userId }: ProfileMenuProps) => {
   const handleSave = async () => {
     if (!userId) return;
 
-    const { error } = await sb
+    const { error } = await supabase
       .from("profiles")
       .update({
         full_name: profile.full_name,
