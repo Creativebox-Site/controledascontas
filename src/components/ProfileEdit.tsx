@@ -232,52 +232,6 @@ export const ProfileEdit = ({ userId }: ProfileEditProps) => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Foto de Perfil</CardTitle>
-          <CardDescription>
-            Altere sua foto de perfil ou escolha um emoji
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col items-center gap-4">
-            <Avatar className="w-32 h-32 border-4 border-background shadow-lg">
-              <AvatarImage src={profile.avatar_url.startsWith("http") ? profile.avatar_url : undefined} />
-              <AvatarFallback className="text-5xl">
-                {profile.avatar_url.startsWith("http") ? <User className="w-16 h-16" /> : profile.avatar_url}
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="flex flex-wrap gap-2 justify-center">
-              <Button
-                type="button"
-                variant="outline"
-                disabled={uploading}
-                onClick={() => document.getElementById("avatar-upload")?.click()}
-              >
-                <ImageIcon className="w-4 h-4 mr-2" />
-                {uploading ? "Enviando..." : "Escolher Foto"}
-              </Button>
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAvatarUpload}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setEmojiPickerOpen(true)}
-              >
-                <Smile className="w-4 h-4 mr-2" />
-                Escolher Emoji
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
           <CardTitle>Informações Pessoais</CardTitle>
           <CardDescription>
             Atualize suas informações pessoais
