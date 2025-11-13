@@ -25,6 +25,13 @@ export function FinancingComparison({ data }: FinancingComparisonProps) {
   const yearsToSave = Math.floor(monthsToSave / 12);
   const remainingMonths = monthsToSave % 12;
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(amount);
+  };
+
   // Prepara dados para o gráfico
   const chartData = investmentSimulation.map((item, index) => ({
     mes: item.month,
@@ -88,7 +95,7 @@ export function FinancingComparison({ data }: FinancingComparisonProps) {
                   tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
                 />
                 <Tooltip 
-                  formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                  formatter={(value: number) => formatCurrency(value)}
                   contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
                 />
                 <Legend />
@@ -114,14 +121,14 @@ export function FinancingComparison({ data }: FinancingComparisonProps) {
             <div className="space-y-2 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
               <p className="text-sm font-medium text-muted-foreground">Total Pago no Financiamento</p>
               <p className="text-2xl font-bold text-destructive">
-                R$ {totalPaid.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {formatCurrency(totalPaid)}
               </p>
             </div>
             
             <div className="space-y-2 p-4 rounded-lg bg-success/10 border border-success/20">
               <p className="text-sm font-medium text-muted-foreground">Total Acumulado Investindo</p>
               <p className="text-2xl font-bold text-success">
-                R$ {finalInvestmentValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {formatCurrency(finalInvestmentValue)}
               </p>
             </div>
           </div>
@@ -132,7 +139,7 @@ export function FinancingComparison({ data }: FinancingComparisonProps) {
               <AlertTitle className="font-bold text-success">Você economizaria:</AlertTitle>
               <AlertDescription>
                 <span className="text-lg font-bold text-success">
-                  R$ {difference.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  {formatCurrency(difference)}
                 </span>
                 <p className="text-sm mt-1">
                   investindo ao invés de financiar, além de ter o patrimônio líquido ao final do período.
@@ -155,13 +162,13 @@ export function FinancingComparison({ data }: FinancingComparisonProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-center p-6 rounded-lg bg-primary/10 border border-primary/20">
-            <p className="text-sm text-muted-foreground mb-2">Economizando R$ {data.monthlyPayment.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} por mês</p>
+            <p className="text-sm text-muted-foreground mb-2">Economizando {formatCurrency(data.monthlyPayment)} por mês</p>
             <p className="text-4xl font-bold text-primary mb-2">
               {yearsToSave > 0 && `${yearsToSave} ${yearsToSave === 1 ? 'ano' : 'anos'}`}
               {yearsToSave > 0 && remainingMonths > 0 && ' e '}
               {remainingMonths > 0 && `${remainingMonths} ${remainingMonths === 1 ? 'mês' : 'meses'}`}
             </p>
-            <p className="text-sm text-muted-foreground">para juntar R$ {data.assetValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+            <p className="text-sm text-muted-foreground">para juntar {formatCurrency(data.assetValue)}</p>
           </div>
 
           <div className="space-y-2 text-sm">

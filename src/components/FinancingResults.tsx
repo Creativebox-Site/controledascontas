@@ -40,6 +40,13 @@ export function FinancingResults({ data }: FinancingResultsProps) {
   const evaluation = evaluateRate(monthlyRate, data.type);
   const message = getRateMessage(evaluation, data.type);
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(amount);
+  };
+
   const getAlertVariant = () => {
     switch (evaluation) {
       case 'good': return 'default';
@@ -167,21 +174,21 @@ export function FinancingResults({ data }: FinancingResultsProps) {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Valor do Bem</p>
               <p className="text-xl font-bold text-foreground">
-                R$ {data.assetValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {formatCurrency(data.assetValue)}
               </p>
             </div>
             
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Total Pago</p>
               <p className="text-xl font-bold text-foreground">
-                R$ {totalPaid.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {formatCurrency(totalPaid)}
               </p>
             </div>
             
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Total de Juros</p>
               <p className="text-xl font-bold text-destructive">
-                R$ {totalInterest.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {formatCurrency(totalInterest)}
               </p>
             </div>
           </div>
