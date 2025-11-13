@@ -9,7 +9,6 @@ import { AvatarImageEditor } from "./AvatarImageEditor";
 import { EmojiPickerDialog } from "./EmojiPickerDialog";
 import { CoverImage } from "./CoverImage";
 import { ThemeToggle } from "./ThemeToggle";
-import { ThemeColorCustomizer } from "./ThemeColorCustomizer";
 
 interface AppearanceSettingsProps {
   userId?: string;
@@ -200,8 +199,6 @@ export const AppearanceSettings = ({ userId }: AppearanceSettingsProps) => {
           </div>
         </CardContent>
       </Card>
-
-      <ThemeColorCustomizer userId={userId} />
 
       <AvatarImageEditor
         open={imageEditorOpen}
