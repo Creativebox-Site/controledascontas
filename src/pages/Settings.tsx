@@ -1,6 +1,7 @@
 import { AccountDeletion } from "@/components/AccountDeletion";
 import { PasswordChange } from "@/components/PasswordChange";
 import { ProfileEdit } from "@/components/ProfileEdit";
+import { AppearanceSettings } from "@/components/AppearanceSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface SettingsProps {
@@ -18,14 +19,19 @@ export const Settings = ({ userId }: SettingsProps) => {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile">Perfil</TabsTrigger>
+          <TabsTrigger value="appearance">Aparência</TabsTrigger>
           <TabsTrigger value="security">Segurança</TabsTrigger>
           <TabsTrigger value="account">Conta</TabsTrigger>
         </TabsList>
         
         <TabsContent value="profile" className="space-y-6 mt-6">
           <ProfileEdit userId={userId} />
+        </TabsContent>
+        
+        <TabsContent value="appearance" className="space-y-6 mt-6">
+          <AppearanceSettings userId={userId} />
         </TabsContent>
         
         <TabsContent value="security" className="space-y-6 mt-6">
