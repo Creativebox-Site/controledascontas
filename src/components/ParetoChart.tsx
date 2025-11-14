@@ -110,30 +110,45 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <ResponsiveContainer width="100%" height={400}>
+        <ResponsiveContainer width="100%" height={450}>
           <ComposedChart
             data={paretoData.data}
-            margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+            margin={{ top: 20, right: 60, left: 60, bottom: 120 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis
               dataKey="name"
               angle={-45}
               textAnchor="end"
-              height={100}
-              tick={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
+              height={120}
+              interval={0}
+              tick={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
             />
             <YAxis
               yAxisId="left"
-              tick={{ fill: "hsl(var(--foreground))" }}
+              tick={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
               tickFormatter={(value) => formatCurrency(value)}
+              width={80}
+              label={{
+                value: "Valor (R$)",
+                angle: -90,
+                position: "insideLeft",
+                style: { fill: "hsl(var(--foreground))", fontSize: 12 }
+              }}
             />
             <YAxis
               yAxisId="right"
               orientation="right"
               domain={[0, 100]}
-              tick={{ fill: "hsl(var(--foreground))" }}
+              tick={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
               tickFormatter={(value) => `${value}%`}
+              width={60}
+              label={{
+                value: "% Acumulada",
+                angle: 90,
+                position: "insideRight",
+                style: { fill: "hsl(var(--foreground))", fontSize: 12 }
+              }}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend
@@ -149,10 +164,12 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
               strokeDasharray="5 5"
               strokeWidth={2}
               label={{
-                value: "80%",
-                position: "right",
+                value: "Meta 80%",
+                position: "insideTopRight",
                 fill: "hsl(var(--warning))",
                 fontWeight: "bold",
+                fontSize: 13,
+                offset: 10
               }}
             />
 
@@ -186,16 +203,21 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
         </ResponsiveContainer>
 
         {/* Mensagem de ação */}
-        <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
-          <p className="text-sm font-medium text-foreground">
-            <span className="font-bold text-warning">
-              Foque na economia destas {paretoData.focusCount} categoria{paretoData.focusCount !== 1 ? 's' : ''}
-            </span>{" "}
-            para ter o maior impacto no seu orçamento:
-          </p>
-          <p className="text-sm text-muted-foreground mt-2">
-            {paretoData.focusCategories.join(", ")}
-          </p>
+        <div className="bg-warning/10 border-2 border-warning/30 rounded-lg p-5 mt-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-base font-semibold text-foreground mb-2">
+                Foque na economia destas {paretoData.focusCount} categoria{paretoData.focusCount !== 1 ? 's' : ''}
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Estas categorias representam 80% das suas despesas. Concentre seus esforços de economia aqui para obter o maior impacto:
+              </p>
+              <p className="text-sm font-medium text-warning mt-2">
+                {paretoData.focusCategories.join(" • ")}
+              </p>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
