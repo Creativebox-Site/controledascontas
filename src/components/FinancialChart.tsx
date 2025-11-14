@@ -8,6 +8,7 @@ import { TrendingUp, TrendingDown, Wallet, PiggyBank, AlertCircle, Calendar, Plu
 import { Sparkline } from "@/components/Sparkline";
 import { FinancialSummary } from "@/components/FinancialSummary";
 import { DateRangeFilter, DateRange } from "@/components/DateRangeFilter";
+import { ParetoChart } from "@/components/ParetoChart";
 import { subMonths, isAfter, isBefore, isWithinInterval, addDays, startOfMonth, endOfMonth } from "date-fns";
 
 interface Transaction {
@@ -404,38 +405,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Despesas por Categoria</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {categoryData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                Sem dados para exibir
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <ParetoChart categoryData={categoryData} formatCurrency={formatCurrency} />
 
         <Card>
           <CardHeader>
