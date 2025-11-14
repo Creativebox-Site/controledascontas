@@ -144,7 +144,7 @@ export const DateRangeFilter = ({ onFilterChange }: DateRangeFilterProps) => {
       {filterType === "custom" && (
         <div className="flex gap-4 items-end">
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Data Inicial </Label>
+            <Label className="text-sm font-medium **mr-4**">Data Inicial</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -171,7 +171,7 @@ export const DateRangeFilter = ({ onFilterChange }: DateRangeFilterProps) => {
           </div>
 
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Data Final </Label>
+            <Label className="text-sm font-medium **mr-4**">Data Final</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
