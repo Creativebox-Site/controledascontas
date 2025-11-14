@@ -9,6 +9,7 @@ import { Sparkline } from "@/components/Sparkline";
 import { FinancialSummary } from "@/components/FinancialSummary";
 import { DateRangeFilter, DateRange } from "@/components/DateRangeFilter";
 import { ParetoChart } from "@/components/ParetoChart";
+import { MonthlyEvolutionChart } from "@/components/MonthlyEvolutionChart";
 import { subMonths, isAfter, isBefore, isWithinInterval, addDays, startOfMonth, endOfMonth } from "date-fns";
 
 interface Transaction {
@@ -406,32 +407,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
 
       <div className="grid gap-6 md:grid-cols-2">
         <ParetoChart categoryData={categoryData} formatCurrency={formatCurrency} />
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Evolução Mensal</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {monthlyData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                  <Legend />
-                  <Line type="monotone" dataKey="income" stroke="hsl(var(--success))" name="Receitas" strokeWidth={2} />
-                  <Line type="monotone" dataKey="expense" stroke="hsl(var(--destructive))" name="Despesas" strokeWidth={2} />
-                  <Line type="monotone" dataKey="investment" stroke="hsl(var(--primary))" name="Investimentos" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                Sem dados para exibir
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <MonthlyEvolutionChart monthlyData={monthlyData} formatCurrency={formatCurrency} />
       </div>
     </div>
   );
