@@ -3,8 +3,30 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
-import { TrendingUp, TrendingDown, Wallet, PiggyBank, AlertCircle, Calendar, Plus, CreditCard, TrendingUp as InvestmentIcon } from "lucide-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  PiggyBank,
+  AlertCircle,
+  Calendar,
+  Plus,
+  CreditCard,
+  TrendingUp as InvestmentIcon,
+} from "lucide-react";
 import { Sparkline } from "@/components/Sparkline";
 import { FinancialSummary } from "@/components/FinancialSummary";
 import { DateRangeFilter, DateRange } from "@/components/DateRangeFilter";
@@ -41,7 +63,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   const [exchangeRate, setExchangeRate] = useState<number>(5.0);
   const [dateRange, setDateRange] = useState<DateRange>({
     from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-    to: new Date()
+    to: new Date(),
   });
   const [incomeHistory, setIncomeHistory] = useState<number[]>([]);
   const [expenseHistory, setExpenseHistory] = useState<number[]>([]);
@@ -49,7 +71,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   const [incomeVariation, setIncomeVariation] = useState(0);
   const [expenseVariation, setExpenseVariation] = useState(0);
   const [balanceVariation, setBalanceVariation] = useState(0);
-  
+
   // Novos estados para os cards
   const [monthlyIncome, setMonthlyIncome] = useState(0);
   const [monthlyExpense, setMonthlyExpense] = useState(0);
@@ -72,25 +94,25 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
 
   const fetchExchangeRate = async () => {
     try {
-      const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+      const response = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
       const data = await response.json();
       setExchangeRate(data.rates.BRL);
     } catch (error) {
-      console.error('Error fetching exchange rate:', error);
+      console.error("Error fetching exchange rate:", error);
     }
   };
 
   const convertAmount = (amount: number, transactionCurrency: string) => {
     if (currency === transactionCurrency) return amount;
-    
+
     if (currency === "BRL" && transactionCurrency === "USD") {
       return amount * exchangeRate;
     }
-    
+
     if (currency === "USD" && transactionCurrency === "BRL") {
       return amount / exchangeRate;
     }
-    
+
     return amount;
   };
 
@@ -99,7 +121,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
       const transactionDate = new Date(t.date);
       return isWithinInterval(transactionDate, {
         start: dateRange.from,
-        end: dateRange.to
+        end: dateRange.to,
       });
     });
   };
@@ -192,14 +214,10 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
     const thisMonthBalance = thisMonthIncome - thisMonthExpense;
     const lastMonthBalance = lastMonthIncome - lastMonthExpense;
 
-    setIncomeVariation(
-      lastMonthIncome > 0 ? ((thisMonthIncome - lastMonthIncome) / lastMonthIncome) * 100 : 0
-    );
-    setExpenseVariation(
-      lastMonthExpense > 0 ? ((thisMonthExpense - lastMonthExpense) / lastMonthExpense) * 100 : 0
-    );
+    setIncomeVariation(lastMonthIncome > 0 ? ((thisMonthIncome - lastMonthIncome) / lastMonthIncome) * 100 : 0);
+    setExpenseVariation(lastMonthExpense > 0 ? ((thisMonthExpense - lastMonthExpense) / lastMonthExpense) * 100 : 0);
     setBalanceVariation(
-      lastMonthBalance !== 0 ? ((thisMonthBalance - lastMonthBalance) / Math.abs(lastMonthBalance)) * 100 : 0
+      lastMonthBalance !== 0 ? ((thisMonthBalance - lastMonthBalance) / Math.abs(lastMonthBalance)) * 100 : 0,
     );
 
     // Dados mensais
@@ -222,7 +240,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
     // Performance dos investimentos (mês atual)
     const thisMonthInvestments = getMonthTotal(thisMonth, "investment");
     const lastMonthInvestments = getMonthTotal(lastMonth, "investment");
-    
+
     if (lastMonthInvestments > 0) {
       const perfPercentage = ((thisMonthInvestments - lastMonthInvestments) / lastMonthInvestments) * 100;
       const perfValue = thisMonthInvestments - lastMonthInvestments;
@@ -243,7 +261,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
         const name = t.categories?.name || "Sem categoria";
         const color = t.categories?.color || "#888";
         const amount = convertAmount(t.amount, t.currency);
-        
+
         if (categoryMap.has(name)) {
           categoryMap.get(name)!.value += amount;
         } else {
@@ -259,7 +277,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
 
     transactions.forEach((t) => {
       const date = new Date(t.date);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       const amount = convertAmount(t.amount, t.currency);
 
       if (!monthlyMap.has(monthKey)) {
@@ -279,9 +297,9 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: currency
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: currency,
     }).format(value);
   };
 
@@ -313,15 +331,10 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
             <Wallet className="h-5 w-5 text-primary" />
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className={`text-3xl font-bold ${balance >= 0 ? 'text-success' : 'text-destructive'}`}>
+            <div className={`text-3xl font-bold ${balance >= 0 ? "text-success" : "text-destructive"}`}>
               {formatCurrency(balance)}
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full"
-              onClick={() => navigate('/transactions')}
-            >
+            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("dashboard/transactions")}>
               Ver Extrato Completo
             </Button>
           </CardContent>
@@ -344,15 +357,10 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
                 <span className="font-medium text-destructive">{formatCurrency(monthlyExpense)}</span>
               </div>
             </div>
-            <div className={`text-2xl font-bold ${monthlyBalance >= 0 ? 'text-success' : 'text-destructive'}`}>
+            <div className={`text-2xl font-bold ${monthlyBalance >= 0 ? "text-success" : "text-destructive"}`}>
               Saldo: {formatCurrency(monthlyBalance)}
             </div>
-            <Button 
-              variant="default" 
-              size="sm" 
-              className="w-full"
-              onClick={() => setTransactionDialogOpen(true)}
-            >
+            <Button variant="default" size="sm" className="w-full" onClick={() => setTransactionDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-1" />
               Lançar Nova Transação
             </Button>
@@ -366,15 +374,13 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
             <AlertCircle className="h-5 w-5 text-warning" />
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="text-3xl font-bold text-warning">
-              {formatCurrency(upcomingPayments)}
-            </div>
+            <div className="text-3xl font-bold text-warning">{formatCurrency(upcomingPayments)}</div>
             <p className="text-sm text-muted-foreground">
-              {upcomingPaymentsCount} {upcomingPaymentsCount === 1 ? 'Conta Pendente' : 'Contas Pendentes'}
+              {upcomingPaymentsCount} {upcomingPaymentsCount === 1 ? "Conta Pendente" : "Contas Pendentes"}
             </p>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               className="w-full border-warning text-warning hover:bg-warning hover:text-warning-foreground"
               onClick={() => setConstructionDialogOpen(true)}
             >
@@ -391,19 +397,13 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
             <PiggyBank className="h-5 w-5 text-primary" />
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="text-3xl font-bold text-primary">
-              {formatCurrency(totalInvestments)}
+            <div className="text-3xl font-bold text-primary">{formatCurrency(totalInvestments)}</div>
+            <div className={`text-sm font-medium ${investmentPerformance >= 0 ? "text-success" : "text-destructive"}`}>
+              {investmentPerformance >= 0 ? "↑" : "↓"} {Math.abs(investmentPerformance).toFixed(1)}% (
+              {investmentPerformance >= 0 ? "+" : ""}
+              {formatCurrency(investmentPerformanceValue)})
             </div>
-            <div className={`text-sm font-medium ${investmentPerformance >= 0 ? 'text-success' : 'text-destructive'}`}>
-              {investmentPerformance >= 0 ? '↑' : '↓'} {Math.abs(investmentPerformance).toFixed(1)}% 
-              ({investmentPerformance >= 0 ? '+' : ''}{formatCurrency(investmentPerformanceValue)})
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full"
-              onClick={() => navigate('/investments')}
-            >
+            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("dashboard/investments")}>
               <InvestmentIcon className="h-4 w-4 mr-1" />
               Gerenciar Investimentos
             </Button>
@@ -416,14 +416,8 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
         <MonthlyEvolutionChart monthlyData={monthlyData} formatCurrency={formatCurrency} />
       </div>
 
-      <TransactionTypeDialog 
-        open={transactionDialogOpen} 
-        onOpenChange={setTransactionDialogOpen} 
-      />
-      <UnderConstructionDialog 
-        open={constructionDialogOpen} 
-        onOpenChange={setConstructionDialogOpen} 
-      />
+      <TransactionTypeDialog open={transactionDialogOpen} onOpenChange={setTransactionDialogOpen} />
+      <UnderConstructionDialog open={constructionDialogOpen} onOpenChange={setConstructionDialogOpen} />
     </div>
   );
 };
