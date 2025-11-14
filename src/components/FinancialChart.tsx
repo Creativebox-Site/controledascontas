@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
-import { TrendingUp, TrendingDown, Wallet, PiggyBank, Coins, Sparkles } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, PiggyBank, AlertCircle, Calendar, Plus, CreditCard, TrendingUp as InvestmentIcon } from "lucide-react";
 import { Sparkline } from "@/components/Sparkline";
 import { FinancialSummary } from "@/components/FinancialSummary";
 import { DateRangeFilter, DateRange } from "@/components/DateRangeFilter";
-import { subMonths, isAfter, isBefore, isWithinInterval } from "date-fns";
+import { subMonths, isAfter, isBefore, isWithinInterval, addDays, startOfMonth, endOfMonth } from "date-fns";
 
 interface Transaction {
   amount: number;
@@ -25,6 +27,7 @@ interface FinancialChartProps {
 }
 
 export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
+  const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [totalIncome, setTotalIncome] = useState(0);
   const [totalExpense, setTotalExpense] = useState(0);
@@ -42,6 +45,15 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   const [incomeVariation, setIncomeVariation] = useState(0);
   const [expenseVariation, setExpenseVariation] = useState(0);
   const [balanceVariation, setBalanceVariation] = useState(0);
+  
+  // Novos estados para os cards
+  const [monthlyIncome, setMonthlyIncome] = useState(0);
+  const [monthlyExpense, setMonthlyExpense] = useState(0);
+  const [monthlyBalance, setMonthlyBalance] = useState(0);
+  const [upcomingPayments, setUpcomingPayments] = useState(0);
+  const [upcomingPaymentsCount, setUpcomingPaymentsCount] = useState(0);
+  const [investmentPerformance, setInvestmentPerformance] = useState(0);
+  const [investmentPerformanceValue, setInvestmentPerformanceValue] = useState(0);
 
   useEffect(() => {
     if (userId) {
@@ -181,6 +193,37 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
     setBalanceVariation(
       lastMonthBalance !== 0 ? ((thisMonthBalance - lastMonthBalance) / Math.abs(lastMonthBalance)) * 100 : 0
     );
+
+    // Dados mensais
+    setMonthlyIncome(thisMonthIncome);
+    setMonthlyExpense(thisMonthExpense);
+    setMonthlyBalance(thisMonthBalance);
+
+    // Próximos pagamentos (7 dias)
+    const today = new Date();
+    const next7Days = addDays(today, 7);
+    const upcoming = data.filter((t) => {
+      if (t.type !== "expense") return false;
+      const tDate = new Date(t.date);
+      return tDate >= today && tDate <= next7Days;
+    });
+    const upcomingTotal = upcoming.reduce((sum, t) => sum + convertAmount(t.amount, t.currency), 0);
+    setUpcomingPayments(upcomingTotal);
+    setUpcomingPaymentsCount(upcoming.length);
+
+    // Performance dos investimentos (mês atual)
+    const thisMonthInvestments = getMonthTotal(thisMonth, "investment");
+    const lastMonthInvestments = getMonthTotal(lastMonth, "investment");
+    
+    if (lastMonthInvestments > 0) {
+      const perfPercentage = ((thisMonthInvestments - lastMonthInvestments) / lastMonthInvestments) * 100;
+      const perfValue = thisMonthInvestments - lastMonthInvestments;
+      setInvestmentPerformance(perfPercentage);
+      setInvestmentPerformanceValue(perfValue);
+    } else {
+      setInvestmentPerformance(0);
+      setInvestmentPerformanceValue(0);
+    }
   };
 
   const getCategoryData = () => {
@@ -237,17 +280,6 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   const categoryData = getCategoryData();
   const monthlyData = getMonthlyData();
 
-  const getBestPerformer = () => {
-    const performances = [
-      { name: "income", value: incomeVariation },
-      { name: "expense", value: -expenseVariation },
-      { name: "investment", value: investmentHistory[5] - investmentHistory[4] },
-    ];
-    return performances.reduce((max, current) => (current.value > max.value ? current : max)).name;
-  };
-
-  const bestPerformer = getBestPerformer();
-
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -265,72 +297,108 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
         formatCurrency={formatCurrency}
       />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card className={bestPerformer === "income" ? "ring-2 ring-success shadow-lg" : ""}>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Card 1: Saldo Disponível */}
+        <Card className="border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Receitas</CardTitle>
-            <TrendingUp className="h-4 w-4 text-success" />
+            <CardTitle className="text-sm font-medium">Saldo Disponível (Contas)</CardTitle>
+            <Wallet className="h-5 w-5 text-primary" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">{formatCurrency(totalIncome)}</div>
-          </CardContent>
-        </Card>
-
-        <Card className={bestPerformer === "expense" ? "ring-2 ring-success shadow-lg" : ""}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              Total Despesas
-              {bestPerformer === "expense" && <Sparkles className="h-3 w-3 text-success" />}
-            </CardTitle>
-            <TrendingDown className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">{formatCurrency(totalExpense)}</div>
-            <p className={`text-xs mt-1 ${expenseVariation <= 0 ? 'text-success' : 'text-destructive'}`}>
-              {expenseVariation >= 0 ? '↑' : '↓'} {Math.abs(expenseVariation).toFixed(1)}% vs mês anterior
-            </p>
-            <div className="mt-2">
-              <Sparkline data={expenseHistory} color="hsl(var(--destructive))" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className={bestPerformer === "investment" ? "ring-2 ring-success shadow-lg" : ""}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              Total Investimentos
-              {bestPerformer === "investment" && <Sparkles className="h-3 w-3 text-success" />}
-            </CardTitle>
-            <PiggyBank className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">{formatCurrency(totalInvestments)}</div>
-            <p className="text-xs mt-1 text-muted-foreground">Últimos 6 meses</p>
-            <div className="mt-2">
-              <Sparkline data={investmentHistory} color="hsl(var(--primary))" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saldo</CardTitle>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${balance >= 0 ? 'text-success' : 'text-destructive'}`}>
+          <CardContent className="space-y-3">
+            <div className={`text-3xl font-bold ${balance >= 0 ? 'text-success' : 'text-destructive'}`}>
               {formatCurrency(balance)}
             </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full"
+              onClick={() => navigate('/transactions')}
+            >
+              Ver Extrato Completo
+            </Button>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Card 2: Fluxo de Caixa Mensal */}
+        <Card className="border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
-            <Coins className="h-4 w-4 text-success" />
+            <CardTitle className="text-sm font-medium">Fluxo de Caixa do Mês</CardTitle>
+            <TrendingUp className="h-5 w-5 text-primary" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">{formatCurrency(totalValue)}</div>
+          <CardContent className="space-y-3">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Receitas:</span>
+                <span className="font-medium text-success">{formatCurrency(monthlyIncome)}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Despesas:</span>
+                <span className="font-medium text-destructive">{formatCurrency(monthlyExpense)}</span>
+              </div>
+            </div>
+            <div className={`text-2xl font-bold ${monthlyBalance >= 0 ? 'text-success' : 'text-destructive'}`}>
+              Saldo: {formatCurrency(monthlyBalance)}
+            </div>
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="w-full"
+              onClick={() => navigate('/transactions')}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Lançar Nova Transação
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Card 3: Próximos Pagamentos */}
+        <Card className="border-warning/20 bg-warning/5">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Contas a Pagar (7 dias)</CardTitle>
+            <AlertCircle className="h-5 w-5 text-warning" />
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="text-3xl font-bold text-warning">
+              {formatCurrency(upcomingPayments)}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {upcomingPaymentsCount} {upcomingPaymentsCount === 1 ? 'Conta Pendente' : 'Contas Pendentes'}
+            </p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full border-warning text-warning hover:bg-warning hover:text-warning-foreground"
+              onClick={() => navigate('/expenses')}
+            >
+              <CreditCard className="h-4 w-4 mr-1" />
+              Pagar/Agendar
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Card 4: Patrimônio Investido */}
+        <Card className="border-primary/20">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Patrimônio Investido</CardTitle>
+            <PiggyBank className="h-5 w-5 text-primary" />
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="text-3xl font-bold text-primary">
+              {formatCurrency(totalInvestments)}
+            </div>
+            <div className={`text-sm font-medium ${investmentPerformance >= 0 ? 'text-success' : 'text-destructive'}`}>
+              {investmentPerformance >= 0 ? '↑' : '↓'} {Math.abs(investmentPerformance).toFixed(1)}% 
+              ({investmentPerformance >= 0 ? '+' : ''}{formatCurrency(investmentPerformanceValue)})
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full"
+              onClick={() => navigate('/investments')}
+            >
+              <InvestmentIcon className="h-4 w-4 mr-1" />
+              Gerenciar Investimentos
+            </Button>
           </CardContent>
         </Card>
       </div>
