@@ -144,14 +144,14 @@ export const DateRangeFilter = ({ onFilterChange }: DateRangeFilterProps) => {
       {filterType === "custom" && (
         <div className="flex gap-4 items-end">
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Data Inicial</Label>
+            <Label className="text-sm font-medium">Data Inicial </Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   className={cn(
                     "w-[200px] justify-start text-left font-normal",
-                    !customFrom && "text-muted-foreground"
+                    !customFrom && "text-muted-foreground",
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
@@ -171,15 +171,12 @@ export const DateRangeFilter = ({ onFilterChange }: DateRangeFilterProps) => {
           </div>
 
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Data Final</Label>
+            <Label className="text-sm font-medium">Data Final </Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className={cn(
-                    "w-[200px] justify-start text-left font-normal",
-                    !customTo && "text-muted-foreground"
-                  )}
+                  className={cn("w-[200px] justify-start text-left font-normal", !customTo && "text-muted-foreground")}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {customTo ? format(customTo, "dd/MM/yyyy") : "Selecione"}
@@ -192,7 +189,7 @@ export const DateRangeFilter = ({ onFilterChange }: DateRangeFilterProps) => {
                   onSelect={setCustomTo}
                   initialFocus
                   className="pointer-events-auto"
-                  disabled={(date) => customFrom ? date < customFrom : false}
+                  disabled={(date) => (customFrom ? date < customFrom : false)}
                 />
               </PopoverContent>
             </Popover>
