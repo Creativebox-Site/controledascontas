@@ -1,12 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
@@ -21,9 +15,9 @@ export const TransactionTypeDialog = ({ open, onOpenChange }: TransactionTypeDia
   const handleSelect = (type: "income" | "expense") => {
     onOpenChange(false);
     if (type === "income") {
-      navigate("/income");
+      navigate("dashboard/income");
     } else {
-      navigate("/expenses");
+      navigate("dashboard/expenses");
     }
   };
 
@@ -32,9 +26,7 @@ export const TransactionTypeDialog = ({ open, onOpenChange }: TransactionTypeDia
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Nova Transação</DialogTitle>
-          <DialogDescription>
-            Selecione o tipo de transação que deseja lançar
-          </DialogDescription>
+          <DialogDescription>Selecione o tipo de transação que deseja lançar</DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-4 py-4">
           <Button
