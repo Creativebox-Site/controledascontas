@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import { TrendingUp, TrendingDown, Wallet, PiggyBank, Coins, Sparkles } from "lucide-react";
 import { Sparkline } from "@/components/Sparkline";
 import { FinancialSummary } from "@/components/FinancialSummary";
-import { startOfWeek, startOfMonth, startOfQuarter, subMonths, isAfter } from "date-fns";
+import { DateRangeFilter, DateRange } from "@/components/DateRangeFilter";
+import { subMonths, isAfter, isBefore, isWithinInterval } from "date-fns";
 
 interface Transaction {
   amount: number;
@@ -32,7 +32,10 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   const [balance, setBalance] = useState(0);
   const [totalValue, setTotalValue] = useState(0);
   const [exchangeRate, setExchangeRate] = useState<number>(5.0);
-  const [timeFilter, setTimeFilter] = useState<string>("month");
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    to: new Date()
+  });
   const [incomeHistory, setIncomeHistory] = useState<number[]>([]);
   const [expenseHistory, setExpenseHistory] = useState<number[]>([]);
   const [investmentHistory, setInvestmentHistory] = useState<number[]>([]);
@@ -45,7 +48,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
       loadTransactions();
       fetchExchangeRate();
     }
-  }, [userId, currency, timeFilter]);
+  }, [userId, currency, dateRange]);
 
   const fetchExchangeRate = async () => {
     try {
@@ -72,23 +75,13 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   };
 
   const getFilteredTransactions = (allTransactions: Transaction[]) => {
-    const now = new Date();
-    let startDate: Date;
-
-    switch (timeFilter) {
-      case "week":
-        startDate = startOfWeek(now);
-        break;
-      case "quarter":
-        startDate = startOfQuarter(now);
-        break;
-      case "month":
-      default:
-        startDate = startOfMonth(now);
-        break;
-    }
-
-    return allTransactions.filter((t) => isAfter(new Date(t.date), startDate));
+    return allTransactions.filter((t) => {
+      const transactionDate = new Date(t.date);
+      return isWithinInterval(transactionDate, {
+        start: dateRange.from,
+        end: dateRange.to
+      });
+    });
   };
 
   const loadTransactions = async () => {
@@ -257,18 +250,9 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="space-y-4">
         <h2 className="text-2xl font-bold">Dashboard Financeiro</h2>
-        <Select value={timeFilter} onValueChange={setTimeFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Período" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="week">Esta Semana</SelectItem>
-            <SelectItem value="month">Este Mês</SelectItem>
-            <SelectItem value="quarter">Este Trimestre</SelectItem>
-          </SelectContent>
-        </Select>
+        <DateRangeFilter onFilterChange={setDateRange} />
       </div>
 
       <FinancialSummary
