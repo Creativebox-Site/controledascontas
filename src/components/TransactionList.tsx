@@ -27,6 +27,7 @@ interface Transaction {
     id: string;
     name: string;
     color: string;
+    is_essential: boolean;
   };
 }
 
@@ -41,6 +42,7 @@ interface TransactionListProps {
 interface Category {
   id: string;
   name: string;
+  is_essential: boolean;
 }
 
 export const TransactionList = ({ userId, currency, filterType, showEdit, refreshKey }: TransactionListProps) => {
@@ -58,6 +60,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
   const [minAmount, setMinAmount] = useState<string>("");
   const [maxAmount, setMaxAmount] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("created_at_desc");
+  const [essentialFilter, setEssentialFilter] = useState<string>("all");
 
   useEffect(() => {
     if (userId) {
@@ -65,7 +68,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
       loadCategories();
       fetchExchangeRate();
     }
-  }, [userId, filterType, refreshKey, searchText, typeFilter, categoryFilter, minAmount, maxAmount, sortBy]);
+  }, [userId, filterType, refreshKey, searchText, typeFilter, categoryFilter, minAmount, maxAmount, sortBy, essentialFilter]);
 
   useEffect(() => {
     if (!userId) return;
@@ -114,7 +117,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
   const loadCategories = async () => {
     const { data, error } = await supabase
       .from("categories")
-      .select("id, name")
+      .select("id, name, is_essential")
       .eq("user_id", userId);
 
     if (!error && data) {
@@ -125,7 +128,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
   const loadTransactions = async () => {
     let query = supabase
       .from("transactions")
-      .select("*, categories(id, name, color)")
+      .select("*, categories(id, name, color, is_essential)")
       .eq("user_id", userId);
     
     if (filterType) {
@@ -183,6 +186,14 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
         t.categories?.name.toLowerCase().includes(searchLower) ||
         t.amount.toString().includes(searchLower) ||
         t.currency.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Filtro de essencial/não essencial
+    if (essentialFilter !== "all") {
+      const isEssential = essentialFilter === "essential";
+      filteredData = filteredData.filter((t: Transaction) => 
+        t.categories?.is_essential === isEssential
       );
     }
 
@@ -269,6 +280,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
     setCategoryFilter("all");
     setMinAmount("");
     setMaxAmount("");
+    setEssentialFilter("all");
   };
 
   const convertAmount = (amount: number, transactionCurrency: string) => {
@@ -354,9 +366,9 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
                 <Button variant="outline" size="sm">
                   <Filter className="w-4 h-4 mr-2" />
                   Filtros
-                  {(searchText || typeFilter !== "all" || categoryFilter !== "all" || minAmount || maxAmount) && (
+                  {(searchText || typeFilter !== "all" || categoryFilter !== "all" || minAmount || maxAmount || essentialFilter !== "all") && (
                     <Badge variant="secondary" className="ml-2">
-                      {[searchText, typeFilter !== "all", categoryFilter !== "all", minAmount, maxAmount].filter(Boolean).length}
+                      {[searchText, typeFilter !== "all", categoryFilter !== "all", minAmount, maxAmount, essentialFilter !== "all"].filter(Boolean).length}
                     </Badge>
                   )}
                 </Button>
@@ -365,7 +377,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h4 className="font-semibold">Filtros</h4>
-                    {(searchText || typeFilter !== "all" || categoryFilter !== "all" || minAmount || maxAmount) && (
+                    {(searchText || typeFilter !== "all" || categoryFilter !== "all" || minAmount || maxAmount || essentialFilter !== "all") && (
                       <Button variant="ghost" size="sm" onClick={clearFilters}>
                         <X className="w-4 h-4 mr-1" />
                         Limpar
@@ -410,6 +422,20 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
                             {cat.name}
                           </SelectItem>
                         ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Tipo de Despesa</Label>
+                    <Select value={essentialFilter} onValueChange={setEssentialFilter}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todas</SelectItem>
+                        <SelectItem value="essential">Essencial</SelectItem>
+                        <SelectItem value="non-essential">Não Essencial</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -518,7 +544,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
                       <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                         <span>{transaction.categories?.name}</span>
                         <span>•</span>
-                        <span>{new Date(transaction.date).toLocaleDateString('pt-BR')}</span>
+                        <span>{transaction.date.split('T')[0].split('-').reverse().join('/')}</span>
                         {transaction.currency !== currency && (
                           <>
                             <span>•</span>
