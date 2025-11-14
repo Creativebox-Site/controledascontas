@@ -121,6 +121,7 @@ export type Database = {
           preferred_currency: string | null
           state: string | null
           street: string | null
+          theme_color: string | null
           updated_at: string | null
           zip_code: string | null
         }
@@ -139,6 +140,7 @@ export type Database = {
           preferred_currency?: string | null
           state?: string | null
           street?: string | null
+          theme_color?: string | null
           updated_at?: string | null
           zip_code?: string | null
         }
@@ -157,6 +159,7 @@ export type Database = {
           preferred_currency?: string | null
           state?: string | null
           street?: string | null
+          theme_color?: string | null
           updated_at?: string | null
           zip_code?: string | null
         }
