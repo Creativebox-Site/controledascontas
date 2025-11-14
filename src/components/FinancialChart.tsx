@@ -10,6 +10,8 @@ import { FinancialSummary } from "@/components/FinancialSummary";
 import { DateRangeFilter, DateRange } from "@/components/DateRangeFilter";
 import { ParetoChart } from "@/components/ParetoChart";
 import { MonthlyEvolutionChart } from "@/components/MonthlyEvolutionChart";
+import { TransactionTypeDialog } from "@/components/TransactionTypeDialog";
+import { UnderConstructionDialog } from "@/components/UnderConstructionDialog";
 import { subMonths, isAfter, isBefore, isWithinInterval, addDays, startOfMonth, endOfMonth } from "date-fns";
 
 interface Transaction {
@@ -56,6 +58,10 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   const [upcomingPaymentsCount, setUpcomingPaymentsCount] = useState(0);
   const [investmentPerformance, setInvestmentPerformance] = useState(0);
   const [investmentPerformanceValue, setInvestmentPerformanceValue] = useState(0);
+
+  // Estados para os dialogs
+  const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
+  const [constructionDialogOpen, setConstructionDialogOpen] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -345,7 +351,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
               variant="default" 
               size="sm" 
               className="w-full"
-              onClick={() => navigate('/transactions')}
+              onClick={() => setTransactionDialogOpen(true)}
             >
               <Plus className="h-4 w-4 mr-1" />
               Lançar Nova Transação
@@ -370,7 +376,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
               variant="outline" 
               size="sm" 
               className="w-full border-warning text-warning hover:bg-warning hover:text-warning-foreground"
-              onClick={() => navigate('/expenses')}
+              onClick={() => setConstructionDialogOpen(true)}
             >
               <CreditCard className="h-4 w-4 mr-1" />
               Pagar/Agendar
@@ -409,6 +415,15 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
         <ParetoChart categoryData={categoryData} formatCurrency={formatCurrency} />
         <MonthlyEvolutionChart monthlyData={monthlyData} formatCurrency={formatCurrency} />
       </div>
+
+      <TransactionTypeDialog 
+        open={transactionDialogOpen} 
+        onOpenChange={setTransactionDialogOpen} 
+      />
+      <UnderConstructionDialog 
+        open={constructionDialogOpen} 
+        onOpenChange={setConstructionDialogOpen} 
+      />
     </div>
   );
 };
