@@ -184,11 +184,11 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
               </PopoverTrigger>
               {existingPayments.length > 0 && (
                 <PopoverContent 
-                  className="w-[500px] p-0 max-h-[400px] overflow-hidden"
+                  className="w-[500px] p-0"
                   align="end"
                   side="bottom"
                 >
-                  <div className="p-3 border-b bg-muted/50">
+                  <div className="p-3 border-b bg-muted/50 sticky top-0 z-10">
                     <p className="text-sm font-medium">
                       Selecione uma conta existente
                     </p>
@@ -196,7 +196,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
                       O valor e categoria serão preenchidos automaticamente
                     </p>
                   </div>
-                  <div className="overflow-y-auto max-h-[300px]">
+                  <div className="overflow-y-auto max-h-[400px]">
                     {existingPayments.map((payment) => (
                       <button
                         key={payment.id}
