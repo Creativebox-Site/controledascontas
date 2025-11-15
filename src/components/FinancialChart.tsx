@@ -44,6 +44,7 @@ interface Transaction {
   categories?: {
     name: string;
     color: string;
+    is_essential: boolean;
   };
 }
 
@@ -129,7 +130,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   const loadTransactions = async () => {
     const { data, error } = await supabase
       .from("transactions")
-      .select("*, categories(name, color)")
+      .select("*, categories(name, color, is_essential)")
       .eq("user_id", userId);
 
     if (error) {
@@ -253,19 +254,20 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   };
 
   const getCategoryData = () => {
-    const categoryMap = new Map<string, { name: string; value: number; color: string }>();
+    const categoryMap = new Map<string, { name: string; value: number; color: string; isEssential: boolean }>();
 
     transactions
       .filter((t) => t.type === "expense")
       .forEach((t) => {
         const name = t.categories?.name || "Sem categoria";
         const color = t.categories?.color || "#888";
+        const isEssential = t.categories?.is_essential || false;
         const amount = convertAmount(t.amount, t.currency);
 
         if (categoryMap.has(name)) {
           categoryMap.get(name)!.value += amount;
         } else {
-          categoryMap.set(name, { name, value: amount, color });
+          categoryMap.set(name, { name, value: amount, color, isEssential });
         }
       });
 
