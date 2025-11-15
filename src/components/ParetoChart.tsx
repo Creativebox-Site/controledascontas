@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ComposedChart,
@@ -14,11 +14,13 @@ import {
   Cell,
 } from "recharts";
 import { AlertCircle } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface CategoryData {
   name: string;
   value: number;
   color: string;
+  isEssential: boolean;
 }
 
 interface ParetoChartProps {
@@ -27,11 +29,20 @@ interface ParetoChartProps {
 }
 
 export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) => {
+  const [expenseFilter, setExpenseFilter] = useState<"all" | "essential" | "non-essential">("all");
+
   const paretoData = useMemo(() => {
-    if (categoryData.length === 0) return { data: [], focusCount: 0, focusCategories: [] };
+    // Filtrar dados baseado no tipo de despesa selecionado
+    const filteredData = categoryData.filter((item) => {
+      if (expenseFilter === "essential") return item.isEssential;
+      if (expenseFilter === "non-essential") return !item.isEssential;
+      return true;
+    });
+
+    if (filteredData.length === 0) return { data: [], focusCount: 0, focusCategories: [] };
 
     // Ordenar por valor decrescente
-    const sorted = [...categoryData].sort((a, b) => b.value - a.value);
+    const sorted = [...filteredData].sort((a, b) => b.value - a.value);
 
     // Calcular total
     const total = sorted.reduce((sum, item) => sum + item.value, 0);
@@ -67,7 +78,7 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
     });
 
     return { data, focusCount, focusCategories };
-  }, [categoryData]);
+  }, [categoryData, expenseFilter]);
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -108,6 +119,13 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
           <AlertCircle className="h-5 w-5 text-warning" />
           Onde está indo 80% do meu dinheiro?
         </CardTitle>
+        <Tabs value={expenseFilter} onValueChange={(value) => setExpenseFilter(value as any)} className="mt-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="all">Todas as Despesas</TabsTrigger>
+            <TabsTrigger value="essential">Despesas Essenciais</TabsTrigger>
+            <TabsTrigger value="non-essential">Despesas Não Essenciais</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </CardHeader>
       <CardContent className="space-y-4">
         <ResponsiveContainer width="100%" height={450}>
@@ -129,12 +147,6 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
               tick={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
               tickFormatter={(value) => formatCurrency(value)}
               width={80}
-              label={{
-                value: "Valor (R$)",
-                angle: -90,
-                position: "insideLeft",
-                style: { fill: "hsl(var(--foreground))", fontSize: 12 }
-              }}
             />
             <YAxis
               yAxisId="right"
@@ -143,12 +155,6 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
               tick={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
               tickFormatter={(value) => `${value}%`}
               width={60}
-              label={{
-                value: "% Acumulada",
-                angle: 90,
-                position: "insideRight",
-                style: { fill: "hsl(var(--foreground))", fontSize: 12 }
-              }}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend
