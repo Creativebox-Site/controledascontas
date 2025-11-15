@@ -334,7 +334,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
             <div className={`text-3xl font-bold ${balance >= 0 ? "text-success" : "text-destructive"}`}>
               {formatCurrency(balance)}
             </div>
-            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/transactions")}>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/dashboard/transactions")}>
               Ver Extrato Completo
             </Button>
           </CardContent>
@@ -403,7 +403,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
               {investmentPerformance >= 0 ? "+" : ""}
               {formatCurrency(investmentPerformanceValue)})
             </div>
-            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/investments")}>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/dashboard/investments")}>
               <InvestmentIcon className="h-4 w-4 mr-1" />
               Gerenciar Investimentos
             </Button>
