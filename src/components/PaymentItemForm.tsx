@@ -187,10 +187,10 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
             <Input
               id="title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex: Conta de luz"
+              placeholder="Selecione uma despesa"
               required
               className="flex-1"
+              readOnly
             />
             <Popover open={showPaymentSelector} onOpenChange={setShowPaymentSelector}>
               <PopoverTrigger asChild>
