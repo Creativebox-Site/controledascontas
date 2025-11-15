@@ -48,11 +48,13 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
   const [notificationChannel, setNotificationChannel] = useState("pwa");
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [expenseSuggestions, setExpenseSuggestions] = useState<any[]>([]);
+  const [existingPayments, setExistingPayments] = useState<any[]>([]);
+  const [showPaymentSelector, setShowPaymentSelector] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     loadCategories();
+    loadExistingPayments();
   }, [userId]);
 
   const loadCategories = async () => {
@@ -72,39 +74,29 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
     }
   };
 
-  const searchExpenses = async (query: string) => {
-    if (!userId || query.length < 2) {
-      setExpenseSuggestions([]);
-      return;
-    }
+  const loadExistingPayments = async () => {
+    if (!userId) return;
 
     const { data, error } = await supabase
-      .from("transactions")
-      .select("description, amount, category_id, categories(name)")
+      .from("payment_items")
+      .select("id, title, value, category_id, categories(name, color)")
       .eq("user_id", userId)
-      .eq("type", "expense")
-      .ilike("description", `%${query}%`)
-      .limit(5);
+      .order("title");
 
     if (error) {
-      console.error("Error searching expenses:", error);
+      console.error("Error loading existing payments:", error);
     } else {
-      setExpenseSuggestions(data || []);
+      setExistingPayments(data || []);
     }
   };
 
-  const handleTitleChange = (newTitle: string) => {
-    setTitle(newTitle);
-    searchExpenses(newTitle);
-  };
-
-  const selectSuggestion = (suggestion: any) => {
-    setTitle(suggestion.description);
-    setValue(suggestion.amount.toString());
-    if (suggestion.category_id) {
-      setCategoryId(suggestion.category_id);
+  const selectPayment = (payment: any) => {
+    setTitle(payment.title);
+    setValue(payment.value.toString());
+    if (payment.category_id) {
+      setCategoryId(payment.category_id);
     }
-    setExpenseSuggestions([]);
+    setShowPaymentSelector(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -166,33 +158,60 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Título com autocomplete */}
-        <div className="relative md:col-span-2">
+        {/* Título com seletor de contas existentes */}
+        <div className="md:col-span-2">
           <Label htmlFor="title">Título *</Label>
-          <Input
-            id="title"
-            value={title}
-            onChange={(e) => handleTitleChange(e.target.value)}
-            placeholder="Ex: Conta de luz"
-            required
-          />
-          {expenseSuggestions.length > 0 && (
-            <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg">
-              {expenseSuggestions.map((suggestion, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => selectSuggestion(suggestion)}
-                  className="w-full px-4 py-2 text-left hover:bg-accent flex justify-between items-center"
-                >
-                  <span>{suggestion.description}</span>
-                  <span className="text-sm text-muted-foreground">
-                    R$ {suggestion.amount.toFixed(2)}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="relative">
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onFocus={() => setShowPaymentSelector(true)}
+              placeholder="Ex: Conta de luz (clique para selecionar)"
+              required
+            />
+            {showPaymentSelector && existingPayments.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                <div className="p-2 border-b bg-muted/50">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Selecione uma conta existente ou digite um novo título
+                  </p>
+                </div>
+                {existingPayments.map((payment) => (
+                  <button
+                    key={payment.id}
+                    type="button"
+                    onClick={() => selectPayment(payment)}
+                    className="w-full px-4 py-3 text-left hover:bg-accent flex justify-between items-center border-b last:border-b-0 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium">{payment.title}</p>
+                      {payment.categories && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <div
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: payment.categories.color }}
+                          />
+                          <span className="text-xs text-muted-foreground">
+                            {payment.categories.name}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-sm font-semibold ml-4">
+                      {currency} {payment.value.toFixed(2)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {showPaymentSelector && (
+              <div
+                className="fixed inset-0 z-0"
+                onClick={() => setShowPaymentSelector(false)}
+              />
+            )}
+          </div>
         </div>
 
         {/* Valor */}
