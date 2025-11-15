@@ -78,21 +78,22 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
     if (!userId) return;
 
     const { data, error } = await supabase
-      .from("payment_items")
-      .select("id, title, value, category_id, categories(name, color)")
+      .from("transactions")
+      .select("id, description, amount, category_id, categories(name, color)")
       .eq("user_id", userId)
-      .order("title");
+      .eq("type", "expense")
+      .order("description");
 
     if (error) {
-      console.error("Error loading existing payments:", error);
+      console.error("Error loading expenses:", error);
     } else {
       setExistingPayments(data || []);
     }
   };
 
   const selectPayment = (payment: any) => {
-    setTitle(payment.title);
-    setValue(payment.value.toString());
+    setTitle(payment.description);
+    setValue(payment.amount.toString());
     if (payment.category_id) {
       setCategoryId(payment.category_id);
     }
@@ -204,7 +205,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
                         className="w-full px-4 py-3 text-left hover:bg-accent flex justify-between items-center border-b last:border-b-0 transition-colors"
                       >
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{payment.title}</p>
+                          <p className="font-medium truncate">{payment.description}</p>
                           {payment.categories && (
                             <div className="flex items-center gap-2 mt-1">
                               <div
@@ -218,7 +219,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
                           )}
                         </div>
                         <span className="text-sm font-semibold ml-4 flex-shrink-0">
-                          {currency} {payment.value.toFixed(2)}
+                          {currency} {payment.amount.toFixed(2)}
                         </span>
                       </button>
                     ))}
