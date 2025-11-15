@@ -39,6 +39,7 @@ interface Category {
 export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentItemFormProps) => {
   const [title, setTitle] = useState("");
   const [value, setValue] = useState("");
+  const [displayValue, setDisplayValue] = useState("");
   const [dueDate, setDueDate] = useState<Date>();
   const [recurrence, setRecurrence] = useState("never");
   const [categoryId, setCategoryId] = useState<string>();
@@ -91,8 +92,28 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
     }
   };
 
+  const formatCurrency = (value: string) => {
+    const numericValue = value.replace(/\D/g, "");
+    const cents = parseInt(numericValue || "0");
+    const reais = cents / 100;
+    return reais.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value.replace(/\D/g, "");
+    setDisplayValue(inputValue);
+    const cents = parseInt(inputValue || "0");
+    const reais = cents / 100;
+    setValue(reais.toString());
+  };
+
   const selectPayment = (payment: any) => {
     setTitle(payment.description);
+    const amountInCents = (payment.amount * 100).toFixed(0);
+    setDisplayValue(amountInCents);
     setValue(payment.amount.toString());
     if (payment.category_id) {
       setCategoryId(payment.category_id);
@@ -235,11 +256,9 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
           <Label htmlFor="value">Valor ({currency}) *</Label>
           <Input
             id="value"
-            type="number"
-            step="0.01"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="0.00"
+            value={displayValue ? formatCurrency(displayValue) : ""}
+            onChange={handleAmountChange}
+            placeholder="0,00"
             required
           />
         </div>
