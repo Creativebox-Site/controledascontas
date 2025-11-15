@@ -15,9 +15,9 @@ export const TransactionTypeDialog = ({ open, onOpenChange }: TransactionTypeDia
   const handleSelect = (type: "income" | "expense") => {
     onOpenChange(false);
     if (type === "income") {
-      navigate("dashboard/income");
+      navigate("/dashboard/income");
     } else {
-      navigate("dashboard/expenses");
+      navigate("/dashboard/expenses");
     }
   };
 
