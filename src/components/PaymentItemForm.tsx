@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Plus, X, Clock } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -50,7 +50,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [existingPayments, setExistingPayments] = useState<any[]>([]);
-  const [showPaymentSelector, setShowPaymentSelector] = useState(false);
+  const [selectedPaymentId, setSelectedPaymentId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -110,7 +110,10 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
     setValue(reais.toString());
   };
 
-  const selectPayment = (payment: any) => {
+  const selectPayment = (paymentId: string) => {
+    const payment = existingPayments.find(p => p.id === paymentId);
+    if (!payment) return;
+    
     setTitle(payment.description);
     const amountInCents = (payment.amount * 100).toFixed(0);
     setDisplayValue(amountInCents);
@@ -118,7 +121,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
     if (payment.category_id) {
       setCategoryId(payment.category_id);
     }
-    setShowPaymentSelector(false);
+    setSelectedPaymentId(paymentId);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -180,76 +183,49 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Título com seletor de contas existentes */}
+        {/* Título */}
         <div className="md:col-span-2 space-y-2">
           <Label htmlFor="title">Título *</Label>
-          <div className="flex gap-2">
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex: Conta de luz"
-              required
-              className="flex-1"
-            />
-            <Popover open={showPaymentSelector} onOpenChange={setShowPaymentSelector}>
-              <PopoverTrigger asChild>
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  className="flex-shrink-0"
-                >
-                  <Clock className="w-4 h-4 mr-2" />
-                  Selecionar Conta
-                </Button>
-              </PopoverTrigger>
-              {existingPayments.length > 0 && (
-                <PopoverContent 
-                  className="w-[500px] p-0"
-                  align="end"
-                  side="bottom"
-                >
-                  <div className="p-3 border-b bg-muted/50 sticky top-0 z-10">
-                    <p className="text-sm font-medium">
-                      Selecione uma conta existente
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      O valor e categoria serão preenchidos automaticamente
-                    </p>
-                  </div>
-                  <div className="overflow-y-auto max-h-[400px]">
-                    {existingPayments.map((payment) => (
-                      <button
-                        key={payment.id}
-                        type="button"
-                        onClick={() => selectPayment(payment)}
-                        className="w-full px-4 py-3 text-left hover:bg-accent flex justify-between items-center border-b last:border-b-0 transition-colors"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{payment.description}</p>
-                          {payment.categories && (
-                            <div className="flex items-center gap-2 mt-1">
-                              <div
-                                className="w-2 h-2 rounded-full flex-shrink-0"
-                                style={{ backgroundColor: payment.categories.color }}
-                              />
-                              <span className="text-xs text-muted-foreground truncate">
-                                {payment.categories.name}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <span className="text-sm font-semibold ml-4 flex-shrink-0">
-                          {currency} {payment.amount.toFixed(2)}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </PopoverContent>
-              )}
-            </Popover>
-          </div>
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Ex: Conta de luz"
+            required
+          />
         </div>
+
+        {/* Seletor de Despesa Existente */}
+        {existingPayments.length > 0 && (
+          <div className="md:col-span-2">
+            <Label htmlFor="existing-payment">Selecionar Despesa</Label>
+            <Select value={selectedPaymentId} onValueChange={selectPayment}>
+              <SelectTrigger>
+                <SelectValue placeholder="Escolha uma despesa existente para preencher automaticamente" />
+              </SelectTrigger>
+              <SelectContent>
+                {existingPayments.map((payment) => (
+                  <SelectItem key={payment.id} value={payment.id}>
+                    <div className="flex items-center justify-between w-full gap-4">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        {payment.categories && (
+                          <div
+                            className="w-2 h-2 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: payment.categories.color }}
+                          />
+                        )}
+                        <span className="truncate">{payment.description}</span>
+                      </div>
+                      <span className="text-muted-foreground text-sm flex-shrink-0">
+                        {currency} {payment.amount.toFixed(2)}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Valor */}
         <div>
