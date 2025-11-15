@@ -189,7 +189,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
               value={title}
               placeholder="Selecione uma despesa"
               required
-              className="flex-1"
+              className="flex-1 whitespace-normal break-words"
               readOnly
             />
             <Popover open={showPaymentSelector} onOpenChange={setShowPaymentSelector}>
