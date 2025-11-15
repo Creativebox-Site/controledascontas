@@ -105,6 +105,148 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          default_channel: string
+          email_enabled: boolean
+          id: string
+          pwa_enabled: boolean
+          sms_enabled: boolean
+          timezone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          default_channel?: string
+          email_enabled?: boolean
+          id?: string
+          pwa_enabled?: boolean
+          sms_enabled?: boolean
+          timezone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          default_channel?: string
+          email_enabled?: boolean
+          id?: string
+          pwa_enabled?: boolean
+          sms_enabled?: boolean
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payment_items: {
+        Row: {
+          attachments: Json | null
+          category_id: string | null
+          created_at: string
+          due_date: string
+          id: string
+          notes: string | null
+          notification_channel: string
+          notifications_enabled: boolean
+          paid_at: string | null
+          payee: string | null
+          recurrence: string | null
+          recurrence_config: Json | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          attachments?: Json | null
+          category_id?: string | null
+          created_at?: string
+          due_date: string
+          id?: string
+          notes?: string | null
+          notification_channel?: string
+          notifications_enabled?: boolean
+          paid_at?: string | null
+          payee?: string | null
+          recurrence?: string | null
+          recurrence_config?: Json | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          attachments?: Json | null
+          category_id?: string | null
+          created_at?: string
+          due_date?: string
+          id?: string
+          notes?: string | null
+          notification_channel?: string
+          notifications_enabled?: boolean
+          paid_at?: string | null
+          payee?: string | null
+          recurrence?: string | null
+          recurrence_config?: Json | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_reminders: {
+        Row: {
+          created_at: string
+          id: string
+          offset_days: number
+          offset_hours: number
+          offset_minutes: number
+          payment_item_id: string
+          send_time: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          offset_days?: number
+          offset_hours?: number
+          offset_minutes?: number
+          payment_item_id: string
+          send_time?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          offset_days?: number
+          offset_hours?: number
+          offset_minutes?: number
+          payment_item_id?: string
+          send_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_reminders_payment_item_id_fkey"
+            columns: ["payment_item_id"]
+            isOneToOne: false
+            referencedRelation: "payment_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -165,6 +307,39 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          created_at: string
+          device_id: string
+          id: string
+          is_active: boolean
+          subscription_data: Json
+          updated_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          id?: string
+          is_active?: boolean
+          subscription_data: Json
+          updated_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          id?: string
+          is_active?: boolean
+          subscription_data?: Json
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       reports_sent: {
         Row: {
           created_at: string
@@ -197,6 +372,69 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      scheduled_notifications: {
+        Row: {
+          attempts: number
+          channel: string
+          created_at: string
+          device_id: string | null
+          id: string
+          last_error: string | null
+          payload: Json
+          payment_item_id: string
+          reminder_id: string | null
+          scheduled_time_utc: string
+          sent_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          channel: string
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          last_error?: string | null
+          payload: Json
+          payment_item_id: string
+          reminder_id?: string | null
+          scheduled_time_utc: string
+          sent_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          last_error?: string | null
+          payload?: Json
+          payment_item_id?: string
+          reminder_id?: string | null
+          scheduled_time_utc?: string
+          sent_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_notifications_payment_item_id_fkey"
+            columns: ["payment_item_id"]
+            isOneToOne: false
+            referencedRelation: "payment_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_notifications_reminder_id_fkey"
+            columns: ["reminder_id"]
+            isOneToOne: false
+            referencedRelation: "payment_reminders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transactions: {
         Row: {

@@ -1,4 +1,4 @@
-import { BarChart3, Receipt, TrendingUp, Tags, LogOut, ArrowDownCircle, ArrowUpCircle, Lightbulb, Target, Calculator, Settings } from "lucide-react";
+import { BarChart3, Receipt, TrendingUp, Tags, LogOut, ArrowDownCircle, ArrowUpCircle, Lightbulb, Target, Calculator, Settings, Clock } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -18,6 +18,7 @@ const menuItems = [
   { title: "Visão Geral", url: "/dashboard", icon: BarChart3, end: true },
   { title: "Receitas", url: "/dashboard/income", icon: ArrowUpCircle },
   { title: "Despesas", url: "/dashboard/expenses", icon: ArrowDownCircle },
+  { title: "Contas a Pagar", url: "/dashboard/payment-items", icon: Clock },
   { title: "Transações", url: "/dashboard/transactions", icon: Receipt },
   { title: "Investimentos", url: "/dashboard/investments", icon: TrendingUp },
   { title: "Metas e Sonhos", url: "/dashboard/goals", icon: Target },
