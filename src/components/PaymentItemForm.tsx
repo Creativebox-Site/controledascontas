@@ -80,7 +80,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
 
     const { data, error } = await supabase
       .from("transactions")
-      .select("id, description, amount, category_id, categories(name, color)")
+      .select("id, description, amount, category_id, series_id, categories(name, color)")
       .eq("user_id", userId)
       .eq("type", "expense")
       .order("description");
@@ -88,7 +88,22 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
     if (error) {
       console.error("Error loading expenses:", error);
     } else {
-      setExistingPayments(data || []);
+      // Agrupar transações recorrentes (mesma series_id) e mostrar apenas uma por série
+      const uniquePayments = (data || []).reduce((acc: any[], payment) => {
+        if (payment.series_id) {
+          // Se for recorrente, verificar se já existe uma com o mesmo series_id
+          const existingSeries = acc.find(p => p.series_id === payment.series_id);
+          if (!existingSeries) {
+            acc.push(payment);
+          }
+        } else {
+          // Se não for recorrente, adicionar normalmente
+          acc.push(payment);
+        }
+        return acc;
+      }, []);
+      
+      setExistingPayments(uniquePayments);
     }
   };
 
