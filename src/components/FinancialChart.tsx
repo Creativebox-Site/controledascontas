@@ -98,19 +98,11 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
     if (!userId) return;
     
     try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const nextWeek = addDays(today, 7);
-      nextWeek.setHours(23, 59, 59, 999);
-
       const { data, error } = await supabase
         .from("payment_items")
         .select("value")
         .eq("user_id", userId)
-        .eq("status", "pending")
-        .gte("due_date", today.toISOString())
-        .lte("due_date", nextWeek.toISOString());
+        .eq("status", "pending");
 
       if (error) {
         console.error("Error loading upcoming payments:", error);
@@ -428,7 +420,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
         {/* Card 3: Próximos Pagamentos */}
         <Card className="border-warning/20 bg-warning/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Contas a Pagar (7 dias)</CardTitle>
+            <CardTitle className="text-sm font-medium">Contas a Pagar Pendentes</CardTitle>
             <AlertCircle className="h-5 w-5 text-warning" />
           </CardHeader>
           <CardContent className="space-y-3">
@@ -443,7 +435,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
               onClick={() => navigate("/dashboard/payment-items")}
             >
               <CreditCard className="h-4 w-4 mr-1" />
-              Pagar/Agendar
+              Gerenciar Pagamentos
             </Button>
           </CardContent>
         </Card>
