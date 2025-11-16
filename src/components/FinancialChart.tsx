@@ -88,6 +88,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
     if (userId) {
       loadTransactions();
       fetchExchangeRate();
+      loadUpcomingPayments();
     }
   }, [userId, currency, dateRange]);
 
@@ -98,6 +99,35 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
       setExchangeRate(data.rates.BRL);
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
+    }
+  };
+
+  const loadUpcomingPayments = async () => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const nextWeek = addDays(today, 7);
+      nextWeek.setHours(23, 59, 59, 999);
+
+      const { data, error } = await supabase
+        .from("payment_items")
+        .select("value")
+        .eq("user_id", userId)
+        .eq("status", "pending")
+        .gte("due_date", today.toISOString())
+        .lte("due_date", nextWeek.toISOString());
+
+      if (error) {
+        console.error("Error loading upcoming payments:", error);
+        return;
+      }
+
+      const total = (data || []).reduce((sum, item) => sum + Number(item.value), 0);
+      setUpcomingPayments(total);
+      setUpcomingPaymentsCount(data?.length || 0);
+    } catch (error) {
+      console.error("Error loading upcoming payments:", error);
     }
   };
 
