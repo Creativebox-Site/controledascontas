@@ -83,6 +83,15 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
     return { data, focusCount, focusCategories };
   }, [categoryData, expenseFilter]);
 
+  const formatCompactCurrency = (value: number) => {
+    if (value >= 1000000) {
+      return `R$ ${(value / 1000000).toFixed(1)} Mi`;
+    } else if (value >= 1000) {
+      return `R$ ${(value / 1000).toFixed(0)} Mil`;
+    }
+    return formatCurrency(value);
+  };
+
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -197,8 +206,8 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
                 <YAxis
                   yAxisId="left"
                   tick={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
-                  tickFormatter={(value) => formatCurrency(value)}
-                  width={80}
+                  tickFormatter={(value) => formatCompactCurrency(value)}
+                  width={100}
                 />
                 <YAxis
                   yAxisId="right"
