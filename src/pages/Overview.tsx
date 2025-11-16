@@ -4,6 +4,7 @@ import { EmergencyFund } from "@/components/EmergencyFund";
 import { EvolutionChart } from "@/components/EvolutionChart";
 import { InvestmentComparison } from "@/components/InvestmentComparison";
 import { QuickActionsWidget } from "@/components/QuickActionsWidget";
+import { UpcomingPayments } from "@/components/UpcomingPayments";
 
 interface OverviewProps {
   userId?: string;
@@ -15,6 +16,7 @@ export const Overview = ({ userId, currency }: OverviewProps) => {
     <div className="space-y-6">
       <h2 className="text-3xl font-bold">Visão Geral</h2>
       <FinancialChart userId={userId} currency={currency} />
+      <UpcomingPayments userId={userId} currency={currency} />
       <InvestmentComparison userId={userId} currency={currency} />
       <EmergencyFund userId={userId} currency={currency} />
       <EvolutionChart userId={userId} currency={currency} />
