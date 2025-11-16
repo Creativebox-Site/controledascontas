@@ -84,14 +84,6 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   // Estados para os dialogs
   const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
 
-  useEffect(() => {
-    if (userId) {
-      loadTransactions();
-      fetchExchangeRate();
-      loadUpcomingPayments();
-    }
-  }, [userId, currency, dateRange]);
-
   const fetchExchangeRate = async () => {
     try {
       const response = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
@@ -103,6 +95,8 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   };
 
   const loadUpcomingPayments = async () => {
+    if (!userId) return;
+    
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -130,6 +124,39 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
       console.error("Error loading upcoming payments:", error);
     }
   };
+
+  useEffect(() => {
+    if (userId) {
+      loadTransactions();
+      fetchExchangeRate();
+      loadUpcomingPayments();
+    }
+  }, [userId, currency, dateRange]);
+
+  // Realtime subscription para contas a pagar
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel('payment-items-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'payment_items',
+          filter: `user_id=eq.${userId}`
+        },
+        () => {
+          loadUpcomingPayments();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
 
   const convertAmount = (amount: number, transactionCurrency: string) => {
     if (currency === transactionCurrency) return amount;
