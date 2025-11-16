@@ -98,15 +98,15 @@ const Dashboard = () => {
           <CoverImage userId={user?.id} />
           
           <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-            <div className="flex items-center justify-between px-4 py-3">
-              <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-3 sm:px-4 py-3">
+              <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
                 <SidebarTrigger />
                 <div className="flex items-center gap-2">
-                  <Wallet className="w-6 h-6 text-primary" />
-                  <h1 className="text-xl font-bold">Controle Financeiro</h1>
+                  <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                  <h1 className="text-base sm:text-xl font-bold truncate">Controle Financeiro</h1>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto justify-end">
                 <CurrencySelector 
                   value={preferredCurrency} 
                   onChange={setPreferredCurrency}
@@ -118,7 +118,7 @@ const Dashboard = () => {
             </div>
           </header>
 
-          <main className="flex-1 container mx-auto px-6 py-8 bg-gradient-to-br from-background via-primary/5 to-accent/5">
+          <main className="flex-1 container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 bg-gradient-to-br from-background via-primary/5 to-accent/5">
             <Routes>
               <Route index element={<Overview userId={user?.id} currency={preferredCurrency} />} />
               <Route path="income" element={<Income userId={user?.id} currency={preferredCurrency} />} />
