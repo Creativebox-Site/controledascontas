@@ -127,7 +127,7 @@ export const PaymentItemsList = ({
                 <div className="flex items-center gap-1">
                   
                   <span className="font-medium text-foreground">
-                    {currency} {item.value.toFixed(2)}
+                    {currency === 'BRL' ? 'R$' : currency} {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
