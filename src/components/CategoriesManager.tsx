@@ -159,16 +159,23 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Gerenciar Categorias</h2>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowBulkImport(!showBulkImport)}>
-            <Upload className="w-4 h-4 mr-2" />
-            Inserir Dados em Lote
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 className="text-xl sm:text-2xl font-bold">Gerenciar Categorias</h2>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowBulkImport(!showBulkImport)}
+            className="w-full sm:w-auto text-xs sm:text-sm"
+          >
+            <Upload className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+            <span className="whitespace-nowrap">Inserir Dados em Lote</span>
           </Button>
-          <Button onClick={() => setShowForm(!showForm)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nova Categoria
+          <Button 
+            onClick={() => setShowForm(!showForm)}
+            className="w-full sm:w-auto text-xs sm:text-sm"
+          >
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+            <span className="whitespace-nowrap">Nova Categoria</span>
           </Button>
         </div>
       </div>
@@ -182,32 +189,33 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
       )}
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl w-[95vw] sm:w-full">
           <DialogHeader>
-            <DialogTitle>{editingId ? "Editar Categoria" : "Nova Categoria"}</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl">{editingId ? "Editar Categoria" : "Nova Categoria"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Nome</Label>
+                <Label className="text-sm">Nome</Label>
                 <Input
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
                   placeholder="Ex: Alimentação"
+                  className="text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Tipo</Label>
+                <Label className="text-sm">Tipo</Label>
                 <Select
                   value={formData.type}
                   onValueChange={(value) =>
                     setFormData({ ...formData, type: value })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -219,21 +227,22 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Cor</Label>
+                <Label className="text-sm">Cor</Label>
                 <Input
                   type="color"
                   value={formData.color}
                   onChange={(e) =>
                     setFormData({ ...formData, color: e.target.value })
                   }
+                  className="h-10"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Essencial</Label>
-                <div className="flex items-center gap-2">
+                <Label className="text-sm">Essencial</Label>
+                <div className="flex items-center gap-2 h-10">
                   <input
                     type="checkbox"
                     checked={formData.is_essential}
@@ -242,16 +251,16 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
                     }
                     className="h-4 w-4"
                   />
-                  <label className="text-sm">Despesa essencial</label>
+                  <label className="text-xs sm:text-sm">Despesa essencial</label>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <Button type="submit" className="flex-1">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button type="submit" className="flex-1 text-sm">
                 {editingId ? "Atualizar" : "Criar"}
               </Button>
-              <Button type="button" variant="outline" onClick={resetForm} className="flex-1">
+              <Button type="button" variant="outline" onClick={resetForm} className="flex-1 text-sm">
                 Cancelar
               </Button>
             </div>
@@ -259,44 +268,46 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
         </DialogContent>
       </Dialog>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle className="text-success">Receitas</CardTitle>
+            <CardTitle className="text-success text-base sm:text-lg">Receitas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {incomeCategories.map((category) => (
               <div
                 key={category.id}
-                className="flex items-center justify-between p-3 rounded-lg border"
+                className="flex items-center justify-between p-2 sm:p-3 rounded-lg border"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                   <div
-                    className="w-8 h-8 rounded-full"
+                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0"
                     style={{ backgroundColor: category.color }}
                   />
-                  <span className="font-medium">{category.name}</span>
+                  <span className="font-medium text-sm sm:text-base truncate">{category.name}</span>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => handleEdit(category)}
+                    className="h-8 w-8"
                   >
-                    <Edit className="w-4 h-4" />
+                    <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => handleDelete(category.id)}
+                    className="h-8 w-8"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                 </div>
               </div>
             ))}
             {incomeCategories.length === 0 && (
-              <p className="text-center text-muted-foreground py-4">
+              <p className="text-center text-muted-foreground py-4 text-xs sm:text-sm">
                 Nenhuma categoria de receita
               </p>
             )}
@@ -305,46 +316,48 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-destructive">Despesas</CardTitle>
+            <CardTitle className="text-destructive text-base sm:text-lg">Despesas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {expenseCategories.map((category) => (
               <div
                 key={category.id}
-                className="flex items-center justify-between p-3 rounded-lg border"
+                className="flex items-center justify-between p-2 sm:p-3 rounded-lg border"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                   <div
-                    className="w-8 h-8 rounded-full"
+                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0"
                     style={{ backgroundColor: category.color }}
                   />
-                  <div className="flex flex-col">
-                    <span className="font-medium">{category.name}</span>
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="font-medium text-sm sm:text-base truncate">{category.name}</span>
                     {category.is_essential && (
                       <span className="text-xs text-muted-foreground">Essencial</span>
                     )}
                   </div>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => handleEdit(category)}
+                    className="h-8 w-8"
                   >
-                    <Edit className="w-4 h-4" />
+                    <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => handleDelete(category.id)}
+                    className="h-8 w-8"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                 </div>
               </div>
             ))}
             {expenseCategories.length === 0 && (
-              <p className="text-center text-muted-foreground py-4">
+              <p className="text-center text-muted-foreground py-4 text-xs sm:text-sm">
                 Nenhuma categoria de despesa
               </p>
             )}
@@ -353,41 +366,43 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-primary">Investimentos</CardTitle>
+            <CardTitle className="text-primary text-base sm:text-lg">Investimentos</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {investmentCategories.map((category) => (
               <div
                 key={category.id}
-                className="flex items-center justify-between p-3 rounded-lg border"
+                className="flex items-center justify-between p-2 sm:p-3 rounded-lg border"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                   <div
-                    className="w-8 h-8 rounded-full"
+                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0"
                     style={{ backgroundColor: category.color }}
                   />
-                  <span className="font-medium">{category.name}</span>
+                  <span className="font-medium text-sm sm:text-base truncate">{category.name}</span>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => handleEdit(category)}
+                    className="h-8 w-8"
                   >
-                    <Edit className="w-4 h-4" />
+                    <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => handleDelete(category.id)}
+                    className="h-8 w-8"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                 </div>
               </div>
             ))}
             {investmentCategories.length === 0 && (
-              <p className="text-center text-muted-foreground py-4">
+              <p className="text-center text-muted-foreground py-4 text-xs sm:text-sm">
                 Nenhuma categoria de investimento
               </p>
             )}
