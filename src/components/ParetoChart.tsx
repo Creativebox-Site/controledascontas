@@ -44,8 +44,8 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
 
     if (filteredData.length === 0) return { data: [], focusCount: 0, focusCategories: [] };
 
-    // Ordenar por valor decrescente
-    const sorted = [...filteredData].sort((a, b) => b.value - a.value);
+    // Ordenar por valor decrescente e pegar apenas as top 5
+    const sorted = [...filteredData].sort((a, b) => b.value - a.value).slice(0, 5);
 
     // Calcular total
     const total = sorted.reduce((sum, item) => sum + item.value, 0);
