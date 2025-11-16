@@ -56,6 +56,39 @@ Deno.serve(async (req) => {
         }
       );
     }
+    // Get the authorization header from the request
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      throw new Error('Não autorizado')
+    }
+
+    // Create a client with the user's token to validate authentication
+    const token = authHeader.replace('Bearer ', '')
+    const userClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: {
+            Authorization: authHeader
+          }
+        },
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    // Validate the user
+    const { data: { user }, error: userError } = await userClient.auth.getUser()
+
+    if (userError || !user) {
+      console.error('Erro ao validar usuário:', userError)
+      throw new Error('Usuário não encontrado')
+    }
+
+    // Create admin client for deletion operations
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -66,20 +99,6 @@ Deno.serve(async (req) => {
         }
       }
     )
-
-    // Get the authorization header from the request
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      throw new Error('Não autorizado')
-    }
-
-    // Get the user from the auth header
-    const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
-
-    if (userError || !user) {
-      throw new Error('Usuário não encontrado')
-    }
 
     console.log(`Iniciando exclusão da conta do usuário: ${user.id}`)
 
