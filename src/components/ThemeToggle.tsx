@@ -1,14 +1,16 @@
-import { Moon, Sun, Monitor } from "lucide-react";
+import { Moon, Sun, Monitor, Eye, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
 
-type Theme = "light" | "dark" | "system";
+type Theme = "light" | "dark" | "system" | "colorblind" | "custom";
 
 export const ThemeToggle = () => {
   const [theme, setTheme] = useState<Theme>(() => {
@@ -18,7 +20,7 @@ export const ThemeToggle = () => {
 
   useEffect(() => {
     const root = window.document.documentElement;
-    root.classList.remove("light", "dark");
+    root.classList.remove("light", "dark", "colorblind", "custom");
 
     if (theme === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -41,7 +43,8 @@ export const ThemeToggle = () => {
           <span className="sr-only">Alternar tema</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>Temas Padrão</DropdownMenuLabel>
         <DropdownMenuItem onClick={() => setTheme("light")}>
           <Sun className="mr-2 h-4 w-4" />
           Claro
@@ -53,6 +56,18 @@ export const ThemeToggle = () => {
         <DropdownMenuItem onClick={() => setTheme("system")}>
           <Monitor className="mr-2 h-4 w-4" />
           Sistema
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        <DropdownMenuLabel>Temas Especiais</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => setTheme("colorblind")}>
+          <Eye className="mr-2 h-4 w-4" />
+          Daltônicos
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("custom")}>
+          <Palette className="mr-2 h-4 w-4" />
+          Personalizado
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
