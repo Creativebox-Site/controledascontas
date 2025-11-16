@@ -9,6 +9,7 @@ import { AvatarImageEditor } from "./AvatarImageEditor";
 import { EmojiPickerDialog } from "./EmojiPickerDialog";
 import { CoverImage } from "./CoverImage";
 import { ThemeToggle } from "./ThemeToggle";
+import { ColorEditor } from "./ColorEditor";
 
 interface AppearanceSettingsProps {
   userId?: string;
@@ -185,18 +186,20 @@ export const AppearanceSettings = ({ userId }: AppearanceSettingsProps) => {
         </CardContent>
       </Card>
 
+      <ColorEditor />
+
       <Card>
         <CardHeader>
-          <CardTitle>Tema</CardTitle>
-          <CardDescription>
-            Escolha entre tema claro, escuro ou sistema
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <Palette className="w-5 h-5" />
+            Tema
+          </CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
+            Escolha entre temas padrão, daltônicos ou personalizado
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-4">
-            <Palette className="h-5 w-5 text-muted-foreground" />
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
         </CardContent>
       </Card>
 
