@@ -117,10 +117,14 @@ export const AccountDeletion = ({ userId }: AccountDeletionProps) => {
     
     setIsDeleting(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      // Refresh session to ensure we have a valid token
+      const { data: { session }, error: sessionError } = await supabase.auth.refreshSession();
       
-      if (!session) {
-        throw new Error('Sessão não encontrada');
+      if (sessionError || !session) {
+        toast.error('Sua sessão expirou. Por favor, faça login novamente.');
+        await supabase.auth.signOut();
+        navigate('/auth');
+        return;
       }
 
       // Call edge function to delete account
@@ -143,10 +147,12 @@ export const AccountDeletion = ({ userId }: AccountDeletionProps) => {
         setTimeout(() => {
           navigate('/auth');
         }, 3000);
+      } else {
+        throw new Error(data?.error || 'Erro ao deletar conta');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao deletar conta:', error);
-      toast.error("Erro ao deletar conta. Tente novamente.");
+      toast.error(error.message || "Erro ao deletar conta. Tente novamente.");
       setIsDeleting(false);
     }
   };
