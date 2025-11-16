@@ -69,18 +69,8 @@ export const PaymentItemsList = ({
   };
 
   const calculateMonthlyStats = (allItems: PaymentItem[]) => {
-    const now = new Date();
-    const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
-    
-    const paidThisMonth = allItems.filter(item => {
-      if (item.status !== 'paid' || !item.paid_at) return false;
-      const paidDate = new Date(item.paid_at);
-      return paidDate >= monthStart && paidDate <= monthEnd;
-    });
-
-    const total = paidThisMonth.reduce((sum, item) => sum + item.value, 0);
-    setMonthlyStats({ total, count: paidThisMonth.length });
+    const total = allItems.reduce((sum, item) => sum + item.value, 0);
+    setMonthlyStats({ total, count: allItems.length });
   };
 
   const markAsPaid = async (id: string) => {
@@ -263,10 +253,10 @@ export const PaymentItemsList = ({
       <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground mb-1">Pagamentos do Mês</p>
+            <p className="text-sm text-muted-foreground mb-1">Total de Pagamentos</p>
             <p className="text-3xl font-bold">{formatCurrency(monthlyStats.total)}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              {monthlyStats.count} {monthlyStats.count === 1 ? 'pagamento' : 'pagamentos'}
+              {monthlyStats.count} {monthlyStats.count === 1 ? 'pagamento' : 'pagamentos'} (Pendentes + Histórico)
             </p>
           </div>
           <TrendingDown className="w-12 h-12 text-primary opacity-50" />
