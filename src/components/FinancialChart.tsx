@@ -377,14 +377,14 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
         {/* Card 1: Saldo Disponível */}
         <Card className="border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saldo Disponível (Contas)</CardTitle>
-            <Wallet className="h-5 w-5 text-primary" />
+            <CardTitle className="text-xs sm:text-sm font-medium line-clamp-2">Saldo Disponível (Contas)</CardTitle>
+            <Wallet className="h-5 w-5 text-primary flex-shrink-0" />
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className={`text-3xl font-bold ${balance >= 0 ? "text-success" : "text-destructive"}`}>
+            <div className={`text-2xl sm:text-3xl font-bold break-words ${balance >= 0 ? "text-success" : "text-destructive"}`}>
               {formatCurrency(balance)}
             </div>
-            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/dashboard/transactions")}>
+            <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm whitespace-normal h-auto py-2" onClick={() => navigate("/dashboard/transactions")}>
               Ver Extrato Completo
             </Button>
           </CardContent>
@@ -393,26 +393,26 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
         {/* Card 2: Fluxo de Caixa Mensal */}
         <Card className="border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Fluxo de Caixa do Mês</CardTitle>
-            <TrendingUp className="h-5 w-5 text-primary" />
+            <CardTitle className="text-xs sm:text-sm font-medium line-clamp-2">Fluxo de Caixa do Mês</CardTitle>
+            <TrendingUp className="h-5 w-5 text-primary flex-shrink-0" />
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-1">
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-muted-foreground">Receitas:</span>
-                <span className="font-medium text-success">{formatCurrency(monthlyIncome)}</span>
+                <span className="font-medium text-success break-words">{formatCurrency(monthlyIncome)}</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-muted-foreground">Despesas:</span>
-                <span className="font-medium text-destructive">{formatCurrency(monthlyExpense)}</span>
+                <span className="font-medium text-destructive break-words">{formatCurrency(monthlyExpense)}</span>
               </div>
             </div>
-            <div className={`text-2xl font-bold ${monthlyBalance >= 0 ? "text-success" : "text-destructive"}`}>
+            <div className={`text-xl sm:text-2xl font-bold break-words ${monthlyBalance >= 0 ? "text-success" : "text-destructive"}`}>
               Saldo: {formatCurrency(monthlyBalance)}
             </div>
-            <Button variant="default" size="sm" className="w-full" onClick={() => setTransactionDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-1" />
-              Lançar Nova Transação
+            <Button variant="default" size="sm" className="w-full text-xs sm:text-sm whitespace-normal h-auto py-2" onClick={() => setTransactionDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-1 flex-shrink-0" />
+              <span>Lançar Nova Transação</span>
             </Button>
           </CardContent>
         </Card>
@@ -420,22 +420,22 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
         {/* Card 3: Próximos Pagamentos */}
         <Card className="border-warning/20 bg-warning/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Contas a Pagar Pendentes</CardTitle>
-            <AlertCircle className="h-5 w-5 text-warning" />
+            <CardTitle className="text-xs sm:text-sm font-medium line-clamp-2">Contas a Pagar Pendentes</CardTitle>
+            <AlertCircle className="h-5 w-5 text-warning flex-shrink-0" />
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="text-3xl font-bold text-warning">{formatCurrency(upcomingPayments)}</div>
-            <p className="text-sm text-muted-foreground">
+            <div className="text-2xl sm:text-3xl font-bold text-warning break-words">{formatCurrency(upcomingPayments)}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {upcomingPaymentsCount} {upcomingPaymentsCount === 1 ? "Conta Pendente" : "Contas Pendentes"}
             </p>
             <Button
               variant="outline"
               size="sm"
-              className="w-full border-warning text-warning hover:bg-warning hover:text-warning-foreground"
+              className="w-full border-warning text-warning hover:bg-warning hover:text-warning-foreground text-xs sm:text-sm whitespace-normal h-auto py-2"
               onClick={() => navigate("/dashboard/payment-items")}
             >
-              <CreditCard className="h-4 w-4 mr-1" />
-              Gerenciar Pagamentos
+              <CreditCard className="h-4 w-4 mr-1 flex-shrink-0" />
+              <span>Gerenciar Pagamentos</span>
             </Button>
           </CardContent>
         </Card>
@@ -443,19 +443,19 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
         {/* Card 4: Patrimônio Investido */}
         <Card className="border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Patrimônio Investido</CardTitle>
-            <PiggyBank className="h-5 w-5 text-primary" />
+            <CardTitle className="text-xs sm:text-sm font-medium line-clamp-2">Patrimônio Investido</CardTitle>
+            <PiggyBank className="h-5 w-5 text-primary flex-shrink-0" />
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="text-3xl font-bold text-primary">{formatCurrency(totalInvestments)}</div>
-            <div className={`text-sm font-medium ${investmentPerformance >= 0 ? "text-success" : "text-destructive"}`}>
+            <div className="text-2xl sm:text-3xl font-bold text-primary break-words">{formatCurrency(totalInvestments)}</div>
+            <div className={`text-xs sm:text-sm font-medium break-words ${investmentPerformance >= 0 ? "text-success" : "text-destructive"}`}>
               {investmentPerformance >= 0 ? "↑" : "↓"} {Math.abs(investmentPerformance).toFixed(1)}% (
               {investmentPerformance >= 0 ? "+" : ""}
               {formatCurrency(investmentPerformanceValue)})
             </div>
-            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/dashboard/investments")}>
-              <InvestmentIcon className="h-4 w-4 mr-1" />
-              Gerenciar Investimentos
+            <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm whitespace-normal h-auto py-2" onClick={() => navigate("/dashboard/investments")}>
+              <InvestmentIcon className="h-4 w-4 mr-1 flex-shrink-0" />
+              <span>Gerenciar Investimentos</span>
             </Button>
           </CardContent>
         </Card>
