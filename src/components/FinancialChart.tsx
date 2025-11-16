@@ -149,6 +149,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
         },
         () => {
           loadUpcomingPayments();
+          loadTransactions();
         }
       )
       .subscribe();
