@@ -9,10 +9,13 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 type Theme = "light" | "dark" | "system" | "colorblind" | "custom";
 
 export const ThemeToggle = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [theme, setTheme] = useState<Theme>(() => {
     const stored = localStorage.getItem("theme") as Theme;
     return stored || "system";
@@ -87,6 +90,30 @@ export const ThemeToggle = () => {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
+  const handleThemeChange = (newTheme: Theme) => {
+    setTheme(newTheme);
+    
+    // Se escolher tema personalizado e não estiver na página de settings
+    if (newTheme === "custom" && !location.pathname.includes("/dashboard/settings")) {
+      navigate("/dashboard/settings");
+      // Aguardar navegação e scroll até o editor
+      setTimeout(() => {
+        const colorEditor = document.getElementById("color-editor");
+        if (colorEditor) {
+          colorEditor.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 300);
+    } else if (newTheme === "custom") {
+      // Já está na página, apenas scroll
+      setTimeout(() => {
+        const colorEditor = document.getElementById("color-editor");
+        if (colorEditor) {
+          colorEditor.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -98,15 +125,15 @@ export const ThemeToggle = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>Temas Padrão</DropdownMenuLabel>
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem onClick={() => handleThemeChange("light")}>
           <Sun className="mr-2 h-4 w-4" />
           Claro
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem onClick={() => handleThemeChange("dark")}>
           <Moon className="mr-2 h-4 w-4" />
           Escuro
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem onClick={() => handleThemeChange("system")}>
           <Monitor className="mr-2 h-4 w-4" />
           Sistema
         </DropdownMenuItem>
@@ -114,11 +141,11 @@ export const ThemeToggle = () => {
         <DropdownMenuSeparator />
         
         <DropdownMenuLabel>Temas Especiais</DropdownMenuLabel>
-        <DropdownMenuItem onClick={() => setTheme("colorblind")}>
+        <DropdownMenuItem onClick={() => handleThemeChange("colorblind")}>
           <Eye className="mr-2 h-4 w-4" />
           Daltônicos
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("custom")}>
+        <DropdownMenuItem onClick={() => handleThemeChange("custom")}>
           <Palette className="mr-2 h-4 w-4" />
           Personalizado
         </DropdownMenuItem>
