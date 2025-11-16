@@ -34,7 +34,10 @@ export const UpcomingPayments = ({ userId, currency }: UpcomingPaymentsProps) =>
   const loadUpcomingPayments = async () => {
     try {
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
       const nextWeek = addDays(today, 7);
+      nextWeek.setHours(23, 59, 59, 999);
 
       const { data, error } = await supabase
         .from("payment_items")
