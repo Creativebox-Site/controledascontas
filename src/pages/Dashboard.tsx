@@ -22,80 +22,68 @@ import { Financing } from "@/pages/Financing";
 import { Settings } from "@/pages/Settings";
 import { Profile } from "@/pages/Profile";
 import { PaymentItems } from "@/pages/PaymentItems";
-
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [preferredCurrency, setPreferredCurrency] = useState<string>("BRL");
-
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (!session) {
-          navigate("/auth");
-        }
+    const {
+      data: {
+        subscription
       }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
-      
       if (!session) {
         navigate("/auth");
       }
     });
-
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+      if (!session) {
+        navigate("/auth");
+      }
+    });
     return () => subscription.unsubscribe();
   }, [navigate]);
-
   useEffect(() => {
     if (user) {
       loadUserPreferences();
     }
   }, [user]);
-
   const loadUserPreferences = async () => {
     if (!user) return;
-    
-    const { data } = await supabase
-      .from('profiles')
-      .select('preferred_currency')
-      .eq('id', user.id)
-      .single();
-    
+    const {
+      data
+    } = await supabase.from('profiles').select('preferred_currency').eq('id', user.id).single();
     if (data?.preferred_currency) {
       setPreferredCurrency(data.preferred_currency);
     }
   };
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     toast.success("Logout realizado com sucesso!");
     navigate("/auth");
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <SidebarProvider>
+  return <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar onSignOut={handleSignOut} />
         
         <div className="flex-1 flex flex-col w-full">
-          <CoverImage userId={user?.id} />
+          
           
           <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-3 sm:px-4 py-3">
@@ -107,11 +95,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto justify-end">
-                <CurrencySelector 
-                  value={preferredCurrency} 
-                  onChange={setPreferredCurrency}
-                  userId={user?.id}
-                />
+                <CurrencySelector value={preferredCurrency} onChange={setPreferredCurrency} userId={user?.id} />
                 <ThemeToggle />
                 <ProfileMenu userId={user?.id} />
               </div>
@@ -136,8 +120,6 @@ const Dashboard = () => {
           </main>
         </div>
       </div>
-    </SidebarProvider>
-  );
+    </SidebarProvider>;
 };
-
 export default Dashboard;
