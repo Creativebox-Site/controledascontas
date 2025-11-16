@@ -150,7 +150,7 @@ export const ColorEditor = () => {
   };
 
   return (
-    <Card>
+    <Card id="color-editor">
       <CardHeader>
         <CardTitle className="text-lg sm:text-xl">Editor de Cores Personalizado</CardTitle>
         <CardDescription className="text-xs sm:text-sm">
