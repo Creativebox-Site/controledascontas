@@ -266,17 +266,17 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogTrigger asChild>
           <Card className="cursor-pointer bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg border-primary">
-            <CardContent className="py-8">
-              <div className="flex items-center justify-center gap-3 text-primary-foreground">
-                <Plus className="w-6 h-6" />
-                <span className="text-lg font-bold">Adicionar Nova Meta</span>
+            <CardContent className="py-6 sm:py-8">
+              <div className="flex items-center justify-center gap-2 sm:gap-3 text-primary-foreground">
+                <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="text-base sm:text-lg font-bold">Adicionar Nova Meta</span>
               </div>
             </CardContent>
           </Card>
         </DialogTrigger>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-md w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">
               {editingGoal ? "Editar Meta" : "Criar Nova Meta"}
             </DialogTitle>
           </DialogHeader>
@@ -398,10 +398,10 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
 
       {goals.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center">
-            <Target className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Nenhuma meta cadastrada</h3>
-            <p className="text-sm text-muted-foreground">
+          <CardContent className="py-8 sm:py-12 text-center">
+            <Target className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-base sm:text-lg font-semibold mb-2">Nenhuma meta cadastrada</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground px-4">
               Comece definindo seus objetivos financeiros e acompanhe seu progresso!
             </p>
           </CardContent>
@@ -409,13 +409,13 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="w-5 h-5" />
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Target className="w-4 h-4 sm:w-5 sm:h-5" />
               Minhas Metas
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {goals.map((goal) => {
               const progress = getProgressPercentage(goal.current_amount, goal.target_amount);
               const monthsRemaining = getMonthsRemaining(goal.target_date);
@@ -423,64 +423,66 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
               return (
                 <div
                   key={goal.id}
-                  className={`p-4 rounded-lg border ${
+                  className={`p-3 sm:p-4 rounded-lg border ${
                     goal.is_completed
                       ? "bg-success/5 border-success"
                       : "bg-card border-border"
                   }`}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className="text-3xl">{goal.icon}</div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold flex items-center gap-2">
-                          {goal.name}
+                  <div className="flex flex-col sm:flex-row items-start gap-3 mb-3">
+                    <div className="flex items-start gap-2 sm:gap-3 flex-1 w-full">
+                      <div className="text-2xl sm:text-3xl flex-shrink-0">{goal.icon}</div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold flex items-center gap-2 text-sm sm:text-base flex-wrap">
+                          <span className="truncate">{goal.name}</span>
                           {goal.is_completed && (
-                            <CheckCircle className="w-4 h-4 text-success" />
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />
                           )}
                         </h4>
                         {goal.description && (
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">
                             {goal.description}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 self-start sm:self-auto">
                       <Button
                         size="icon"
                         variant="ghost"
                         onClick={() => handleEdit(goal)}
+                        className="h-8 w-8"
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                       </Button>
                       <Button
                         size="icon"
                         variant="ghost"
                         onClick={() => handleDelete(goal.id)}
+                        className="h-8 w-8"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                       </Button>
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                       <div className="flex items-center gap-2">
-                        <DollarSign className="w-4 h-4 text-muted-foreground" />
-                        <div>
+                        <DollarSign className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <div className="min-w-0">
                           <p className="text-xs text-muted-foreground">Progresso</p>
-                          <p className="font-semibold">
+                          <p className="font-semibold text-xs sm:text-sm truncate">
                             {formatCurrency(goal.current_amount)} /{" "}
                             {formatCurrency(goal.target_amount)}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <div>
+                        <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <div className="min-w-0">
                           <p className="text-xs text-muted-foreground">Prazo</p>
-                          <p className="font-semibold">
+                          <p className="font-semibold text-xs sm:text-sm truncate">
                             {monthsRemaining > 0
                               ? `${monthsRemaining} ${monthsRemaining === 1 ? "mês" : "meses"}`
                               : "Prazo vencido"}
@@ -490,15 +492,15 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
                     </div>
 
                     <div>
-                      <div className="flex justify-between text-sm mb-2">
+                      <div className="flex justify-between text-xs sm:text-sm mb-2">
                         <span className="text-muted-foreground">Progresso</span>
                         <span className="font-semibold">{progress.toFixed(1)}%</span>
                       </div>
                       <Progress value={progress} className="h-2" />
                     </div>
 
-                    <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-                      <p className="text-sm text-foreground">
+                    <div className="p-2 sm:p-3 rounded-lg bg-primary/5 border border-primary/20">
+                      <p className="text-xs sm:text-sm text-foreground">
                         {getMotivationalMessage(goal)}
                       </p>
                     </div>
@@ -508,9 +510,9 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
                         variant="outline"
                         size="sm"
                         onClick={() => handleToggleComplete(goal)}
-                        className="w-full"
+                        className="w-full text-xs sm:text-sm"
                       >
-                        <CheckCircle className="w-4 h-4 mr-2" />
+                        <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                         Marcar como Concluída
                       </Button>
                     )}

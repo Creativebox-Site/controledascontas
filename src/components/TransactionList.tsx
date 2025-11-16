@@ -353,21 +353,21 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
       )}
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
-          <CardTitle>Histórico de Transações</CardTitle>
-          <div className="flex gap-2 flex-wrap">
+         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 flex-wrap">
+          <CardTitle className="text-base sm:text-lg">Histórico de Transações</CardTitle>
+          <div className="flex gap-2 flex-wrap w-full sm:w-auto">
             {selectedIds.size > 0 && (
-              <Button variant="destructive" size="sm" onClick={handleDeleteSelected}>
+              <Button variant="destructive" size="sm" onClick={handleDeleteSelected} className="text-xs sm:text-sm">
                 Deletar {selectedIds.size} selecionada(s)
               </Button>
             )}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Filter className="w-4 h-4 mr-2" />
+                <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+                  <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                   Filtros
                   {(searchText || typeFilter !== "all" || categoryFilter !== "all" || minAmount || maxAmount || essentialFilter !== "all") && (
-                    <Badge variant="secondary" className="ml-2">
+                    <Badge variant="secondary" className="ml-2 text-xs">
                       {[searchText, typeFilter !== "all", categoryFilter !== "all", minAmount, maxAmount, essentialFilter !== "all"].filter(Boolean).length}
                     </Badge>
                   )}
@@ -507,15 +507,15 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
                 onCheckedChange={handleSelectAll}
                 id="select-all"
               />
-              <Label htmlFor="select-all" className="cursor-pointer">
+              <Label htmlFor="select-all" className="cursor-pointer text-xs sm:text-sm">
                 Selecionar tudo ({transactions.length})
               </Label>
             </div>
           )}
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
         {transactions.length === 0 ? (
           <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
+            <CardContent className="py-8 text-center text-muted-foreground text-xs sm:text-sm">
               Nenhuma transação encontrada.
             </CardContent>
           </Card>
@@ -525,14 +525,15 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
             const isSelected = selectedIds.has(transaction.id);
             return (
               <Card key={transaction.id} className={isSelected ? "border-primary" : ""}>
-                <CardContent className="flex items-center justify-between py-4">
-                  <div className="flex items-center gap-4 flex-1">
+                <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 py-3 sm:py-4">
+                  <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto sm:flex-1">
                     <Checkbox
                       checked={isSelected}
                       onCheckedChange={() => handleToggleSelect(transaction.id)}
+                      className="flex-shrink-0"
                     />
                     <div 
-                      className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: transaction.categories?.color || '#888' }}
                     >
                       <span className="text-white text-xs font-bold">
@@ -540,14 +541,14 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold truncate">{transaction.description}</h4>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
-                        <span>{transaction.categories?.name}</span>
-                        <span>•</span>
-                        <span>{transaction.date.split('T')[0].split('-').reverse().join('/')}</span>
+                      <h4 className="font-semibold truncate text-sm sm:text-base">{transaction.description}</h4>
+                      <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
+                        <span className="truncate">{transaction.categories?.name}</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span className="whitespace-nowrap">{transaction.date.split('T')[0].split('-').reverse().join('/')}</span>
                         {transaction.currency !== currency && (
                           <>
-                            <span>•</span>
+                            <span className="hidden sm:inline">•</span>
                             <Badge variant="outline" className="text-xs">
                               {formatCurrency(transaction.amount, transaction.currency)}
                             </Badge>
@@ -555,7 +556,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
                         )}
                         {transaction.series_id && (
                           <>
-                            <span>•</span>
+                            <span className="hidden sm:inline">•</span>
                             <Badge variant="secondary" className="text-xs">
                               Série
                             </Badge>
@@ -564,22 +565,23 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className={`text-lg font-bold ${
+                  <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 w-full sm:w-auto">
+                    <span className={`text-base sm:text-lg font-bold ${
                       transaction.type === "income" ? "text-success" : "text-destructive"
                     }`}>
                       {transaction.type === "income" ? "+" : "-"}
                       {formatCurrency(convertedAmount, currency)}
                     </span>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1 sm:gap-2 flex-shrink-0">
                       {transaction.series_id && (
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleDeleteSeries(transaction.series_id!)}
                           title="Deletar série completa"
+                          className="h-8 w-8"
                         >
-                          <Trash2 className="w-4 h-4 text-orange-500" />
+                          <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />
                         </Button>
                       )}
                       {showEdit && (
@@ -590,8 +592,9 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
                             setEditingTransaction(transaction);
                             setShowEditDialog(true);
                           }}
+                          className="h-8 w-8"
                         >
-                          <Pencil className="w-4 h-4" />
+                          <Pencil className="w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
                       )}
                       {!showEdit && (
@@ -599,16 +602,18 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
                           variant="ghost"
                           size="icon"
                           onClick={() => setEditingTransaction(transaction)}
+                          className="h-8 w-8"
                         >
-                          <Pencil className="w-4 h-4" />
+                          <Pencil className="w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
                       )}
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(transaction.id)}
+                        className="h-8 w-8"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                       </Button>
                     </div>
                   </div>

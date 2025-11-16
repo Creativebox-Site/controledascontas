@@ -167,27 +167,56 @@ export const PaymentItemsList = ({
   }
 
   const renderPaymentCard = (item: PaymentItem) => (
-    <Card key={item.id} className="p-4 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 space-y-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-semibold text-lg">{item.title}</h3>
-            {getStatusBadge(item.status, item.due_date)}
-            {item.categories && (
-              <Badge
-                variant="outline"
-                style={{
-                  borderColor: item.categories.color,
-                  color: item.categories.color
-                }}
-              >
-                {item.categories.name}
-              </Badge>
-            )}
+    <Card key={item.id} className="p-3 sm:p-4 hover:shadow-md transition-shadow">
+      <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+        <div className="flex-1 space-y-2 w-full">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+              <h3 className="font-semibold text-base sm:text-lg truncate">{item.title}</h3>
+              {getStatusBadge(item.status, item.due_date)}
+              {item.categories && (
+                <Badge
+                  variant="outline"
+                  className="text-xs"
+                  style={{
+                    borderColor: item.categories.color,
+                    color: item.categories.color
+                  }}
+                >
+                  {item.categories.name}
+                </Badge>
+              )}
+            </div>
+            <div className="sm:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {item.status !== "paid" && (
+                    <DropdownMenuItem onClick={() => markAsPaid(item.id)}>
+                      <Check className="w-4 h-4 mr-2" />
+                      Marcar como Pago
+                    </DropdownMenuItem>
+                  )}
+                  {item.status === "paid" && (
+                    <DropdownMenuItem onClick={() => addToTransactions(item)}>
+                      <ArrowRight className="w-4 h-4 mr-2" />
+                      Adicionar à Visão Geral
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={() => deleteItem(item.id)} className="text-destructive">
+                    Excluir
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
+          <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground flex-wrap">
             <div className="flex items-center gap-1">
-              <Calendar className="w-4 h-4" />
+              <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>
                 {item.status === 'paid' && item.paid_at 
                   ? `Pago em: ${format(new Date(item.paid_at), "dd/MM/yyyy", { locale: ptBR })}`
@@ -197,88 +226,90 @@ export const PaymentItemsList = ({
             </div>
             {item.payment_reminders.length > 0 && (
               <div className="flex items-center gap-1">
-                <Bell className="w-4 h-4" />
+                <Bell className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span>{item.payment_reminders.length} lembrete(s)</span>
               </div>
             )}
           </div>
           {item.payee && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Beneficiário: {item.payee}
             </p>
           )}
           {item.notes && (
-            <p className="text-sm text-muted-foreground italic">
+            <p className="text-xs sm:text-sm text-muted-foreground italic">
               {item.notes}
             </p>
           )}
         </div>
-        <div className="flex items-center gap-3">
-          <div className="text-right">
-            <p className="text-2xl font-bold">
+        <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+          <div className="text-left sm:text-right">
+            <p className="text-xl sm:text-2xl font-bold">
               {formatCurrency(item.value)}
             </p>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {item.status !== "paid" && (
-                <DropdownMenuItem onClick={() => markAsPaid(item.id)}>
-                  <Check className="w-4 h-4 mr-2" />
-                  Marcar como Pago
+          <div className="hidden sm:block">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {item.status !== "paid" && (
+                  <DropdownMenuItem onClick={() => markAsPaid(item.id)}>
+                    <Check className="w-4 h-4 mr-2" />
+                    Marcar como Pago
+                  </DropdownMenuItem>
+                )}
+                {item.status === "paid" && (
+                  <DropdownMenuItem onClick={() => addToTransactions(item)}>
+                    <ArrowRight className="w-4 h-4 mr-2" />
+                    Adicionar à Visão Geral
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={() => deleteItem(item.id)} className="text-destructive">
+                  Excluir
                 </DropdownMenuItem>
-              )}
-              {item.status === "paid" && (
-                <DropdownMenuItem onClick={() => addToTransactions(item)}>
-                  <ArrowRight className="w-4 h-4 mr-2" />
-                  Adicionar à Visão Geral
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onClick={() => deleteItem(item.id)} className="text-destructive">
-                Excluir
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
     </Card>
   );
 
   return (
-    <div className="space-y-6">
-      <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Total de Pagamentos</p>
-            <p className="text-3xl font-bold">{formatCurrency(monthlyStats.total)}</p>
-            <p className="text-sm text-muted-foreground mt-1">
+    <div className="space-y-4 sm:space-y-6">
+      <Card className="p-4 sm:p-6 bg-gradient-to-br from-primary/5 to-primary/10">
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total de Pagamentos</p>
+            <p className="text-2xl sm:text-3xl font-bold truncate">{formatCurrency(monthlyStats.total)}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
               {monthlyStats.count} {monthlyStats.count === 1 ? 'pagamento' : 'pagamentos'} (Pendentes + Histórico)
             </p>
           </div>
-          <TrendingDown className="w-12 h-12 text-primary opacity-50" />
+          <TrendingDown className="w-10 h-10 sm:w-12 sm:h-12 text-primary opacity-50 flex-shrink-0" />
         </div>
       </Card>
 
       <Tabs defaultValue="pending" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="pending">
+          <TabsTrigger value="pending" className="text-xs sm:text-sm">
             Pendentes ({pendingItems.length})
           </TabsTrigger>
-          <TabsTrigger value="history">
+          <TabsTrigger value="history" className="text-xs sm:text-sm">
             Histórico ({paidItems.length})
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="pending" className="space-y-4 mt-4">
+        <TabsContent value="pending" className="space-y-3 sm:space-y-4 mt-4">
           {pendingItems.length === 0 ? (
-            <Card className="p-8 text-center">
-              <Check className="w-16 h-16 mx-auto text-green-500 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Tudo em dia!</h3>
-              <p className="text-muted-foreground">
+            <Card className="p-6 sm:p-8 text-center">
+              <Check className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-green-500 mb-4" />
+              <h3 className="text-base sm:text-lg font-semibold mb-2">Tudo em dia!</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Você não tem pagamentos pendentes
               </p>
             </Card>
@@ -287,19 +318,19 @@ export const PaymentItemsList = ({
           )}
         </TabsContent>
 
-        <TabsContent value="history" className="space-y-4 mt-4">
+        <TabsContent value="history" className="space-y-3 sm:space-y-4 mt-4">
           {paidItems.length === 0 ? (
-            <Card className="p-8 text-center">
-              <Calendar className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Nenhum histórico</h3>
-              <p className="text-muted-foreground">
+            <Card className="p-6 sm:p-8 text-center">
+              <Calendar className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-base sm:text-lg font-semibold mb-2">Nenhum histórico</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Pagamentos marcados como pagos aparecerão aqui
               </p>
             </Card>
           ) : (
             <>
-              <div className="bg-muted/50 p-3 rounded-lg">
-                <p className="text-sm text-muted-foreground">
+              <div className="bg-muted/50 p-2 sm:p-3 rounded-lg">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   💡 <strong>Dica:</strong> Clique nos 3 pontinhos de um pagamento pago e selecione 
                   "Adicionar à Visão Geral" para incluí-lo nas suas transações e análises financeiras.
                 </p>
