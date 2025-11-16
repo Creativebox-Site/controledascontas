@@ -14,7 +14,7 @@ import {
   Cell,
 } from "recharts";
 import { AlertCircle, TrendingDown } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -118,17 +118,23 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <AlertCircle className="h-5 w-5 text-warning" />
-          Onde está indo 80% do meu dinheiro?
-        </CardTitle>
-        <Tabs value={expenseFilter} onValueChange={(value) => setExpenseFilter(value as any)} className="mt-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="all">Todas as Despesas</TabsTrigger>
-            <TabsTrigger value="essential">Despesas Essenciais</TabsTrigger>
-            <TabsTrigger value="non-essential">Despesas Não Essenciais</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <CardTitle className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-warning" />
+            Onde está indo 80% do meu dinheiro?
+          </CardTitle>
+          
+          <Select value={expenseFilter} onValueChange={(value) => setExpenseFilter(value as any)}>
+            <SelectTrigger className="w-[220px] bg-background">
+              <SelectValue placeholder="Filtrar despesas" />
+            </SelectTrigger>
+            <SelectContent className="bg-background z-50">
+              <SelectItem value="all">Todas as Despesas</SelectItem>
+              <SelectItem value="essential">Despesas Essenciais</SelectItem>
+              <SelectItem value="non-essential">Despesas Não Essenciais</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {isMobile ? (
