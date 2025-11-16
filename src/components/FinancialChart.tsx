@@ -33,7 +33,6 @@ import { DateRangeFilter, DateRange } from "@/components/DateRangeFilter";
 import { ParetoChart } from "@/components/ParetoChart";
 import { MonthlyEvolutionChart } from "@/components/MonthlyEvolutionChart";
 import { TransactionTypeDialog } from "@/components/TransactionTypeDialog";
-import { UnderConstructionDialog } from "@/components/UnderConstructionDialog";
 import { subMonths, isAfter, isBefore, isWithinInterval, addDays, startOfMonth, endOfMonth } from "date-fns";
 
 interface Transaction {
@@ -84,7 +83,6 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
 
   // Estados para os dialogs
   const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
-  const [constructionDialogOpen, setConstructionDialogOpen] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -384,7 +382,7 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
               variant="outline"
               size="sm"
               className="w-full border-warning text-warning hover:bg-warning hover:text-warning-foreground"
-              onClick={() => setConstructionDialogOpen(true)}
+              onClick={() => navigate("/dashboard/payment-items")}
             >
               <CreditCard className="h-4 w-4 mr-1" />
               Pagar/Agendar
@@ -419,7 +417,6 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
       </div>
 
       <TransactionTypeDialog open={transactionDialogOpen} onOpenChange={setTransactionDialogOpen} />
-      <UnderConstructionDialog open={constructionDialogOpen} onOpenChange={setConstructionDialogOpen} />
     </div>
   );
 };
