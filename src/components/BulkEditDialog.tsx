@@ -79,19 +79,19 @@ export const BulkEditDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             Editar {selectedCount} {type === "investment" ? "investimento" : "transação"}(ões) em massa
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <p className="text-sm text-muted-foreground">
             Selecione os campos que deseja atualizar para todos os itens selecionados:
           </p>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* Categoria */}
             <div className="flex items-start gap-3">
               <input
