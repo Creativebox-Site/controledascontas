@@ -151,9 +151,18 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
     const amountInCents = (payment.amount * 100).toFixed(0);
     setDisplayValue(amountInCents);
     setValue(payment.amount.toString());
+    
     if (payment.category_id) {
+      // Encontrar a categoria selecionada e seu pai
+      const selectedCategory = categories.find(cat => cat.id === payment.category_id);
+      if (selectedCategory?.parent_id) {
+        setSelectedParentId(selectedCategory.parent_id);
+        const subs = categories.filter(cat => cat.parent_id === selectedCategory.parent_id);
+        setSubCategories(subs);
+      }
       setCategoryId(payment.category_id);
     }
+    
     setSelectedPaymentId(paymentId);
   };
 
@@ -304,7 +313,11 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
         {/* Categoria Principal */}
         <div>
           <Label htmlFor="parent-category">Categoria Principal</Label>
-          <Select value={selectedParentId} onValueChange={handleParentCategoryChange}>
+          <Select 
+            value={selectedParentId} 
+            onValueChange={handleParentCategoryChange}
+            disabled={!!selectedPaymentId}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Selecione a categoria..." />
             </SelectTrigger>
@@ -328,7 +341,11 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
         {selectedParentId && (
           <div>
             <Label htmlFor="category">Subcategoria</Label>
-            <Select value={categoryId} onValueChange={setCategoryId}>
+            <Select 
+              value={categoryId} 
+              onValueChange={setCategoryId}
+              disabled={!!selectedPaymentId}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione a subcategoria..." />
               </SelectTrigger>
