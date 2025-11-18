@@ -51,21 +51,26 @@ export const MonthlyEvolutionChart = ({
           return (
             <button
               key={`legend-${index}`}
-              onClick={() => handleLegendClick(entry.dataKey)}
-              className={`flex items-center gap-2 px-3 py-1 rounded-md transition-all ${
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleLegendClick(entry.dataKey);
+              }}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all cursor-pointer border ${
                 isVisible
-                  ? "opacity-100 hover:bg-muted"
-                  : "opacity-40 hover:opacity-60"
+                  ? "opacity-100 hover:bg-muted border-transparent"
+                  : "opacity-50 hover:opacity-70 border-border"
               }`}
             >
               <div
-                className={`w-4 h-4 rounded ${isVisible ? "" : "border-2 border-current"}`}
+                className={`w-4 h-4 rounded transition-all ${isVisible ? "" : "border-2 border-current bg-transparent"}`}
                 style={{
                   backgroundColor: isVisible ? entry.color : "transparent",
                   borderColor: !isVisible ? entry.color : undefined,
                 }}
               />
-              <span className="text-sm font-medium">{entry.value}</span>
+              <span className="text-sm font-medium select-none">{entry.value}</span>
             </button>
           );
         })}
