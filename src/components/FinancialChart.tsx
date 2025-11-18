@@ -334,7 +334,7 @@ export const FinancialChart = ({
         <DateRangeFilter onFilterChange={setDateRange} />
       </div>
 
-      <FinancialSummary totalIncome={totalIncome} totalExpense={totalExpense} balance={balance} incomeVariation={incomeVariation} expenseVariation={expenseVariation} balanceVariation={balanceVariation} formatCurrency={formatCurrency} />
+      <FinancialSummary totalIncome={totalIncome} totalExpense={totalExpense} balance={balance} incomeVariation={incomeVariation} expenseVariation={expenseVariation} balanceVariation={balanceVariation} formatCurrency={formatCurrency} dateRange={dateRange} />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Saldo Disponível */}
