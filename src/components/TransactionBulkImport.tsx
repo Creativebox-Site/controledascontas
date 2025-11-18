@@ -49,9 +49,9 @@ export const TransactionBulkImport = ({
         }
       }
 
-      // Converter moeda
+      // Converter moeda (usar moeda do usuário se não informada)
       let currencyCode = currency;
-      if (row.moeda !== undefined && row.moeda !== null) {
+      if (row.moeda !== undefined && row.moeda !== null && String(row.moeda).trim()) {
         const m = String(row.moeda).trim();
         if (m.toLowerCase() === 'r$' || m.toLowerCase() === 'brl') {
           currencyCode = 'BRL';
@@ -66,11 +66,17 @@ export const TransactionBulkImport = ({
         amountValue = parseFloat(row.valor.replace(',', '.'));
       }
 
+      // Determinar tipo (padrão: despesa)
+      let transactionType: 'income' | 'expense' = 'expense';
+      if (row.tipo !== undefined && row.tipo !== null && String(row.tipo).trim()) {
+        transactionType = String(row.tipo).toLowerCase() === 'receita' ? 'income' : 'expense';
+      }
+
       return {
         user_id: userId,
         description: row.descricao,
         amount: amountValue,
-        type: String(row.tipo || '').toLowerCase() === 'receita' ? 'income' : 'expense',
+        type: transactionType,
         category_id: category?.id || null,
         date: dateFormatted,
         currency: currencyCode

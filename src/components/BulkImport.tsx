@@ -28,6 +28,8 @@ export const BulkImport = ({ type, onImport, onClose }: BulkImportProps) => {
   const templates = {
     transactions: {
       filename: "template_transacoes.xls",
+      requiredColumns: ["descricao", "valor", "data"],
+      optionalColumns: ["tipo", "categoria", "moeda"],
       columns: ["descricao", "valor", "tipo", "categoria", "data", "moeda"],
       sheetName: "Transações"
     },
@@ -73,12 +75,20 @@ export const BulkImport = ({ type, onImport, onClose }: BulkImportProps) => {
       return { isValid: false, errors, warnings };
     }
 
-    // Validar colunas
+    // Validar colunas obrigatórias
     const fileColumns = Object.keys(fileData[0] || {});
-    const missingColumns = template.columns.filter(col => !fileColumns.includes(col));
+    const requiredCols = (template as any).requiredColumns || template.columns;
+    const optionalCols = (template as any).optionalColumns || [];
     
-    if (missingColumns.length > 0) {
-      errors.push(`Colunas faltando: ${missingColumns.join(", ")}`);
+    const missingRequired = requiredCols.filter((col: string) => !fileColumns.includes(col));
+    const missingOptional = optionalCols.filter((col: string) => !fileColumns.includes(col));
+    
+    if (missingRequired.length > 0) {
+      errors.push(`Colunas obrigatórias faltando: ${missingRequired.join(", ")}`);
+    }
+    
+    if (missingOptional.length > 0) {
+      warnings.push(`Colunas opcionais ausentes (valores padrão serão usados): ${missingOptional.join(", ")}`);
     }
 
     // Validar dados numéricos
@@ -105,6 +115,18 @@ export const BulkImport = ({ type, onImport, onClose }: BulkImportProps) => {
     // Validações específicas por tipo
     if (type === "transactions") {
       fileData.forEach((row, index) => {
+        // Validar campos obrigatórios
+        if (!row.descricao) {
+          errors.push(`Linha ${index + 2}: Descrição é obrigatória`);
+        }
+        if (row.valor === undefined || row.valor === null || row.valor === '') {
+          errors.push(`Linha ${index + 2}: Valor é obrigatório`);
+        }
+        if (!row.data) {
+          errors.push(`Linha ${index + 2}: Data é obrigatória`);
+        }
+        
+        // Validar tipo apenas se fornecido
         if (row.tipo && !["receita", "despesa"].includes(row.tipo.toLowerCase())) {
           errors.push(`Linha ${index + 2}: Tipo deve ser "receita" ou "despesa"`);
         }
