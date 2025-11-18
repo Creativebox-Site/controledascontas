@@ -41,6 +41,7 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [analysisType, setAnalysisType] = useState<"category" | "type">("type");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [categoryFilterType, setCategoryFilterType] = useState<string>("expense");
   const [startDate, setStartDate] = useState<Date>(new Date(new Date().setMonth(new Date().getMonth() - 6)));
@@ -97,15 +98,13 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
     }
   };
 
-  const getFilteredCategories = () => {
-    return categories.filter(cat => cat.type === categoryFilterType);
+  const getParentCategories = () => {
+    return categories.filter(cat => cat.type === categoryFilterType && !cat.parent_id);
   };
 
-  const getCategoryDisplayName = (category: Category) => {
-    if (!category.parent_id) return category.name;
-    
-    const parent = categories.find(c => c.id === category.parent_id);
-    return parent ? `${parent.name} > ${category.name}` : category.name;
+  const getSubcategories = () => {
+    if (selectedCategory === "all") return [];
+    return categories.filter(cat => cat.parent_id === selectedCategory);
   };
 
   const loadTransactions = async () => {
@@ -162,9 +161,23 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
   const getCategoryEvolutionData = () => {
     const dailyMap = new Map<string, Record<string, number>>();
 
-    const filteredTransactions = selectedCategory === "all"
-      ? transactions
-      : transactions.filter(t => t.category_id === selectedCategory);
+    let filteredTransactions = transactions;
+    
+    // Filtrar por categoria pai se selecionada
+    if (selectedCategory !== "all") {
+      if (selectedSubcategory === "all") {
+        // Mostrar categoria pai e todas as subcategorias
+        const subcategoryIds = categories
+          .filter(c => c.parent_id === selectedCategory)
+          .map(c => c.id);
+        filteredTransactions = transactions.filter(t => 
+          t.category_id === selectedCategory || subcategoryIds.includes(t.category_id || "")
+        );
+      } else {
+        // Mostrar apenas a subcategoria específica
+        filteredTransactions = transactions.filter(t => t.category_id === selectedSubcategory);
+      }
+    }
 
     filteredTransactions.forEach((t) => {
       const dateKey = t.date;
@@ -343,6 +356,7 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
                 <Select value={categoryFilterType} onValueChange={(value) => {
                   setCategoryFilterType(value);
                   setSelectedCategory("all");
+                  setSelectedSubcategory("all");
                 }}>
                   <SelectTrigger>
                     <SelectValue />
@@ -357,20 +371,42 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
 
               <div className="space-y-2">
                 <Label>Categoria</Label>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <Select value={selectedCategory} onValueChange={(value) => {
+                  setSelectedCategory(value);
+                  setSelectedSubcategory("all");
+                }}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas</SelectItem>
-                    {getFilteredCategories().map((cat) => (
+                    {getParentCategories().map((cat) => (
                       <SelectItem key={cat.id} value={cat.id}>
-                        {getCategoryDisplayName(cat)}
+                        {cat.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+
+              {selectedCategory !== "all" && getSubcategories().length > 0 && (
+                <div className="space-y-2">
+                  <Label>Subcategoria</Label>
+                  <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas</SelectItem>
+                      {getSubcategories().map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </>
           )}
         </div>
