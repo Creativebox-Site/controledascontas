@@ -250,15 +250,23 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
     const lastMonth = subMonths(new Date(), 1).toISOString().slice(0, 7);
 
     const getMonthTotal = (month: string, type: string) => {
-      return data
-        .filter((t) => t.date.startsWith(month) && t.type === type)
-        .reduce((sum, t) => sum + convertAmount(t.amount, t.currency), 0);
+      const filtered = data.filter((t) => t.date.startsWith(month) && t.type === type);
+      const total = filtered.reduce((sum, t) => sum + convertAmount(t.amount, t.currency), 0);
+      console.log(`Month: ${month}, Type: ${type}, Count: ${filtered.length}, Total: ${total}`);
+      return total;
     };
 
     const thisMonthIncome = getMonthTotal(thisMonth, "income");
     const lastMonthIncome = getMonthTotal(lastMonth, "income");
     const thisMonthExpense = getMonthTotal(thisMonth, "expense");
     const lastMonthExpense = getMonthTotal(lastMonth, "expense");
+
+    console.log('Monthly calculations:', {
+      thisMonth,
+      thisMonthIncome,
+      thisMonthExpense,
+      balance: thisMonthIncome - thisMonthExpense
+    });
 
     const thisMonthBalance = thisMonthIncome - thisMonthExpense;
     const lastMonthBalance = lastMonthIncome - lastMonthExpense;
