@@ -28,6 +28,8 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
   const [showForm, setShowForm] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<string>("all");
+  const [filterParentId, setFilterParentId] = useState<string>("all");
   const [formData, setFormData] = useState({
     name: "",
     type: "expense",
@@ -167,12 +169,126 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
   const getSubcategories = (parentId: string) =>
     categories.filter((c) => c.parent_id === parentId);
 
-  const expenseCategories = parentCategories.filter((c) => c.type === "expense");
-  const incomeCategories = parentCategories.filter((c) => c.type === "income");
-  const investmentCategories = parentCategories.filter((c) => c.type === "investment");
+  // Aplicar filtros
+  const filteredParentCategories = parentCategories.filter((c) => {
+    if (filterType !== "all" && c.type !== filterType) return false;
+    if (filterParentId !== "all" && c.id !== filterParentId) return false;
+    return true;
+  });
+
+  const expenseCategories = filteredParentCategories.filter((c) => c.type === "expense");
+  const incomeCategories = filteredParentCategories.filter((c) => c.type === "income");
+  const investmentCategories = filteredParentCategories.filter((c) => c.type === "investment");
+
+  // Categorias disponíveis para o filtro de categoria (baseado no tipo selecionado)
+  const availableParentCategories = filterType === "all" 
+    ? parentCategories 
+    : parentCategories.filter(c => c.type === filterType);
 
   return (
     <div className="space-y-6">
+      {/* Filtros */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Filtros</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Tipo de Categoria</Label>
+              <Select value={filterType} onValueChange={(value) => {
+                setFilterType(value);
+                setFilterParentId("all"); // Reset categoria ao mudar tipo
+              }}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="font-normal">Todas</Badge>
+                      <span className="text-muted-foreground">({parentCategories.length})</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="expense">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="destructive" className="font-normal">Despesas</Badge>
+                      <span className="text-muted-foreground">({parentCategories.filter(c => c.type === "expense").length})</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="income">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="default" className="bg-success font-normal">Receitas</Badge>
+                      <span className="text-muted-foreground">({parentCategories.filter(c => c.type === "income").length})</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="investment">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="font-normal">Investimentos</Badge>
+                      <span className="text-muted-foreground">({parentCategories.filter(c => c.type === "investment").length})</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Categoria Específica</Label>
+              <Select value={filterParentId} onValueChange={setFilterParentId} disabled={filterType === "all"}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todas as categorias" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    Todas as categorias
+                  </SelectItem>
+                  {availableParentCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: category.color }}
+                        />
+                        {category.name}
+                        <Badge variant="outline" className="ml-auto">
+                          {getSubcategories(category.id).length}
+                        </Badge>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {(filterType !== "all" || filterParentId !== "all") && (
+            <div className="mt-4 flex items-center gap-2">
+              <Badge variant="secondary">
+                {filterType !== "all" && (
+                  <span>
+                    {filterType === "expense" ? "Despesas" : filterType === "income" ? "Receitas" : "Investimentos"}
+                  </span>
+                )}
+                {filterType !== "all" && filterParentId !== "all" && " • "}
+                {filterParentId !== "all" && (
+                  <span>{availableParentCategories.find(c => c.id === filterParentId)?.name}</span>
+                )}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setFilterType("all");
+                  setFilterParentId("all");
+                }}
+              >
+                Limpar filtros
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="flex gap-2 justify-end">
         <Button onClick={() => setShowForm(true)} variant="outline">
           <Plus className="h-4 w-4 mr-2" />
