@@ -7,6 +7,7 @@ import { Pencil, Trash2, Upload, Filter, ArrowUpDown, X } from "lucide-react";
 import { toast } from "sonner";
 import { TransactionForm } from "./TransactionForm";
 import { TransactionBulkImport } from "./TransactionBulkImport";
+import { BulkEditDialog } from "./BulkEditDialog";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -54,6 +55,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
   const [exchangeRate, setExchangeRate] = useState<number>(5.0);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
+  const [showBulkEditDialog, setShowBulkEditDialog] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -256,6 +258,27 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
     }
   };
 
+  const handleBulkEdit = async (updates: Partial<Transaction>) => {
+    if (selectedIds.size === 0) {
+      toast.error("Selecione pelo menos uma transação");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("transactions")
+      .update(updates)
+      .in("id", Array.from(selectedIds));
+
+    if (error) {
+      toast.error("Erro ao atualizar transações");
+    } else {
+      toast.success(`${selectedIds.size} transação(ões) atualizada(s)!`);
+      setSelectedIds(new Set());
+      setShowBulkEditDialog(false);
+      loadTransactions();
+    }
+  };
+
   const handleSelectAll = () => {
     if (selectedIds.size === transactions.length) {
       setSelectedIds(new Set());
@@ -319,25 +342,36 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
       )}
 
       {showEdit ? (
-        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Editar Transação</DialogTitle>
-            </DialogHeader>
-            {editingTransaction && (
-              <TransactionForm
-                userId={userId}
-                transaction={editingTransaction}
-                onClose={() => {
-                  setShowEditDialog(false);
-                  setEditingTransaction(null);
-                  loadTransactions();
-                }}
-                currency={currency}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
+        <>
+          <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Editar Transação</DialogTitle>
+              </DialogHeader>
+              {editingTransaction && (
+                <TransactionForm
+                  userId={userId}
+                  transaction={editingTransaction}
+                  onClose={() => {
+                    setShowEditDialog(false);
+                    setEditingTransaction(null);
+                    loadTransactions();
+                  }}
+                  currency={currency}
+                />
+              )}
+            </DialogContent>
+          </Dialog>
+
+          <BulkEditDialog
+            open={showBulkEditDialog}
+            onOpenChange={setShowBulkEditDialog}
+            selectedCount={selectedIds.size}
+            categories={categories}
+            onSave={handleBulkEdit}
+            type="transaction"
+          />
+        </>
       ) : (
         editingTransaction && (
           <TransactionForm
@@ -357,9 +391,26 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
           <CardTitle className="text-base sm:text-lg">Histórico de Transações</CardTitle>
           <div className="flex gap-2 flex-wrap w-full sm:w-auto">
             {selectedIds.size > 0 && (
-              <Button variant="destructive" size="sm" onClick={handleDeleteSelected} className="text-xs sm:text-sm">
-                Deletar {selectedIds.size} selecionada(s)
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowBulkEditDialog(true)}
+                  className="text-xs sm:text-sm"
+                >
+                  <Pencil className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  Editar ({selectedIds.size})
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={handleDeleteSelected} 
+                  className="text-xs sm:text-sm"
+                >
+                  <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                  Excluir ({selectedIds.size})
+                </Button>
+              </div>
             )}
             <Popover>
               <PopoverTrigger asChild>
