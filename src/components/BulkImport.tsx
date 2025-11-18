@@ -84,15 +84,18 @@ export const BulkImport = ({ type, onImport, onClose }: BulkImportProps) => {
     // Validar dados numéricos
     fileData.forEach((row, index) => {
       if (row.valor) {
-        const valorStr = String(row.valor);
-        
-        // Verificar se usa ponto ao invés de vírgula
-        if (valorStr.includes(".")) {
-          warnings.push(`Linha ${index + 2}: O valor contém ponto (.). Use vírgula (,) como separador decimal`);
+        // Se já é um número, o Excel parseou corretamente (vírgula foi aceita)
+        if (typeof row.valor === 'number') {
+          if (isNaN(row.valor)) {
+            errors.push(`Linha ${index + 2}: Valor inválido`);
+          }
+          return;
         }
 
-        // Verificar se é um número válido
+        // Se é string, validar formato
+        const valorStr = String(row.valor);
         const valorNumber = parseFloat(valorStr.replace(",", "."));
+        
         if (isNaN(valorNumber)) {
           errors.push(`Linha ${index + 2}: Valor inválido "${row.valor}"`);
         }
