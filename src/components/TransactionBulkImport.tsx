@@ -18,13 +18,16 @@ export const TransactionBulkImport = ({
   const handleBulkImport = async (data: any[]) => {
     if (!userId) return;
 
+    console.log("📊 Dados recebidos para importação:", data);
+
     // Buscar categorias do usuário para fazer o match
     const { data: categories } = await supabase
       .from("categories")
       .select("*")
       .eq("user_id", userId);
 
-    const transactionsToInsert = data.map(row => {
+    const transactionsToInsert = data.map((row, index) => {
+      console.log(`Linha ${index + 1}:`, row);
       // Tentar encontrar a categoria pelo nome (case-insensitive)
       const category = categories?.find(
         c => c.name.toLowerCase() === String(row.categoria || '').toLowerCase()
@@ -72,24 +75,42 @@ export const TransactionBulkImport = ({
         transactionType = String(row.tipo).toLowerCase() === 'receita' ? 'income' : 'expense';
       }
 
-      return {
+      const transaction = {
         user_id: userId,
-        description: row.descricao,
+        description: row.descricao || '',
         amount: amountValue,
         type: transactionType,
         category_id: category?.id || null,
         date: dateFormatted,
         currency: currencyCode
       };
+
+      // Validar campos obrigatórios
+      if (!transaction.description || transaction.description.trim() === '') {
+        console.error(`❌ Linha ${index + 1}: Descrição vazia ou inválida`, row);
+        throw new Error(`Linha ${index + 2}: A descrição é obrigatória mas está vazia. Verifique a coluna "descricao" no Excel.`);
+      }
+      if (!transaction.amount || isNaN(transaction.amount)) {
+        console.error(`❌ Linha ${index + 1}: Valor inválido`, row);
+        throw new Error(`Linha ${index + 2}: O valor é obrigatório e deve ser numérico.`);
+      }
+
+      console.log(`✅ Linha ${index + 1} validada:`, transaction);
+      return transaction;
     });
+
+    console.log("📤 Transações prontas para inserir:", transactionsToInsert);
 
     const { error } = await supabase
       .from("transactions")
       .insert(transactionsToInsert);
 
     if (error) {
+      console.error("❌ Erro ao inserir no banco:", error);
       throw error;
     }
+
+    console.log("✅ Importação concluída com sucesso!");
 
     onImportComplete();
   };
