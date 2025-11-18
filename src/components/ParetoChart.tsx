@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ComposedChart,
@@ -17,6 +17,7 @@ import { AlertCircle, TrendingDown } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { toast } from "sonner";
 
 interface CategoryData {
   name: string;
@@ -33,6 +34,24 @@ interface ParetoChartProps {
 export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) => {
   const [expenseFilter, setExpenseFilter] = useState<"all" | "essential" | "non-essential">("all");
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    // Verificar se não há dados com o filtro atual (exceto "all")
+    if (expenseFilter !== "all") {
+      const filteredData = categoryData.filter((item) => {
+        if (expenseFilter === "essential") return item.isEssential;
+        if (expenseFilter === "non-essential") return !item.isEssential;
+        return true;
+      });
+
+      if (filteredData.length === 0) {
+        toast.info("Não há dados com este filtro. Mostrando todos os dados.", {
+          duration: 4000,
+        });
+        setExpenseFilter("all");
+      }
+    }
+  }, [expenseFilter, categoryData]);
 
   const paretoData = useMemo(() => {
     // Filtrar dados baseado no tipo de despesa selecionado
