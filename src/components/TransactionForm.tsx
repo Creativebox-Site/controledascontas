@@ -63,7 +63,24 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
 
   useEffect(() => {
     loadCategories();
-  }, [formData.type]);
+  }, [formData.type, userId]);
+  
+  // Restaurar categoria pai quando editar
+  useEffect(() => {
+    if (transaction?.category_id && categories.length > 0) {
+      const selectedCategory = categories.find(cat => cat.id === transaction.category_id);
+      if (selectedCategory?.parent_id) {
+        setSelectedParentId(selectedCategory.parent_id);
+        const subs = categories.filter(cat => cat.parent_id === selectedCategory.parent_id);
+        setSubCategories(subs);
+      } else if (selectedCategory && !selectedCategory.parent_id) {
+        // Se a categoria selecionada é uma categoria pai
+        setSelectedParentId(selectedCategory.id);
+        const subs = categories.filter(cat => cat.parent_id === selectedCategory.id);
+        setSubCategories(subs);
+      }
+    }
+  }, [transaction?.category_id, categories]);
 
   const loadCategories = async () => {
     const { data, error } = await supabase
@@ -84,16 +101,6 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
     // Separar categorias pai (sem parent_id) e subcategorias
     const parents = allCategories.filter(cat => !cat.parent_id);
     setParentCategories(parents);
-    
-    // Se estiver editando, definir a categoria pai automaticamente
-    if (transaction?.category_id) {
-      const selectedCategory = allCategories.find(cat => cat.id === transaction.category_id);
-      if (selectedCategory?.parent_id) {
-        setSelectedParentId(selectedCategory.parent_id);
-        const subs = allCategories.filter(cat => cat.parent_id === selectedCategory.parent_id);
-        setSubCategories(subs);
-      }
-    }
   };
 
   const handleParentCategoryChange = (parentId: string) => {
@@ -305,7 +312,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-3">
           {!defaultType && (
             <div className="space-y-2">
               <Label>Tipo</Label>
@@ -370,18 +377,18 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
           )}
 
           {formData.type === "expense" && (
-            <div className="space-y-3 p-4 bg-muted/50 rounded-lg border-2 border-muted">
-              <Label className="text-base font-semibold">Esta despesa é essencial?</Label>
+            <div className="space-y-2 p-3 bg-muted/50 rounded-lg border border-muted">
+              <Label className="text-sm font-semibold">Esta despesa é essencial?</Label>
               <RadioGroup
                 value={formData.is_essential ? "essential" : "non-essential"}
                 onValueChange={(value) =>
                   setFormData({ ...formData, is_essential: value === "essential" })
                 }
-                className="grid grid-cols-2 gap-4"
+                className="grid grid-cols-2 gap-3"
               >
                 <Label
                   htmlFor="essential"
-                  className={`flex items-center justify-center space-x-2 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                  className={`flex items-center justify-center space-x-2 p-3 rounded-lg border-2 cursor-pointer transition-all ${
                     formData.is_essential
                       ? "border-primary bg-primary/10 shadow-md"
                       : "border-border hover:border-primary/50"
@@ -392,7 +399,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
                 </Label>
                 <Label
                   htmlFor="non-essential"
-                  className={`flex items-center justify-center space-x-2 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                  className={`flex items-center justify-center space-x-2 p-3 rounded-lg border-2 cursor-pointer transition-all ${
                     !formData.is_essential
                       ? "border-primary bg-primary/10 shadow-md"
                       : "border-border hover:border-primary/50"

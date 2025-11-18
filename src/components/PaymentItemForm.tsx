@@ -223,8 +223,8 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Título */}
         <div className="md:col-span-2 space-y-2">
           <Label htmlFor="title">Título *</Label>
