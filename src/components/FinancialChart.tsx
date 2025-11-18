@@ -246,6 +246,27 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   };
 
   const calculateVariations = (data: Transaction[]) => {
+    // Usar o dateRange do filtro para o fluxo de caixa
+    const getFilteredTotal = (type: string) => {
+      return data
+        .filter((t) => {
+          if (t.type !== type) return false;
+          const tDate = new Date(t.date);
+          return isWithinInterval(tDate, { start: dateRange.from, end: dateRange.to });
+        })
+        .reduce((sum, t) => sum + convertAmount(t.amount, t.currency), 0);
+    };
+
+    const filteredIncome = getFilteredTotal("income");
+    const filteredExpense = getFilteredTotal("expense");
+    const filteredBalance = filteredIncome - filteredExpense;
+
+    // Dados do período filtrado (para o card de Fluxo de Caixa)
+    setMonthlyIncome(filteredIncome);
+    setMonthlyExpense(filteredExpense);
+    setMonthlyBalance(filteredBalance);
+
+    // Cálculos de variação (mês atual vs mês anterior)
     const today = new Date();
     const thisMonthStart = startOfMonth(today);
     const thisMonthEnd = endOfMonth(today);
@@ -275,11 +296,6 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
     setBalanceVariation(
       lastMonthBalance !== 0 ? ((thisMonthBalance - lastMonthBalance) / Math.abs(lastMonthBalance)) * 100 : 0,
     );
-
-    // Dados mensais
-    setMonthlyIncome(thisMonthIncome);
-    setMonthlyExpense(thisMonthExpense);
-    setMonthlyBalance(thisMonthBalance);
 
     // Próximos pagamentos (7 dias)
     const next7Days = addDays(today, 7);
@@ -396,10 +412,10 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
           </CardContent>
         </Card>
 
-        {/* Card 2: Fluxo de Caixa Mensal */}
+        {/* Card 2: Fluxo de Caixa do Período Filtrado */}
         <Card className="border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium line-clamp-2">Fluxo de Caixa do Mês</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium line-clamp-2">Fluxo de Caixa (Período Filtrado)</CardTitle>
             <TrendingUp className="h-5 w-5 text-primary flex-shrink-0" />
           </CardHeader>
           <CardContent className="space-y-3">
