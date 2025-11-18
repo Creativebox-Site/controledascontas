@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Upload } from "lucide-react";
+import { Plus, Upload, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { EmergencyFund } from "@/components/EmergencyFund";
 import { BulkImport } from "@/components/BulkImport";
+import { BulkEditDialog } from "@/components/BulkEditDialog";
 import { addDays, addWeeks, addMonths, addYears } from "date-fns";
 
 interface InvestmentsProps {
@@ -38,8 +39,10 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
   const [categories, setCategories] = useState<InvestmentCategory[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
+  const [showBulkEditDialog, setShowBulkEditDialog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isRecurring, setIsRecurring] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState({
     category_id: "",
     description: "",
@@ -308,6 +311,67 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
     return totals;
   };
 
+  const handleSelectAll = () => {
+    if (selectedIds.size === investments.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(investments.map(inv => inv.id)));
+    }
+  };
+
+  const handleToggleSelect = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.size === 0) {
+      toast.error("Selecione pelo menos um investimento");
+      return;
+    }
+
+    if (!confirm(`Deseja realmente excluir ${selectedIds.size} investimento(s)?`)) return;
+
+    const { error } = await supabase
+      .from("transactions")
+      .delete()
+      .in("id", Array.from(selectedIds));
+
+    if (error) {
+      toast.error("Erro ao excluir investimentos");
+    } else {
+      toast.success(`${selectedIds.size} investimento(s) excluído(s)!`);
+      setSelectedIds(new Set());
+      loadInvestments();
+    }
+  };
+
+  const handleBulkEdit = async (updates: any) => {
+    if (selectedIds.size === 0) {
+      toast.error("Selecione pelo menos um investimento");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("transactions")
+      .update(updates)
+      .in("id", Array.from(selectedIds));
+
+    if (error) {
+      toast.error("Erro ao atualizar investimentos");
+    } else {
+      toast.success(`${selectedIds.size} investimento(s) atualizado(s)!`);
+      setSelectedIds(new Set());
+      setShowBulkEditDialog(false);
+      loadInvestments();
+    }
+  };
+
   const categoryTotals = getTotalByCategory();
 
   return (
@@ -475,6 +539,15 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
         </DialogContent>
       </Dialog>
 
+      <BulkEditDialog
+        open={showBulkEditDialog}
+        onOpenChange={setShowBulkEditDialog}
+        selectedCount={selectedIds.size}
+        categories={categories.map(cat => ({ ...cat, is_essential: false }))}
+        onSave={handleBulkEdit}
+        type="investment"
+      />
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base sm:text-lg">Resumo por Categoria</CardTitle>
@@ -503,29 +576,75 @@ export const Investments = ({ userId, currency }: InvestmentsProps) => {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base sm:text-lg">Histórico de Investimentos</CardTitle>
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+          <div>
+            <CardTitle className="text-base sm:text-lg">Histórico de Investimentos</CardTitle>
+          </div>
+          {selectedIds.size > 0 && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowBulkEditDialog(true)}
+                className="text-xs sm:text-sm"
+              >
+                <Pencil className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                Editar ({selectedIds.size})
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDeleteSelected}
+                className="text-xs sm:text-sm"
+              >
+                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                Excluir ({selectedIds.size})
+              </Button>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
+          {investments.length > 0 && (
+            <div className="mb-4 flex items-center gap-2">
+              <Checkbox
+                checked={selectedIds.size === investments.length && investments.length > 0}
+                onCheckedChange={handleSelectAll}
+                id="select-all-investments"
+              />
+              <Label htmlFor="select-all-investments" className="cursor-pointer text-xs sm:text-sm">
+                Selecionar tudo ({investments.length})
+              </Label>
+            </div>
+          )}
           <div className="space-y-2">
-            {investments.map((investment) => (
-              <div
-                key={investment.id}
-                className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 p-2 sm:p-3 rounded-lg border"
-              >
-                <div className="space-y-1 flex-1 min-w-0 w-full">
-                  <p className="font-medium text-sm sm:text-base truncate">{investment.description}</p>
-                  <div className="flex gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
-                    <span className="truncate">{investment.category_name}</span>
-                    <span className="hidden sm:inline">•</span>
-                    <span className="whitespace-nowrap">{new Date(investment.date).toLocaleDateString('pt-BR')}</span>
+            {investments.map((investment) => {
+              const isSelected = selectedIds.has(investment.id);
+              return (
+                <div
+                  key={investment.id}
+                  className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 p-2 sm:p-3 rounded-lg border ${isSelected ? "border-primary" : ""}`}
+                >
+                  <div className="flex items-start gap-2 flex-1 min-w-0 w-full">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => handleToggleSelect(investment.id)}
+                      className="mt-1"
+                    />
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <p className="font-medium text-sm sm:text-base truncate">{investment.description}</p>
+                      <div className="flex gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
+                        <span className="truncate">{investment.category_name}</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span className="whitespace-nowrap">{new Date(investment.date).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                    </div>
                   </div>
+                  <span className="font-semibold text-primary text-sm sm:text-base whitespace-nowrap self-end sm:self-auto">
+                    {formatCurrency(investment.amount, investment.currency)}
+                  </span>
                 </div>
-                <span className="font-semibold text-primary text-sm sm:text-base whitespace-nowrap self-end sm:self-auto">
-                  {formatCurrency(investment.amount, investment.currency)}
-                </span>
-              </div>
-            ))}
+              );
+            })}
             {investments.length === 0 && !loading && (
               <p className="text-center text-muted-foreground py-4 text-xs sm:text-sm">
                 Nenhum investimento registrado
