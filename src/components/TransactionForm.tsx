@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { addDays, addWeeks, addMonths, addYears } from "date-fns";
 
@@ -23,6 +24,7 @@ interface Transaction {
   type: "income" | "expense" | "investment";
   date: string;
   category_id: string;
+  is_essential?: boolean;
 }
 
 interface TransactionFormProps {
@@ -45,6 +47,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
     type: transaction?.type || defaultType || "expense",
     date: transaction?.date || new Date().toISOString().split('T')[0],
     category_id: transaction?.category_id || "",
+    is_essential: transaction?.is_essential || false,
   });
   const [displayValue, setDisplayValue] = useState(
     transaction?.amount ? (transaction.amount * 100).toFixed(0) : ""
@@ -315,6 +318,45 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
               </SelectContent>
             </Select>
           </div>
+
+          {formData.type === "expense" && (
+            <div className="space-y-3 p-4 bg-muted/50 rounded-lg border-2 border-muted">
+              <Label className="text-base font-semibold">Esta despesa é essencial?</Label>
+              <RadioGroup
+                value={formData.is_essential ? "essential" : "non-essential"}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, is_essential: value === "essential" })
+                }
+                className="grid grid-cols-2 gap-4"
+              >
+                <Label
+                  htmlFor="essential"
+                  className={`flex items-center justify-center space-x-2 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    formData.is_essential
+                      ? "border-primary bg-primary/10 shadow-md"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  <RadioGroupItem value="essential" id="essential" />
+                  <span className="font-medium">✅ Essencial</span>
+                </Label>
+                <Label
+                  htmlFor="non-essential"
+                  className={`flex items-center justify-center space-x-2 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    !formData.is_essential
+                      ? "border-primary bg-primary/10 shadow-md"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  <RadioGroupItem value="non-essential" id="non-essential" />
+                  <span className="font-medium">💎 Não Essencial</span>
+                </Label>
+              </RadioGroup>
+              <p className="text-xs text-muted-foreground">
+                Despesas essenciais são aquelas necessárias para manter seu padrão de vida básico (moradia, alimentação, saúde, transporte).
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
