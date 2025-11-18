@@ -35,10 +35,12 @@ export const MonthlyEvolutionChart = ({
   });
 
   const handleLegendClick = (dataKey: string) => {
-    setVisibleSeries((prev) => ({
-      ...prev,
-      [dataKey]: !prev[dataKey],
-    }));
+    // Ao clicar, mostra apenas a série clicada
+    setVisibleSeries({
+      income: dataKey === 'income',
+      expense: dataKey === 'expense',
+      investment: dataKey === 'investment',
+    });
   };
 
   const CustomLegend = (props: any) => {
