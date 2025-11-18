@@ -3,11 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Bell, MoreVertical, Check, TrendingDown, ArrowRight } from "lucide-react";
+import { Calendar, Bell, MoreVertical, Check, TrendingDown, ArrowRight, Trash2 } from "lucide-react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 interface PaymentItemsListProps {
@@ -44,6 +45,7 @@ export const PaymentItemsList = ({
   const [items, setItems] = useState<PaymentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [monthlyStats, setMonthlyStats] = useState({ total: 0, count: 0 });
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadItems();
@@ -125,6 +127,46 @@ export const PaymentItemsList = ({
     }
   };
 
+  const deleteSelectedItems = async () => {
+    if (selectedItems.size === 0) {
+      toast.error("Nenhum item selecionado");
+      return;
+    }
+
+    if (!confirm(`Tem certeza que deseja excluir ${selectedItems.size} pagamento(s)?`)) return;
+
+    const { error } = await supabase
+      .from("payment_items")
+      .delete()
+      .in("id", Array.from(selectedItems));
+
+    if (error) {
+      toast.error("Erro ao excluir pagamentos");
+    } else {
+      toast.success(`${selectedItems.size} pagamento(s) excluído(s)!`);
+      setSelectedItems(new Set());
+      loadItems();
+    }
+  };
+
+  const toggleSelectItem = (id: string) => {
+    const newSelected = new Set(selectedItems);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedItems(newSelected);
+  };
+
+  const toggleSelectAll = (itemsList: PaymentItem[]) => {
+    if (selectedItems.size === itemsList.length) {
+      setSelectedItems(new Set());
+    } else {
+      setSelectedItems(new Set(itemsList.map(item => item.id)));
+    }
+  };
+
   const getStatusBadge = (status: string, dueDate: string) => {
     if (status === "paid") {
       return <Badge variant="default" className="bg-green-500">Pago</Badge>;
@@ -169,6 +211,12 @@ export const PaymentItemsList = ({
   const renderPaymentCard = (item: PaymentItem) => (
     <Card key={item.id} className="p-3 sm:p-4 hover:shadow-md transition-shadow">
       <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+        <div className="flex items-center pt-1">
+          <Checkbox
+            checked={selectedItems.has(item.id)}
+            onCheckedChange={() => toggleSelectItem(item.id)}
+          />
+        </div>
         <div className="flex-1 space-y-2 w-full">
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
@@ -314,7 +362,31 @@ export const PaymentItemsList = ({
               </p>
             </Card>
           ) : (
-            pendingItems.map(item => renderPaymentCard(item))
+            <>
+              <div className="flex items-center justify-between gap-4 p-3 sm:p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={selectedItems.size === pendingItems.length && pendingItems.length > 0}
+                    onCheckedChange={() => toggleSelectAll(pendingItems)}
+                  />
+                  <span className="text-xs sm:text-sm font-medium">
+                    {selectedItems.size > 0 ? `${selectedItems.size} selecionado(s)` : 'Selecionar todos'}
+                  </span>
+                </div>
+                {selectedItems.size > 0 && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={deleteSelectedItems}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Excluir selecionados</span>
+                    <span className="sm:hidden">Excluir</span>
+                  </Button>
+                )}
+              </div>
+              {pendingItems.map(item => renderPaymentCard(item))}
+            </>
           )}
         </TabsContent>
 
@@ -329,6 +401,28 @@ export const PaymentItemsList = ({
             </Card>
           ) : (
             <>
+              <div className="flex items-center justify-between gap-4 p-3 sm:p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={selectedItems.size === paidItems.length && paidItems.length > 0}
+                    onCheckedChange={() => toggleSelectAll(paidItems)}
+                  />
+                  <span className="text-xs sm:text-sm font-medium">
+                    {selectedItems.size > 0 ? `${selectedItems.size} selecionado(s)` : 'Selecionar todos'}
+                  </span>
+                </div>
+                {selectedItems.size > 0 && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={deleteSelectedItems}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Excluir selecionados</span>
+                    <span className="sm:hidden">Excluir</span>
+                  </Button>
+                )}
+              </div>
               <div className="bg-muted/50 p-2 sm:p-3 rounded-lg">
                 <p className="text-xs sm:text-sm text-muted-foreground">
                   💡 <strong>Dica:</strong> Clique nos 3 pontinhos de um pagamento pago e selecione 
