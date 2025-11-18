@@ -246,27 +246,26 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
   };
 
   const calculateVariations = (data: Transaction[]) => {
-    const thisMonth = new Date().toISOString().slice(0, 7);
-    const lastMonth = subMonths(new Date(), 1).toISOString().slice(0, 7);
+    const today = new Date();
+    const thisMonthStart = startOfMonth(today);
+    const thisMonthEnd = endOfMonth(today);
+    const lastMonthStart = startOfMonth(subMonths(today, 1));
+    const lastMonthEnd = endOfMonth(subMonths(today, 1));
 
-    const getMonthTotal = (month: string, type: string) => {
-      const filtered = data.filter((t) => t.date.startsWith(month) && t.type === type);
-      const total = filtered.reduce((sum, t) => sum + convertAmount(t.amount, t.currency), 0);
-      console.log(`Month: ${month}, Type: ${type}, Count: ${filtered.length}, Total: ${total}`);
-      return total;
+    const getMonthTotal = (start: Date, end: Date, type: string) => {
+      return data
+        .filter((t) => {
+          if (t.type !== type) return false;
+          const tDate = new Date(t.date);
+          return isWithinInterval(tDate, { start, end });
+        })
+        .reduce((sum, t) => sum + convertAmount(t.amount, t.currency), 0);
     };
 
-    const thisMonthIncome = getMonthTotal(thisMonth, "income");
-    const lastMonthIncome = getMonthTotal(lastMonth, "income");
-    const thisMonthExpense = getMonthTotal(thisMonth, "expense");
-    const lastMonthExpense = getMonthTotal(lastMonth, "expense");
-
-    console.log('Monthly calculations:', {
-      thisMonth,
-      thisMonthIncome,
-      thisMonthExpense,
-      balance: thisMonthIncome - thisMonthExpense
-    });
+    const thisMonthIncome = getMonthTotal(thisMonthStart, thisMonthEnd, "income");
+    const lastMonthIncome = getMonthTotal(lastMonthStart, lastMonthEnd, "income");
+    const thisMonthExpense = getMonthTotal(thisMonthStart, thisMonthEnd, "expense");
+    const lastMonthExpense = getMonthTotal(lastMonthStart, lastMonthEnd, "expense");
 
     const thisMonthBalance = thisMonthIncome - thisMonthExpense;
     const lastMonthBalance = lastMonthIncome - lastMonthExpense;
@@ -283,20 +282,19 @@ export const FinancialChart = ({ userId, currency }: FinancialChartProps) => {
     setMonthlyBalance(thisMonthBalance);
 
     // Próximos pagamentos (7 dias)
-    const today = new Date();
     const next7Days = addDays(today, 7);
     const upcoming = data.filter((t) => {
       if (t.type !== "expense") return false;
       const tDate = new Date(t.date);
-      return tDate >= today && tDate <= next7Days;
+      return isWithinInterval(tDate, { start: today, end: next7Days });
     });
     const upcomingTotal = upcoming.reduce((sum, t) => sum + convertAmount(t.amount, t.currency), 0);
     setUpcomingPayments(upcomingTotal);
     setUpcomingPaymentsCount(upcoming.length);
 
     // Performance dos investimentos (mês atual)
-    const thisMonthInvestments = getMonthTotal(thisMonth, "investment");
-    const lastMonthInvestments = getMonthTotal(lastMonth, "investment");
+    const thisMonthInvestments = getMonthTotal(thisMonthStart, thisMonthEnd, "investment");
+    const lastMonthInvestments = getMonthTotal(lastMonthStart, lastMonthEnd, "investment");
 
     if (lastMonthInvestments > 0) {
       const perfPercentage = ((thisMonthInvestments - lastMonthInvestments) / lastMonthInvestments) * 100;
