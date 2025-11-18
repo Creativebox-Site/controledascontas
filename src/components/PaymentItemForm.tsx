@@ -34,6 +34,7 @@ interface Category {
   id: string;
   name: string;
   color: string;
+  parent_id: string | null;
 }
 
 export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentItemFormProps) => {
@@ -49,6 +50,9 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
   const [notificationChannel, setNotificationChannel] = useState("pwa");
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [parentCategories, setParentCategories] = useState<Category[]>([]);
+  const [subCategories, setSubCategories] = useState<Category[]>([]);
+  const [selectedParentId, setSelectedParentId] = useState<string>("");
   const [existingPayments, setExistingPayments] = useState<any[]>([]);
   const [selectedPaymentId, setSelectedPaymentId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -63,7 +67,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
 
     const { data, error } = await supabase
       .from("categories")
-      .select("id, name, color")
+      .select("id, name, color, parent_id")
       .eq("user_id", userId)
       .eq("type", "expense")
       .order("name");
@@ -71,8 +75,22 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
     if (error) {
       console.error("Error loading categories:", error);
     } else {
-      setCategories(data || []);
+      const allCategories = data || [];
+      setCategories(allCategories);
+      
+      // Separar categorias pai (sem parent_id)
+      const parents = allCategories.filter(cat => !cat.parent_id);
+      setParentCategories(parents);
     }
+  };
+
+  const handleParentCategoryChange = (parentId: string) => {
+    setSelectedParentId(parentId);
+    setCategoryId(undefined);
+    
+    // Filtrar subcategorias da categoria pai selecionada
+    const subs = categories.filter(cat => cat.parent_id === parentId);
+    setSubCategories(subs);
   };
 
   const loadExistingPayments = async () => {
@@ -283,15 +301,15 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
           </Popover>
         </div>
 
-        {/* Categoria */}
+        {/* Categoria Principal */}
         <div>
-          <Label htmlFor="category">Categoria</Label>
-          <Select value={categoryId} onValueChange={setCategoryId}>
+          <Label htmlFor="parent-category">Categoria Principal</Label>
+          <Select value={selectedParentId} onValueChange={handleParentCategoryChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Selecione uma categoria" />
+              <SelectValue placeholder="Selecione a categoria..." />
             </SelectTrigger>
             <SelectContent>
-              {categories.map((cat) => (
+              {parentCategories.map((cat) => (
                 <SelectItem key={cat.id} value={cat.id}>
                   <div className="flex items-center gap-2">
                     <div
@@ -305,6 +323,31 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
             </SelectContent>
           </Select>
         </div>
+
+        {/* Subcategoria */}
+        {selectedParentId && (
+          <div>
+            <Label htmlFor="category">Subcategoria</Label>
+            <Select value={categoryId} onValueChange={setCategoryId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a subcategoria..." />
+              </SelectTrigger>
+              <SelectContent>
+                {subCategories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: cat.color }}
+                      />
+                      {cat.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Destinatário/Pagador */}
         <div>
