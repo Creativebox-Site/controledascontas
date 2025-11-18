@@ -182,29 +182,10 @@ export const MonthlyAnalysis = ({
     return insights;
   };
   if (loading) {
-    return <Card>
-        
-        <CardContent>
-          <div className="animate-pulse space-y-4">
-            <div className="h-24 bg-muted rounded"></div>
-            <div className="h-24 bg-muted rounded"></div>
-          </div>
-        </CardContent>
-      </Card>;
+    return;
   }
   return <Card>
-      <CardHeader>
-        <CardTitle>Análise Mensal</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Insights principais */}
-        {getInsights().map((insight, index) => <InsightCard key={index} {...insight} />)}
-
-        {/* Mudanças por categoria */}
-        {data.categoryChanges.length > 0 && <div className="space-y-3">
-            <h4 className="font-semibold text-sm">Mudanças Significativas por Categoria</h4>
-            {data.categoryChanges.map((category, index) => <InsightCard key={index} title={category.name} description={`Mudança de ${formatCurrency(category.last)} para ${formatCurrency(category.current)} em relação ao mês passado.`} type={category.percentChange > 0 ? "warning" : "success"} value={`${category.percentChange > 0 ? "+" : ""}${category.percentChange.toFixed(1)}%`} trend={category.percentChange > 0 ? "up" : "down"} />)}
-          </div>}
-      </CardContent>
+      
+      
     </Card>;
 };
