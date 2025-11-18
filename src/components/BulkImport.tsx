@@ -57,9 +57,9 @@ export const BulkImport = ({ type, onImport, onClose }: BulkImportProps) => {
     const warnings: string[] = [];
     const template = templates[type];
 
-    // Validar nome do arquivo
+    // Validar nome do arquivo (warning ao invés de erro)
     if (!fileName.includes(template.filename.replace(".xls", ""))) {
-      errors.push(`O nome do arquivo deve conter "${template.filename.replace(".xls", "")}"`);
+      warnings.push(`Recomendado: Nome do arquivo deve conter "${template.filename.replace(".xls", "")}"`);
     }
 
     // Validar extensão
