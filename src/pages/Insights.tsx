@@ -1,6 +1,3 @@
-import { WeeklySummary } from "@/components/WeeklySummary";
-import { MonthlyAnalysis } from "@/components/MonthlyAnalysis";
-import { CategoryVariationChart } from "@/components/CategoryVariationChart";
 import { FinancialTips } from "@/components/FinancialTips";
 
 interface InsightsProps {
@@ -18,9 +15,6 @@ export const Insights = ({ userId, currency }: InsightsProps) => {
         </p>
       </div>
 
-      <WeeklySummary userId={userId} currency={currency} />
-      <MonthlyAnalysis userId={userId} currency={currency} />
-      <CategoryVariationChart userId={userId} currency={currency} />
       <FinancialTips userId={userId} currency={currency} />
     </div>
   );

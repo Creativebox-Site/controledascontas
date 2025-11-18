@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import { TrendingUp, TrendingDown, Wallet, PiggyBank, AlertCircle, Calendar, Plus, CreditCard, TrendingUp as InvestmentIcon } from "lucide-react";
 import { Sparkline } from "@/components/Sparkline";
-import { FinancialSummary } from "@/components/FinancialSummary";
 import { DateRangeFilter, DateRange } from "@/components/DateRangeFilter";
 import { ParetoChart } from "@/components/ParetoChart";
 import { MonthlyEvolutionChart } from "@/components/MonthlyEvolutionChart";
@@ -333,8 +332,6 @@ export const FinancialChart = ({
         <h2 className="text-2xl font-bold">Dashboard Financeiro</h2>
         <DateRangeFilter onFilterChange={setDateRange} />
       </div>
-
-      <FinancialSummary totalIncome={totalIncome} totalExpense={totalExpense} balance={balance} incomeVariation={incomeVariation} expenseVariation={expenseVariation} balanceVariation={balanceVariation} formatCurrency={formatCurrency} dateRange={dateRange} />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Saldo Disponível */}
