@@ -199,9 +199,12 @@ export const BulkImport = ({ type, onImport, onClose }: BulkImportProps) => {
       await onImport(normalizedData);
       toast.success(`${parsedData.length} registros importados com sucesso!`);
       onClose();
-    } catch (error) {
-      toast.error("Erro ao importar dados");
-    }
+      } catch (error: any) {
+        const message = error?.message || "Erro ao importar dados";
+        const details = error?.details || error?.error_description || error?.hint;
+        const extra = !details && error ? ` (${typeof error === 'string' ? error : JSON.stringify(error)})` : '';
+        toast.error(`${message}${details ? `: ${details}` : extra}`);
+      }
   };
 
   return (
