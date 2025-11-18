@@ -301,7 +301,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
       </div>
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingId ? "Editar Categoria" : "Nova Categoria"}
