@@ -66,8 +66,8 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
 
   useEffect(() => {
     if (userId) {
-      loadTransactions();
       loadCategories();
+      loadTransactions();
       fetchExchangeRate();
     }
   }, [userId, filterType, refreshKey, searchText, typeFilter, categoryFilter, minAmount, maxAmount, sortBy, essentialFilter]);
@@ -117,10 +117,17 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
   };
 
   const loadCategories = async () => {
-    const { data, error } = await supabase
+    let query = supabase
       .from("categories")
       .select("id, name, is_essential")
       .eq("user_id", userId);
+
+    // Filtrar por tipo se filterType estiver definido
+    if (filterType) {
+      query = query.eq("type", filterType);
+    }
+
+    const { data, error } = await query;
 
     if (!error && data) {
       setCategories(data);
