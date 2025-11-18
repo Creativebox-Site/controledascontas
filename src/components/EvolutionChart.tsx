@@ -27,6 +27,8 @@ interface Category {
   id: string;
   name: string;
   color: string;
+  type: string;
+  parent_id: string | null;
 }
 
 interface EvolutionChartProps {
@@ -40,6 +42,7 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
   const [analysisType, setAnalysisType] = useState<"category" | "type">("type");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
+  const [categoryFilterType, setCategoryFilterType] = useState<string>("expense");
   const [startDate, setStartDate] = useState<Date>(new Date(new Date().setMonth(new Date().getMonth() - 6)));
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [exchangeRate, setExchangeRate] = useState<number>(5.0);
@@ -84,13 +87,25 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
   const loadCategories = async () => {
     const { data } = await supabase
       .from("categories")
-      .select("id, name, color")
+      .select("id, name, color, type, parent_id")
       .eq("user_id", userId)
+      .order("parent_id", { ascending: true, nullsFirst: true })
       .order("name");
 
     if (data) {
       setCategories(data);
     }
+  };
+
+  const getFilteredCategories = () => {
+    return categories.filter(cat => cat.type === categoryFilterType);
+  };
+
+  const getCategoryDisplayName = (category: Category) => {
+    if (!category.parent_id) return category.name;
+    
+    const parent = categories.find(c => c.id === category.parent_id);
+    return parent ? `${parent.name} > ${category.name}` : category.name;
   };
 
   const loadTransactions = async () => {
@@ -322,22 +337,41 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
           )}
 
           {analysisType === "category" && (
-            <div className="space-y-2">
-              <Label>Categoria</Label>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas</SelectItem>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <>
+              <div className="space-y-2">
+                <Label>Tipo de Categoria</Label>
+                <Select value={categoryFilterType} onValueChange={(value) => {
+                  setCategoryFilterType(value);
+                  setSelectedCategory("all");
+                }}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="expense">Despesas</SelectItem>
+                    <SelectItem value="income">Receitas</SelectItem>
+                    <SelectItem value="investment">Investimentos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Categoria</Label>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {getFilteredCategories().map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {getCategoryDisplayName(cat)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
           )}
         </div>
 
