@@ -14,6 +14,7 @@ interface Category {
   name: string;
   type: string;
   color: string;
+  parent_id: string | null;
 }
 
 interface Transaction {
@@ -66,7 +67,9 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
       .from("categories")
       .select("*")
       .eq("user_id", userId)
-      .eq("type", formData.type);
+      .eq("type", formData.type)
+      .order("parent_id", { ascending: true, nullsFirst: true })
+      .order("name", { ascending: true });
 
     if (error) {
       toast.error("Erro ao carregar categorias");
@@ -74,6 +77,13 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
     }
 
     setCategories(data || []);
+  };
+
+  const getCategoryDisplayName = (category: Category) => {
+    if (!category.parent_id) return category.name;
+    
+    const parent = categories.find(c => c.id === category.parent_id);
+    return parent ? `${parent.name} > ${category.name}` : category.name;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -312,7 +322,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
               <SelectContent>
                 {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
-                    {cat.name}
+                    {getCategoryDisplayName(cat)}
                   </SelectItem>
                 ))}
               </SelectContent>
