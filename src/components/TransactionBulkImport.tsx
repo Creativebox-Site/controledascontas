@@ -25,36 +25,43 @@ export const TransactionBulkImport = ({
       .eq("user_id", userId);
 
     const transactionsToInsert = data.map(row => {
-      // Tentar encontrar a categoria pelo nome
+      // Tentar encontrar a categoria pelo nome (case-insensitive)
       const category = categories?.find(
-        c => c.name.toLowerCase() === row.categoria?.toLowerCase()
+        c => c.name.toLowerCase() === String(row.categoria || '').toLowerCase()
       );
 
-      // Converter formato de data dd/mm/yyyy para yyyy-mm-dd
+      // Converter formato de data (aceita dd/mm/yyyy, Date, e serial do Excel)
       let dateFormatted = new Date().toISOString().split('T')[0];
-      if (row.data) {
+      if (row.data !== undefined && row.data !== null) {
         if (typeof row.data === 'string' && row.data.includes('/')) {
           const [day, month, year] = row.data.split('/');
-          dateFormatted = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+          dateFormatted = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         } else if (row.data instanceof Date) {
           dateFormatted = row.data.toISOString().split('T')[0];
+        } else if (typeof row.data === 'number') {
+          // Converter serial do Excel para data (base 1899-12-30)
+          const excelEpoch = Date.UTC(1899, 11, 30);
+          const ms = excelEpoch + row.data * 24 * 60 * 60 * 1000;
+          dateFormatted = new Date(ms).toISOString().split('T')[0];
         } else {
-          dateFormatted = row.data;
+          // Tentar usar diretamente (caso já venha em ISO)
+          dateFormatted = String(row.data);
         }
       }
 
       // Converter moeda
       let currencyCode = currency;
-      if (row.moeda) {
-        if (row.moeda === 'R$' || row.moeda.toLowerCase() === 'brl') {
+      if (row.moeda !== undefined && row.moeda !== null) {
+        const m = String(row.moeda).trim();
+        if (m.toLowerCase() === 'r$' || m.toLowerCase() === 'brl') {
           currencyCode = 'BRL';
         } else {
-          currencyCode = row.moeda;
+          currencyCode = m.toUpperCase();
         }
       }
 
       // Garantir que o valor seja numérico
-      let amountValue = row.valor;
+      let amountValue: number = row.valor as number;
       if (typeof row.valor === 'string') {
         amountValue = parseFloat(row.valor.replace(',', '.'));
       }
@@ -63,7 +70,7 @@ export const TransactionBulkImport = ({
         user_id: userId,
         description: row.descricao,
         amount: amountValue,
-        type: row.tipo?.toLowerCase() === "receita" ? "income" : "expense",
+        type: String(row.tipo || '').toLowerCase() === 'receita' ? 'income' : 'expense',
         category_id: category?.id || null,
         date: dateFormatted,
         currency: currencyCode
