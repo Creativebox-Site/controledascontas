@@ -182,7 +182,23 @@ export const MonthlyAnalysis = ({
     return insights;
   };
   if (loading) {
-    return;
+    return null;
   }
-  return;
+  
+  const insights = getInsights();
+  
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Análise Mensal</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {insights.map((insight, index) => (
+            <InsightCard key={index} {...insight} />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
 };
