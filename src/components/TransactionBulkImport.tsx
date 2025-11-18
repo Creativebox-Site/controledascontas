@@ -30,14 +30,43 @@ export const TransactionBulkImport = ({
         c => c.name.toLowerCase() === row.categoria?.toLowerCase()
       );
 
+      // Converter formato de data dd/mm/yyyy para yyyy-mm-dd
+      let dateFormatted = new Date().toISOString().split('T')[0];
+      if (row.data) {
+        if (typeof row.data === 'string' && row.data.includes('/')) {
+          const [day, month, year] = row.data.split('/');
+          dateFormatted = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        } else if (row.data instanceof Date) {
+          dateFormatted = row.data.toISOString().split('T')[0];
+        } else {
+          dateFormatted = row.data;
+        }
+      }
+
+      // Converter moeda
+      let currencyCode = currency;
+      if (row.moeda) {
+        if (row.moeda === 'R$' || row.moeda.toLowerCase() === 'brl') {
+          currencyCode = 'BRL';
+        } else {
+          currencyCode = row.moeda;
+        }
+      }
+
+      // Garantir que o valor seja numérico
+      let amountValue = row.valor;
+      if (typeof row.valor === 'string') {
+        amountValue = parseFloat(row.valor.replace(',', '.'));
+      }
+
       return {
         user_id: userId,
         description: row.descricao,
-        amount: row.valor,
-        type: row.tipo === "receita" ? "income" : "expense",
+        amount: amountValue,
+        type: row.tipo?.toLowerCase() === "receita" ? "income" : "expense",
         category_id: category?.id || null,
-        date: row.data || new Date().toISOString().split('T')[0],
-        currency: row.moeda || currency
+        date: dateFormatted,
+        currency: currencyCode
       };
     });
 
