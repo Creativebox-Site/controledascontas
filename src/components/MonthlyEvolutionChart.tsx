@@ -43,37 +43,50 @@ export const MonthlyEvolutionChart = ({
 
   const CustomLegend = (props: any) => {
     const { payload } = props;
+    const hasHiddenSeries = !visibleSeries.income || !visibleSeries.expense || !visibleSeries.investment;
 
     return (
-      <div className="flex justify-center gap-6 mt-4 flex-wrap">
-        {payload.map((entry: any, index: number) => {
-          const isVisible = visibleSeries[entry.dataKey as keyof typeof visibleSeries];
-          return (
-            <button
-              key={`legend-${index}`}
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleLegendClick(entry.dataKey);
-              }}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all cursor-pointer border ${
-                isVisible
-                  ? "opacity-100 hover:bg-muted border-transparent"
-                  : "opacity-50 hover:opacity-70 border-border"
-              }`}
-            >
-              <div
-                className={`w-4 h-4 rounded transition-all ${isVisible ? "" : "border-2 border-current bg-transparent"}`}
-                style={{
-                  backgroundColor: isVisible ? entry.color : "transparent",
-                  borderColor: !isVisible ? entry.color : undefined,
+      <div className="flex flex-col items-center gap-3 mt-4">
+        <div className="flex justify-center gap-4 flex-wrap">
+          {payload.map((entry: any, index: number) => {
+            const isVisible = visibleSeries[entry.dataKey as keyof typeof visibleSeries];
+            return (
+              <button
+                key={`legend-${index}`}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleLegendClick(entry.dataKey);
                 }}
-              />
-              <span className="text-sm font-medium select-none">{entry.value}</span>
-            </button>
-          );
-        })}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all cursor-pointer border ${
+                  isVisible
+                    ? "opacity-100 hover:bg-muted border-transparent"
+                    : "opacity-50 hover:opacity-70 border-border"
+                }`}
+              >
+                <div
+                  className={`w-4 h-4 rounded transition-all ${isVisible ? "" : "border-2 border-current bg-transparent"}`}
+                  style={{
+                    backgroundColor: isVisible ? entry.color : "transparent",
+                    borderColor: !isVisible ? entry.color : undefined,
+                  }}
+                />
+                <span className="text-sm font-medium select-none">{entry.value}</span>
+              </button>
+            );
+          })}
+        </div>
+        
+        {hasHiddenSeries && (
+          <button
+            type="button"
+            onClick={() => setVisibleSeries({ income: true, expense: true, investment: true })}
+            className="text-xs text-primary hover:underline px-3 py-1 rounded-md hover:bg-primary/10 transition-colors animate-fade-in"
+          >
+            Mostrar Todas
+          </button>
+        )}
       </div>
     );
   };
