@@ -39,6 +39,9 @@ interface TransactionFormProps {
 
 export const TransactionForm = ({ userId, transaction, onClose, onSaved, currency, defaultType }: TransactionFormProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [parentCategories, setParentCategories] = useState<Category[]>([]);
+  const [subCategories, setSubCategories] = useState<Category[]>([]);
+  const [selectedParentId, setSelectedParentId] = useState<string>("");
   const [isRecurring, setIsRecurring] = useState(false);
   const [convertToRecurring, setConvertToRecurring] = useState(false);
   const [formData, setFormData] = useState({
@@ -68,7 +71,6 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
       .select("*")
       .eq("user_id", userId)
       .eq("type", formData.type)
-      .order("parent_id", { ascending: true, nullsFirst: true })
       .order("name", { ascending: true });
 
     if (error) {
@@ -76,14 +78,31 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
       return;
     }
 
-    setCategories(data || []);
+    const allCategories = data || [];
+    setCategories(allCategories);
+    
+    // Separar categorias pai (sem parent_id) e subcategorias
+    const parents = allCategories.filter(cat => !cat.parent_id);
+    setParentCategories(parents);
+    
+    // Se estiver editando, definir a categoria pai automaticamente
+    if (transaction?.category_id) {
+      const selectedCategory = allCategories.find(cat => cat.id === transaction.category_id);
+      if (selectedCategory?.parent_id) {
+        setSelectedParentId(selectedCategory.parent_id);
+        const subs = allCategories.filter(cat => cat.parent_id === selectedCategory.parent_id);
+        setSubCategories(subs);
+      }
+    }
   };
 
-  const getCategoryDisplayName = (category: Category) => {
-    if (!category.parent_id) return category.name;
+  const handleParentCategoryChange = (parentId: string) => {
+    setSelectedParentId(parentId);
+    setFormData({ ...formData, category_id: "" });
     
-    const parent = categories.find(c => c.id === category.parent_id);
-    return parent ? `${parent.name} > ${category.name}` : category.name;
+    // Filtrar subcategorias da categoria pai selecionada
+    const subs = categories.filter(cat => cat.parent_id === parentId);
+    setSubCategories(subs);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -309,25 +328,46 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
           )}
 
           <div className="space-y-2">
-            <Label>Categoria</Label>
+            <Label>Categoria Principal</Label>
             <Select
-              value={formData.category_id}
-              onValueChange={(value) =>
-                setFormData({ ...formData, category_id: value })
-              }
+              value={selectedParentId}
+              onValueChange={handleParentCategoryChange}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecione..." />
+                <SelectValue placeholder="Selecione a categoria..." />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((cat) => (
+                {parentCategories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
-                    {getCategoryDisplayName(cat)}
+                    {cat.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+
+          {selectedParentId && (
+            <div className="space-y-2">
+              <Label>Subcategoria</Label>
+              <Select
+                value={formData.category_id}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, category_id: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a subcategoria..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {subCategories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {formData.type === "expense" && (
             <div className="space-y-3 p-4 bg-muted/50 rounded-lg border-2 border-muted">
