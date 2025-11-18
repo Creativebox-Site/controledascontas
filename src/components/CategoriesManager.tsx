@@ -16,6 +16,7 @@ interface Category {
   name: string;
   type: string;
   color: string;
+  parent_id: string | null;
 }
 
 interface CategoriesManagerProps {
@@ -31,6 +32,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
     name: "",
     type: "expense",
     color: "#10b981",
+    parent_id: null as string | null,
   });
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
       .from("categories")
       .select("*")
       .eq("user_id", userId)
-      .order("type", { ascending: false })
+      .order("parent_id", { ascending: true, nullsFirst: true })
       .order("name");
 
     if (error) {
@@ -66,7 +68,12 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
     if (editingId) {
       const { error } = await supabase
         .from("categories")
-        .update(formData)
+        .update({
+          name: formData.name,
+          type: formData.type,
+          color: formData.color,
+          parent_id: formData.parent_id,
+        })
         .eq("id", editingId);
 
       if (error) {
@@ -79,7 +86,10 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
     } else {
       const { error } = await supabase.from("categories").insert([
         {
-          ...formData,
+          name: formData.name,
+          type: formData.type,
+          color: formData.color,
+          parent_id: formData.parent_id,
           user_id: userId,
         },
       ]);
@@ -99,6 +109,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
       name: "",
       type: "expense",
       color: "#10b981",
+      parent_id: null,
     });
     setShowForm(false);
     setEditingId(null);
@@ -109,6 +120,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
       name: category.name,
       type: category.type,
       color: category.color || "#10b981",
+      parent_id: category.parent_id,
     });
     setEditingId(category.id);
     setShowForm(true);
@@ -135,7 +147,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
       name: row.nome,
       type: row.tipo === "receita" ? "income" : "expense",
       is_essential: row.essencial,
-      color: row.cor || "#6b7280"
+      color: row.cor || "#10b981",
     }));
 
     const { error } = await supabase
@@ -143,243 +155,387 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
       .insert(categoriesToInsert);
 
     if (error) {
+      toast.error("Erro ao importar categorias");
       throw error;
+    } else {
+      toast.success(`${data.length} categorias importadas!`);
+      loadCategories();
     }
-
-    loadCategories();
   };
 
-  const incomeCategories = categories.filter((c) => c.type === "income");
-  const expenseCategories = categories.filter((c) => c.type === "expense");
-  const investmentCategories = categories.filter((c) => c.type === "investment");
+  const parentCategories = categories.filter((c) => !c.parent_id);
+  const getSubcategories = (parentId: string) =>
+    categories.filter((c) => c.parent_id === parentId);
+
+  const expenseCategories = parentCategories.filter((c) => c.type === "expense");
+  const incomeCategories = parentCategories.filter((c) => c.type === "income");
+  const investmentCategories = parentCategories.filter((c) => c.type === "investment");
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-xl sm:text-2xl font-bold">Gerenciar Categorias</h2>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <Button 
-            variant="outline" 
-            onClick={() => setShowBulkImport(!showBulkImport)}
-            className="w-full sm:w-auto text-xs sm:text-sm"
-          >
-            <Upload className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-            <span className="whitespace-nowrap">Inserir Dados em Lote</span>
-          </Button>
-          <Button 
-            onClick={() => setShowForm(!showForm)}
-            className="w-full sm:w-auto text-xs sm:text-sm"
-          >
-            <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-            <span className="whitespace-nowrap">Nova Categoria</span>
-          </Button>
-        </div>
+      <div className="flex gap-2 justify-end">
+        <Button onClick={() => setShowForm(true)} variant="outline">
+          <Plus className="h-4 w-4 mr-2" />
+          Nova Categoria
+        </Button>
+        <Button onClick={() => setShowBulkImport(true)} variant="outline">
+          <Upload className="h-4 w-4 mr-2" />
+          Importar em Lote
+        </Button>
       </div>
 
-      {showBulkImport && (
-        <BulkImport
-          type="categories"
-          onImport={handleBulkImport}
-          onClose={() => setShowBulkImport(false)}
-        />
-      )}
-
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-2xl w-[95vw] sm:w-full">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-lg sm:text-xl">{editingId ? "Editar Categoria" : "Nova Categoria"}</DialogTitle>
+            <DialogTitle>
+              {editingId ? "Editar Categoria" : "Nova Categoria"}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm">Nome</Label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  placeholder="Ex: Alimentação"
-                  className="text-sm"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm">Tipo</Label>
-                <Select
-                  value={formData.type}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, type: value })
-                  }
-                >
-                  <SelectTrigger className="text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="income">Receita</SelectItem>
-                    <SelectItem value="expense">Despesa</SelectItem>
-                    <SelectItem value="investment">Investimento</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
             <div className="space-y-2">
-              <Label className="text-sm">Cor</Label>
+              <Label htmlFor="name">Nome</Label>
               <Input
-                type="color"
-                value={formData.color}
+                id="name"
+                value={formData.name}
                 onChange={(e) =>
-                  setFormData({ ...formData, color: e.target.value })
+                  setFormData({ ...formData, name: e.target.value })
                 }
-                className="h-10"
+                placeholder="Nome da categoria"
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button type="submit" className="flex-1 text-sm">
-                {editingId ? "Atualizar" : "Criar"}
-              </Button>
-              <Button type="button" variant="outline" onClick={resetForm} className="flex-1 text-sm">
+            <div className="space-y-2">
+              <Label htmlFor="type">Tipo</Label>
+              <Select
+                value={formData.type}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, type: value, parent_id: null })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="expense">Despesa</SelectItem>
+                  <SelectItem value="income">Receita</SelectItem>
+                  <SelectItem value="investment">Investimento</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="parent">Categoria Pai (Opcional)</Label>
+              <Select
+                value={formData.parent_id || "none"}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, parent_id: value === "none" ? null : value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Nenhuma (Categoria Principal)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhuma (Categoria Principal)</SelectItem>
+                  {parentCategories
+                    .filter((c) => c.type === formData.type && c.id !== editingId)
+                    .map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="color">Cor</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  id="color"
+                  type="color"
+                  value={formData.color}
+                  onChange={(e) =>
+                    setFormData({ ...formData, color: e.target.value })
+                  }
+                  className="w-20 h-10"
+                />
+                <Input
+                  type="text"
+                  value={formData.color}
+                  onChange={(e) =>
+                    setFormData({ ...formData, color: e.target.value })
+                  }
+                  placeholder="#10b981"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <Button type="button" variant="outline" onClick={resetForm}>
                 Cancelar
+              </Button>
+              <Button type="submit">
+                {editingId ? "Atualizar" : "Criar"}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
-      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
+      <Dialog open={showBulkImport} onOpenChange={setShowBulkImport}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <BulkImport
+            type="categories"
+            onImport={handleBulkImport}
+            onClose={() => setShowBulkImport(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <div className="grid gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-success text-base sm:text-lg">Receitas</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              Despesas
+              <Badge variant="secondary">{expenseCategories.length}</Badge>
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {incomeCategories.map((category) => (
-              <div
-                key={category.id}
-                className="flex items-center justify-between p-2 sm:p-3 rounded-lg border"
-              >
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                  <div
-                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: category.color }}
-                  />
-                  <span className="font-medium text-sm sm:text-base truncate">{category.name}</span>
-                </div>
-                <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(category)}
-                    className="h-8 w-8"
-                  >
-                    <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(category.id)}
-                    className="h-8 w-8"
-                  >
-                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-            {incomeCategories.length === 0 && (
-              <p className="text-center text-muted-foreground py-4 text-xs sm:text-sm">
-                Nenhuma categoria de receita
-              </p>
-            )}
+          <CardContent>
+            <div className="space-y-4">
+              {expenseCategories.map((category) => {
+                const subcategories = getSubcategories(category.id);
+                return (
+                  <div key={category.id} className="space-y-2">
+                    <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <span className="font-medium">{category.name}</span>
+                        {subcategories.length > 0 && (
+                          <Badge variant="secondary">{subcategories.length}</Badge>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(category)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(category.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    {subcategories.length > 0 && (
+                      <div className="ml-8 space-y-2">
+                        {subcategories.map((sub) => (
+                          <div
+                            key={sub.id}
+                            className="flex items-center justify-between p-2 bg-background rounded-lg border"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: sub.color }}
+                              />
+                              <span className="text-sm">{sub.name}</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(sub)}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(sub.id)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-destructive text-base sm:text-lg">Despesas</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              Receitas
+              <Badge variant="secondary">{incomeCategories.length}</Badge>
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {expenseCategories.map((category) => (
-              <div
-                key={category.id}
-                className="flex items-center justify-between p-2 sm:p-3 rounded-lg border"
-              >
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                  <div
-                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: category.color }}
-                  />
-                  <span className="font-medium text-sm sm:text-base truncate">{category.name}</span>
-                </div>
-                <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(category)}
-                    className="h-8 w-8"
-                  >
-                    <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(category.id)}
-                    className="h-8 w-8"
-                  >
-                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-            {expenseCategories.length === 0 && (
-              <p className="text-center text-muted-foreground py-4 text-xs sm:text-sm">
-                Nenhuma categoria de despesa
-              </p>
-            )}
+          <CardContent>
+            <div className="space-y-4">
+              {incomeCategories.map((category) => {
+                const subcategories = getSubcategories(category.id);
+                return (
+                  <div key={category.id} className="space-y-2">
+                    <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <span className="font-medium">{category.name}</span>
+                        {subcategories.length > 0 && (
+                          <Badge variant="secondary">{subcategories.length}</Badge>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(category)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(category.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    {subcategories.length > 0 && (
+                      <div className="ml-8 space-y-2">
+                        {subcategories.map((sub) => (
+                          <div
+                            key={sub.id}
+                            className="flex items-center justify-between p-2 bg-background rounded-lg border"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: sub.color }}
+                              />
+                              <span className="text-sm">{sub.name}</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(sub)}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(sub.id)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-primary text-base sm:text-lg">Investimentos</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              Investimentos
+              <Badge variant="secondary">{investmentCategories.length}</Badge>
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {investmentCategories.map((category) => (
-              <div
-                key={category.id}
-                className="flex items-center justify-between p-2 sm:p-3 rounded-lg border"
-              >
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                  <div
-                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: category.color }}
-                  />
-                  <span className="font-medium text-sm sm:text-base truncate">{category.name}</span>
-                </div>
-                <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(category)}
-                    className="h-8 w-8"
-                  >
-                    <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(category.id)}
-                    className="h-8 w-8"
-                  >
-                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-            {investmentCategories.length === 0 && (
-              <p className="text-center text-muted-foreground py-4 text-xs sm:text-sm">
-                Nenhuma categoria de investimento
-              </p>
-            )}
+          <CardContent>
+            <div className="space-y-4">
+              {investmentCategories.map((category) => {
+                const subcategories = getSubcategories(category.id);
+                return (
+                  <div key={category.id} className="space-y-2">
+                    <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <span className="font-medium">{category.name}</span>
+                        {subcategories.length > 0 && (
+                          <Badge variant="secondary">{subcategories.length}</Badge>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(category)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(category.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    {subcategories.length > 0 && (
+                      <div className="ml-8 space-y-2">
+                        {subcategories.map((sub) => (
+                          <div
+                            key={sub.id}
+                            className="flex items-center justify-between p-2 bg-background rounded-lg border"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: sub.color }}
+                              />
+                              <span className="text-sm">{sub.name}</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(sub)}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(sub.id)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
       </div>
