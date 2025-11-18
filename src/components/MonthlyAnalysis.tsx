@@ -184,8 +184,5 @@ export const MonthlyAnalysis = ({
   if (loading) {
     return;
   }
-  return <Card>
-      
-      
-    </Card>;
+  return;
 };
