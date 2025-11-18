@@ -445,6 +445,7 @@ export type Database = {
           date: string | null
           description: string
           id: string
+          is_essential: boolean | null
           series_id: string | null
           type: string
           updated_at: string | null
@@ -458,6 +459,7 @@ export type Database = {
           date?: string | null
           description: string
           id?: string
+          is_essential?: boolean | null
           series_id?: string | null
           type: string
           updated_at?: string | null
@@ -471,6 +473,7 @@ export type Database = {
           date?: string | null
           description?: string
           id?: string
+          is_essential?: boolean | null
           series_id?: string | null
           type?: string
           updated_at?: string | null
