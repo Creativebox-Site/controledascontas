@@ -15,7 +15,6 @@ interface Category {
   id: string;
   name: string;
   type: string;
-  is_essential: boolean;
   color: string;
 }
 
@@ -31,7 +30,6 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
   const [formData, setFormData] = useState({
     name: "",
     type: "expense",
-    is_essential: false,
     color: "#10b981",
   });
 
@@ -100,7 +98,6 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
     setFormData({
       name: "",
       type: "expense",
-      is_essential: false,
       color: "#10b981",
     });
     setShowForm(false);
@@ -111,7 +108,6 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
     setFormData({
       name: category.name,
       type: category.type,
-      is_essential: category.is_essential,
       color: category.color || "#10b981",
     });
     setEditingId(category.id);
@@ -227,33 +223,16 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm">Cor</Label>
-                <Input
-                  type="color"
-                  value={formData.color}
-                  onChange={(e) =>
-                    setFormData({ ...formData, color: e.target.value })
-                  }
-                  className="h-10"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm">Essencial</Label>
-                <div className="flex items-center gap-2 h-10">
-                  <input
-                    type="checkbox"
-                    checked={formData.is_essential}
-                    onChange={(e) =>
-                      setFormData({ ...formData, is_essential: e.target.checked })
-                    }
-                    className="h-4 w-4"
-                  />
-                  <label className="text-xs sm:text-sm">Despesa essencial</label>
-                </div>
-              </div>
+            <div className="space-y-2">
+              <Label className="text-sm">Cor</Label>
+              <Input
+                type="color"
+                value={formData.color}
+                onChange={(e) =>
+                  setFormData({ ...formData, color: e.target.value })
+                }
+                className="h-10"
+              />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2">
@@ -329,12 +308,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
                     className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0"
                     style={{ backgroundColor: category.color }}
                   />
-                  <div className="flex flex-col min-w-0 flex-1">
-                    <span className="font-medium text-sm sm:text-base truncate">{category.name}</span>
-                    {category.is_essential && (
-                      <span className="text-xs text-muted-foreground">Essencial</span>
-                    )}
-                  </div>
+                  <span className="font-medium text-sm sm:text-base truncate">{category.name}</span>
                 </div>
                 <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
                   <Button
