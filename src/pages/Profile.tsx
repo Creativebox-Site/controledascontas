@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "lucide-react";
+import { TrustedDevices } from "@/components/TrustedDevices";
 
 interface ProfileProps {
   userId?: string;
@@ -121,6 +122,10 @@ export const Profile = ({ userId }: ProfileProps) => {
           </div>
         </CardContent>
       </Card>
+
+      <div className="max-w-2xl">
+        <TrustedDevices />
+      </div>
     </div>
   );
 };
