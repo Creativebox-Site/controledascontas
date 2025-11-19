@@ -57,8 +57,83 @@ export function FinancingForm({ onCalculate }: FinancingFormProps) {
         </CardGlassDescription>
       </CardGlassHeader>
       <CardGlassContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-...
+        <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
+          <div className="space-y-2">
+            <Label htmlFor="type">Tipo de Financiamento</Label>
+            <Select value={type} onValueChange={(value) => setType(value as FinancingType)}>
+              <SelectTrigger id="type">
+                <SelectValue placeholder="Selecione o tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="vehicle">Veículo</SelectItem>
+                <SelectItem value="property">Imóvel</SelectItem>
+                <SelectItem value="personal">Pessoal</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="assetValue">Valor do Bem (R$)</Label>
+            <Input
+              id="assetValue"
+              type="number"
+              step="0.01"
+              placeholder="Ex: 50000"
+              value={assetValue}
+              onChange={(e) => setAssetValue(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="downPayment">Entrada (R$)</Label>
+            <Input
+              id="downPayment"
+              type="number"
+              step="0.01"
+              placeholder="Ex: 10000"
+              value={downPayment}
+              onChange={(e) => setDownPayment(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="monthlyPayment">Valor da Parcela (R$)</Label>
+            <Input
+              id="monthlyPayment"
+              type="number"
+              step="0.01"
+              placeholder="Ex: 1200"
+              value={monthlyPayment}
+              onChange={(e) => setMonthlyPayment(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="numberOfPayments">Número de Parcelas</Label>
+            <Input
+              id="numberOfPayments"
+              type="number"
+              placeholder="Ex: 48"
+              value={numberOfPayments}
+              onChange={(e) => setNumberOfPayments(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="knownRate">Taxa de Juros Conhecida (% ao mês) - Opcional</Label>
+            <Input
+              id="knownRate"
+              type="number"
+              step="0.01"
+              placeholder="Ex: 1.5"
+              value={knownRate}
+              onChange={(e) => setKnownRate(e.target.value)}
+            />
+          </div>
+
           <ButtonPremium type="submit" variant="primary" className="w-full" disabled={!isValid}>
             <Calculator className="w-4 h-4 mr-2" />
             Analisar Financiamento
