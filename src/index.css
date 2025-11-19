@@ -418,4 +418,42 @@ All colors MUST be HSL.
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
   }
+
+  /* 3D Transform utilities */
+  .rotate-x-1 {
+    transform: rotateX(1deg);
+  }
+
+  .rotate-x-2 {
+    transform: rotateX(2deg);
+  }
+
+  .rotate-x-3 {
+    transform: rotateX(3deg);
+  }
+
+  .hover\:rotate-x-1:hover {
+    transform: rotateX(1deg);
+  }
+
+  .hover\:rotate-x-2:hover {
+    transform: rotateX(2deg);
+  }
+
+  .hover\:rotate-x-3:hover {
+    transform: rotateX(3deg);
+  }
+
+  .translate-z-1 {
+    transform: translateZ(1px);
+  }
+
+  .translate-z-5 {
+    transform: translateZ(5px);
+  }
+
+  /* Rounded inherit */
+  .rounded-inherit {
+    border-radius: inherit;
+  }
 }
