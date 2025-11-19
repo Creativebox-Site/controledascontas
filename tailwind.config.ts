@@ -27,6 +27,27 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        'bg-elevated': {
+          '1': "hsl(var(--bg-elevated-1))",
+          '2': "hsl(var(--bg-elevated-2))",
+          '3': "hsl(var(--bg-elevated-3))",
+        },
+        'primary-alpha': {
+          '10': "var(--primary-alpha-10)",
+          '20': "var(--primary-alpha-20)",
+          '30': "var(--primary-alpha-30)",
+          '50': "var(--primary-alpha-50)",
+        },
+        'black-alpha': {
+          '5': "var(--black-alpha-5)",
+          '10': "var(--black-alpha-10)",
+          '20': "var(--black-alpha-20)",
+        },
+        'white-alpha': {
+          '10': "var(--white-alpha-10)",
+          '20': "var(--white-alpha-20)",
+          '80': "var(--white-alpha-80)",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -114,6 +135,52 @@ export default {
       minHeight: {
         'touch': 'var(--touch-target-min)',
       },
+      backgroundImage: {
+        'gradient-primary': 'var(--gradient-primary)',
+        'gradient-success': 'var(--gradient-success)',
+        'gradient-sunset': 'var(--gradient-sunset)',
+        'gradient-ocean': 'var(--gradient-ocean)',
+        'gradient-glass': 'var(--gradient-glass)',
+        'gradient-glow-primary': 'var(--gradient-glow-primary)',
+        'gradient-glow-success': 'var(--gradient-glow-success)',
+        'gradient-rainbow': 'var(--gradient-rainbow)',
+        'gradient-primary-spin': 'var(--gradient-primary-spin)',
+      },
+      boxShadow: {
+        'z1': 'var(--shadow-z1)',
+        'z2': 'var(--shadow-z2)',
+        'z3': 'var(--shadow-z3)',
+        'z4': 'var(--shadow-z4)',
+        'z5': 'var(--shadow-z5)',
+        'z6': 'var(--shadow-z6)',
+        'glow-primary': 'var(--shadow-glow-primary)',
+        'glow-success': 'var(--shadow-glow-success)',
+        'glow-warning': 'var(--shadow-glow-warning)',
+        'inner-subtle': 'var(--shadow-inner-subtle)',
+        'inner-strong': 'var(--shadow-inner-strong)',
+        'colored-primary': 'var(--shadow-colored-primary)',
+        'colored-success': 'var(--shadow-colored-success)',
+      },
+      blur: {
+        'xs': 'var(--blur-sm)',
+        'DEFAULT': 'var(--blur-base)',
+        'md': 'var(--blur-md)',
+        'lg': 'var(--blur-lg)',
+        'xl': 'var(--blur-xl)',
+      },
+      backdropBlur: {
+        'glass-light': 'var(--glass-backdrop-light)',
+        'glass-dark': 'var(--glass-backdrop-dark)',
+      },
+      transitionDuration: {
+        'fast': '150ms',
+        'DEFAULT': '200ms',
+        'slow': '300ms',
+      },
+      transitionTimingFunction: {
+        'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'bounce': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+      },
       keyframes: {
         "accordion-down": {
           from: {
@@ -149,5 +216,84 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    function({ addUtilities }: any) {
+      const newUtilities = {
+        '.glass': {
+          'background': 'var(--glass-bg-light)',
+          'backdrop-filter': 'var(--glass-backdrop-light)',
+          '-webkit-backdrop-filter': 'var(--glass-backdrop-light)',
+          'border': '1px solid var(--glass-border-light)',
+        },
+        '.dark .glass': {
+          'background': 'var(--glass-bg-dark)',
+          'backdrop-filter': 'var(--glass-backdrop-dark)',
+          '-webkit-backdrop-filter': 'var(--glass-backdrop-dark)',
+          'border-color': 'var(--glass-border-dark)',
+        },
+        '.glass-strong': {
+          'background': 'var(--white-alpha-20)',
+          'backdrop-filter': 'blur(16px) saturate(180%)',
+          '-webkit-backdrop-filter': 'blur(16px) saturate(180%)',
+          'border': '1px solid var(--glass-border-light)',
+        },
+        '.dark .glass-strong': {
+          'background': 'var(--black-alpha-20)',
+          'backdrop-filter': 'blur(20px) saturate(200%)',
+          '-webkit-backdrop-filter': 'blur(20px) saturate(200%)',
+          'border-color': 'var(--glass-border-dark)',
+        },
+        '.preserve-3d': {
+          'transform-style': 'preserve-3d',
+        },
+        '.perspective': {
+          'perspective': '1000px',
+        },
+        '.perspective-lg': {
+          'perspective': '2000px',
+        },
+        '.backface-hidden': {
+          'backface-visibility': 'hidden',
+        },
+        '.elevation-1': {
+          'box-shadow': 'var(--shadow-z1)',
+        },
+        '.elevation-2': {
+          'box-shadow': 'var(--shadow-z2)',
+        },
+        '.elevation-3': {
+          'box-shadow': 'var(--shadow-z3)',
+        },
+        '.elevation-4': {
+          'box-shadow': 'var(--shadow-z4)',
+        },
+        '.elevation-5': {
+          'box-shadow': 'var(--shadow-z5)',
+        },
+        '.elevation-6': {
+          'box-shadow': 'var(--shadow-z6)',
+        },
+        '.glow-hover': {
+          'transition': 'box-shadow var(--transition-base)',
+        },
+        '.glow-hover:hover': {
+          'box-shadow': 'var(--shadow-glow-primary)',
+        },
+        '.text-gradient-primary': {
+          'background': 'var(--gradient-primary)',
+          'background-clip': 'text',
+          '-webkit-background-clip': 'text',
+          '-webkit-text-fill-color': 'transparent',
+        },
+        '.text-gradient-success': {
+          'background': 'var(--gradient-success)',
+          'background-clip': 'text',
+          '-webkit-background-clip': 'text',
+          '-webkit-text-fill-color': 'transparent',
+        },
+      }
+      addUtilities(newUtilities, ['responsive', 'hover', 'dark'])
+    }
+  ],
 } satisfies Config;
