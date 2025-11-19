@@ -366,12 +366,12 @@ export const FinancialChart = ({
         <DateRangeFilter onFilterChange={setDateRange} />
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2">
         {/* Card 1: Saldo Disponível */}
         
 
         {/* Card 2: Fluxo de Caixa do Período Filtrado */}
-        <CardGlass className="border-primary/20" padding="sm">
+        <CardGlass className="border-primary/20">
           <CardGlassHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
             <CardGlassTitle className="text-xs font-medium line-clamp-2">Fluxo de Caixa (Período Filtrado)</CardGlassTitle>
             <TrendingUp className="h-4 w-4 text-primary flex-shrink-0" />
@@ -398,7 +398,7 @@ export const FinancialChart = ({
         </CardGlass>
 
         {/* Card 3: Próximos Pagamentos */}
-        <CardGlass className="border-warning/20 bg-warning/5" padding="sm">
+        <CardGlass className="border-warning/20 bg-warning/5">
           <CardGlassHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
             <CardGlassTitle className="text-xs font-medium line-clamp-2">Contas a Pagar Pendentes</CardGlassTitle>
             <AlertCircle className="h-4 w-4 text-warning flex-shrink-0" />
@@ -416,7 +416,7 @@ export const FinancialChart = ({
         </CardGlass>
 
         {/* Card 4: Patrimônio Investido */}
-        <CardGlass className="border-primary/20" padding="sm">
+        <CardGlass className="border-primary/20">
           <CardGlassHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
             <CardGlassTitle className="text-xs font-medium line-clamp-2">Patrimônio Investido</CardGlassTitle>
             <PiggyBank className="h-4 w-4 text-primary flex-shrink-0" />
@@ -436,7 +436,7 @@ export const FinancialChart = ({
         </CardGlass>
 
         {/* Card 5: Metas e Sonhos */}
-        <CardGlass className="border-primary/20 bg-primary/5" padding="sm">
+        <CardGlass className="border-primary/20 bg-primary/5">
           <CardGlassHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
             <CardGlassTitle className="text-xs font-medium line-clamp-2">Metas e Sonhos</CardGlassTitle>
             <Target className="h-4 w-4 text-primary flex-shrink-0" />
