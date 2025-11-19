@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Auth from "./pages/Auth";
 import Install from "./pages/Install";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 import { MainLayout } from "./layouts/MainLayout";
 import { CurrencyProvider, useCurrency } from "./contexts/CurrencyContext";
@@ -80,9 +81,10 @@ const App = () => (
         <PWAInstallPrompt />
         <CurrencyProvider>
           <Routes>
-            {/* Rota pública de autenticação */}
+            {/* Rotas públicas */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/install" element={<Install />} />
+            <Route path="/onboarding" element={<Onboarding />} />
 
             {/* Rotas protegidas com MainLayout */}
             <Route element={<MainLayout />}>

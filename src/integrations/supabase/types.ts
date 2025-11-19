@@ -424,6 +424,7 @@ export type Database = {
           id: string
           neighborhood: string | null
           number: string | null
+          onboarding_completed: boolean | null
           phone: string | null
           preferred_currency: string | null
           state: string | null
@@ -443,6 +444,7 @@ export type Database = {
           id: string
           neighborhood?: string | null
           number?: string | null
+          onboarding_completed?: boolean | null
           phone?: string | null
           preferred_currency?: string | null
           state?: string | null
@@ -462,6 +464,7 @@ export type Database = {
           id?: string
           neighborhood?: string | null
           number?: string | null
+          onboarding_completed?: boolean | null
           phone?: string | null
           preferred_currency?: string | null
           state?: string | null
