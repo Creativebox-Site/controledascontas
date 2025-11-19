@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Plus } from "lucide-react";
 
 interface EmergencyFundProps {
   userId?: string;
@@ -10,9 +12,11 @@ interface EmergencyFundProps {
 }
 
 export const EmergencyFund = ({ userId, currency }: EmergencyFundProps) => {
+  const navigate = useNavigate();
   const [essentialExpenses, setEssentialExpenses] = useState(0);
   const [currentReserve, setCurrentReserve] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [emergencyCategoryId, setEmergencyCategoryId] = useState<string | null>(null);
 
   useEffect(() => {
     if (userId) {
@@ -60,11 +64,13 @@ export const EmergencyFund = ({ userId, currency }: EmergencyFundProps) => {
       .from("categories")
       .select("id")
       .eq("user_id", userId)
-      .eq("name", "Reserva de Emergência")
+      .eq("name", "Reserva de emergência")
       .eq("type", "investment")
       .maybeSingle();
 
     if (investmentCategory) {
+      setEmergencyCategoryId(investmentCategory.id);
+      
       const { data: reserves } = await supabase
         .from("transactions")
         .select("amount")
@@ -142,10 +148,21 @@ export const EmergencyFund = ({ userId, currency }: EmergencyFundProps) => {
         </div>
 
         <div className="pt-2 border-t">
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-sm mb-3">
             <span className="text-muted-foreground">Despesas essenciais (mês)</span>
             <span className="font-medium">{formatCurrency(essentialExpenses)}</span>
           </div>
+          
+          <Button 
+            className="w-full" 
+            size="sm"
+            onClick={() => navigate('/dashboard/investments', { 
+              state: { preselectedCategory: emergencyCategoryId } 
+            })}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Adicionar à Reserva
+          </Button>
         </div>
       </CardContent>
     </Card>
