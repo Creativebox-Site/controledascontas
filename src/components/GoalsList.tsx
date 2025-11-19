@@ -4,9 +4,9 @@ import { CardGlass, CardGlassContent, CardGlassHeader, CardGlassTitle } from "@/
 import { ButtonPremium } from "@/components/ui/button-premium";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { InputGlass } from "@/components/ui/input-glass";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { TextareaGlass } from "@/components/ui/textarea-glass";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollIndicator } from "@/components/ui/scroll-indicator";
 import { GoalContributionDialog } from "@/components/GoalContributionDialog";
@@ -391,7 +391,7 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
 
             <div>
               <Label>Nome da Meta *</Label>
-              <Input
+              <InputGlass
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Ex: Comprar casa própria"
@@ -401,7 +401,7 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
 
             <div>
               <Label>Descrição</Label>
-              <Textarea
+              <TextareaGlass
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Descreva seu sonho..."
@@ -415,7 +415,7 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                   R$
                 </span>
-                <Input
+                <InputGlass
                   type="text"
                   value={formData.target_amount}
                   onChange={(e) => {
@@ -435,7 +435,7 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                   R$
                 </span>
-                <Input
+                <InputGlass
                   type="text"
                   value={formData.current_amount}
                   onChange={(e) => {
@@ -450,7 +450,7 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
 
             <div>
               <Label>Data Alvo *</Label>
-              <Input
+              <InputGlass
                 type="date"
                 value={formData.target_date}
                 onChange={(e) => setFormData({ ...formData, target_date: e.target.value })}

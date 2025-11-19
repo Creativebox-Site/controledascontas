@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { ButtonPremium } from "@/components/ui/button-premium";
-import { Input } from "@/components/ui/input";
+import { InputGlass } from "@/components/ui/input-glass";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { TextareaGlass } from "@/components/ui/textarea-glass";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
@@ -228,7 +228,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
         {/* Título */}
         <div className="md:col-span-2 space-y-2">
           <Label htmlFor="title">Título *</Label>
-          <Input
+          <InputGlass
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -272,7 +272,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
         {/* Valor */}
         <div>
           <Label htmlFor="value">Valor ({currency}) *</Label>
-          <Input
+          <InputGlass
             id="value"
             value={displayValue ? formatCurrency(displayValue) : ""}
             onChange={handleAmountChange}
@@ -369,7 +369,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
         {/* Destinatário/Pagador */}
         <div>
           <Label htmlFor="payee">Destinatário/Pagador</Label>
-          <Input
+          <InputGlass
             id="payee"
             value={payee}
             onChange={(e) => setPayee(e.target.value)}
@@ -423,7 +423,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
       {/* Notas */}
       <div>
         <Label htmlFor="notes">Notas</Label>
-        <Textarea
+        <TextareaGlass
           id="notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}

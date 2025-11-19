@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ButtonPremium } from "@/components/ui/button-premium";
 import { CardGlass, CardGlassContent, CardGlassHeader, CardGlassTitle } from "@/components/ui/card-glass";
-import { Input } from "@/components/ui/input";
+import { InputGlass } from "@/components/ui/input-glass";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -312,7 +312,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
           <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
             <div className="space-y-2">
               <Label htmlFor="name">Nome</Label>
-              <Input
+              <InputGlass
                 id="name"
                 value={formData.name}
                 onChange={(e) =>
@@ -368,7 +368,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
             <div className="space-y-2">
               <Label htmlFor="color">Cor</Label>
               <div className="flex gap-2 items-center">
-                <Input
+                <InputGlass
                   id="color"
                   type="color"
                   value={formData.color}
@@ -377,7 +377,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
                   }
                   className="w-20 h-10"
                 />
-                <Input
+                <InputGlass
                   type="text"
                   value={formData.color}
                   onChange={(e) =>
