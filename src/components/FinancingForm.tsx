@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { CardGlass, CardGlassContent, CardGlassDescription, CardGlassHeader, CardGlassTitle } from "@/components/ui/card-glass";
-import { Input } from "@/components/ui/input";
+import { InputGlass } from "@/components/ui/input-glass";
 import { Label } from "@/components/ui/label";
 import { ButtonPremium } from "@/components/ui/button-premium";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -74,7 +74,7 @@ export function FinancingForm({ onCalculate }: FinancingFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="assetValue">Valor do Bem (R$)</Label>
-            <Input
+            <InputGlass
               id="assetValue"
               type="number"
               step="0.01"
@@ -87,7 +87,7 @@ export function FinancingForm({ onCalculate }: FinancingFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="downPayment">Entrada (R$)</Label>
-            <Input
+            <InputGlass
               id="downPayment"
               type="number"
               step="0.01"
@@ -99,7 +99,7 @@ export function FinancingForm({ onCalculate }: FinancingFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="monthlyPayment">Valor da Parcela (R$)</Label>
-            <Input
+            <InputGlass
               id="monthlyPayment"
               type="number"
               step="0.01"
@@ -112,7 +112,7 @@ export function FinancingForm({ onCalculate }: FinancingFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="numberOfPayments">Número de Parcelas</Label>
-            <Input
+            <InputGlass
               id="numberOfPayments"
               type="number"
               placeholder="Ex: 48"
@@ -124,7 +124,7 @@ export function FinancingForm({ onCalculate }: FinancingFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="knownRate">Taxa de Juros Conhecida (% ao mês) - Opcional</Label>
-            <Input
+            <InputGlass
               id="knownRate"
               type="number"
               step="0.01"
