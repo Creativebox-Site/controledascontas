@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ButtonPremium } from "@/components/ui/button-premium";
-import { Input } from "@/components/ui/input";
+import { InputGlass } from "@/components/ui/input-glass";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -422,7 +422,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                   R$
                 </span>
-                <Input
+                <InputGlass
                   type="text"
                   inputMode="numeric"
                   placeholder="0,00"
@@ -454,7 +454,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
 
           <div className="space-y-2">
             <Label>Descrição</Label>
-            <Input
+            <InputGlass
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
@@ -465,7 +465,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
 
           <div className="space-y-2">
             <Label>Data de Início</Label>
-            <Input
+            <InputGlass
               type="date"
               value={formData.date}
               onChange={(e) =>
@@ -515,7 +515,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
 
                   <div className="space-y-2">
                     <Label>Repetições</Label>
-                    <Input
+                    <InputGlass
                       type="number"
                       min="2"
                       max="120"
