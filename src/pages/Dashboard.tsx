@@ -22,6 +22,7 @@ import { Financing } from "@/pages/Financing";
 import { Settings } from "@/pages/Settings";
 import { Profile } from "@/pages/Profile";
 import { PaymentItems } from "@/pages/PaymentItems";
+import { PremiumComponentsDemo } from "@/components/demos/PremiumComponentsDemo";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -116,6 +117,7 @@ const Dashboard = () => {
               <Route path="financing" element={<Financing currency={preferredCurrency} />} />
               <Route path="profile" element={<Profile userId={user?.id} />} />
               <Route path="settings" element={<Settings userId={user?.id} />} />
+              <Route path="premium-demo" element={<PremiumComponentsDemo />} />
             </Routes>
           </main>
         </div>
