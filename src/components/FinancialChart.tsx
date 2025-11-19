@@ -408,7 +408,7 @@ export const FinancialChart = ({
             <p className="text-xs sm:text-sm text-muted-foreground">
               {upcomingPaymentsCount} {upcomingPaymentsCount === 1 ? "Conta Pendente" : "Contas Pendentes"}
             </p>
-            <ButtonPremium variant="primary" size="sm" className="w-full border-warning text-warning hover:bg-warning hover:text-warning-foreground text-xs sm:text-sm whitespace-normal h-auto py-2" onClick={() => navigate("/dashboard/payment-items")}>
+            <ButtonPremium variant="primary" size="sm" className="w-full text-xs sm:text-sm whitespace-normal h-auto py-2" onClick={() => navigate("/dashboard/payment-items")}>
               <CreditCard className="h-4 w-4 mr-1 flex-shrink-0" />
               <span>Gerenciar Pagamentos</span>
             </ButtonPremium>
