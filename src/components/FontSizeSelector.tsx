@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 type FontSize = "small" | "medium" | "large";
 
@@ -42,20 +43,28 @@ export const FontSizeSelector = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Type className="h-5 w-5" />
-          <span className="sr-only">Ajustar tamanho da fonte</span>
+        <Button 
+          variant="outline" 
+          className="gap-2 transition-all duration-300 hover:scale-105 hover:shadow-md"
+        >
+          <Type className="h-4 w-4" />
+          <span>Alterar tamanho da fonte</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="min-w-[200px]">
         {(Object.keys(fontSizeLabels) as FontSize[]).map((size) => (
           <DropdownMenuItem
             key={size}
             onClick={() => handleFontSizeChange(size)}
-            className={fontSize === size ? "bg-accent" : ""}
+            className={cn(
+              "cursor-pointer transition-all duration-200",
+              fontSize === size && "bg-accent font-semibold"
+            )}
           >
-            {fontSizeLabels[size]}
-            {size === "medium" && " (padrão)"}
+            <span className="flex items-center gap-2 w-full">
+              {fontSizeLabels[size]}
+              {size === "medium" && <span className="text-muted-foreground text-xs">(padrão)</span>}
+            </span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
