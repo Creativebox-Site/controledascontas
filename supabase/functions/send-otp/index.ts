@@ -259,7 +259,20 @@ Deno.serve(async (req) => {
     });
 
     if (!emailResponse.ok) {
-      console.error('Error sending email:', await emailResponse.text());
+      const errorData = await emailResponse.json();
+      console.error('Error sending email:', JSON.stringify(errorData));
+      
+      // Se for erro de validação do Resend (modo teste)
+      if (errorData.name === 'validation_error') {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Serviço de email em modo de teste. Verifique seu domínio no Resend.',
+            details: errorData.message 
+          }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ error: 'Erro ao enviar email' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

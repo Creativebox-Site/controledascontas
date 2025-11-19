@@ -8,6 +8,7 @@ import { ProfileMenu } from "@/components/ProfileMenu";
 import { AppearanceCustomizer } from "@/components/AppearanceCustomizer";
 import { CoverImage } from "@/components/CoverImage";
 import { EmailVerificationBanner } from "@/components/EmailVerificationBanner";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import logoCreativeBox from "@/assets/logo-creative-box.png";
 
@@ -75,6 +76,9 @@ export const MainLayout = () => {
           </main>
         </div>
       </div>
+      
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
     </SidebarProvider>
   );
 };
