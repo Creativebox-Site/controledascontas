@@ -251,11 +251,11 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center">
-            <div className="w-20 h-20 flex items-center justify-center">
+            <div className="w-20 h-20 flex items-center justify-center animate-fade-in">
               <img src={logoCreativeBox} alt="Creative Box Logo" className="w-full h-full object-contain" />
             </div>
           </div>
-          <CardTitle className="text-2xl">App Contas | Creative Box</CardTitle>
+          <CardTitle className="text-2xl animate-fade-in">App Contas | Creative Box</CardTitle>
           <CardDescription>Gerencie suas finanças de forma inteligente</CardDescription>
         </CardHeader>
         <CardContent>
