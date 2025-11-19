@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { ButtonPremium } from "@/components/ui/button-premium";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
 import { TransactionList } from "@/components/TransactionList";
@@ -18,10 +18,14 @@ export const Income = ({ userId, currency }: IncomeProps) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold">Receitas</h2>
-        <Button onClick={() => setShowTransactionForm(true)}>
-          <Plus className="w-4 h-4 mr-2" />
+        <ButtonPremium 
+          variant="success" 
+          size="md" 
+          onClick={() => setShowTransactionForm(true)}
+          leftIcon={<Plus className="w-4 h-4" />}
+        >
           Nova Receita
-        </Button>
+        </ButtonPremium>
       </div>
 
       <Dialog open={showTransactionForm} onOpenChange={setShowTransactionForm}>

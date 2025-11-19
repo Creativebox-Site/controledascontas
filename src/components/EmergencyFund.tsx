@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { CardGlass, CardGlassContent, CardGlassDescription, CardGlassHeader, CardGlassTitle } from "@/components/ui/card-glass";
+import { ButtonPremium } from "@/components/ui/button-premium";
 import { Progress } from "@/components/ui/progress";
 import { ShieldCheck, Plus } from "lucide-react";
 
@@ -101,29 +101,29 @@ export const EmergencyFund = ({ userId, currency }: EmergencyFundProps) => {
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="pt-6">
+      <CardGlass variant="light" elevation="medium">
+        <CardGlassContent className="pt-6">
           <div className="animate-pulse space-y-4">
             <div className="h-4 bg-muted rounded w-3/4"></div>
             <div className="h-8 bg-muted rounded"></div>
           </div>
-        </CardContent>
-      </Card>
+        </CardGlassContent>
+      </CardGlass>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <CardGlass variant="light" elevation="medium" effect="subtle">
+      <CardGlassHeader>
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-success" />
-          <CardTitle>Reserva de Emergência</CardTitle>
+          <CardGlassTitle>Reserva de Emergência</CardGlassTitle>
         </div>
-        <CardDescription>
+        <CardGlassDescription>
           Meta: 6 meses de despesas essenciais
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+        </CardGlassDescription>
+      </CardGlassHeader>
+      <CardGlassContent className="space-y-4">
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Progresso</span>
@@ -153,18 +153,19 @@ export const EmergencyFund = ({ userId, currency }: EmergencyFundProps) => {
             <span className="font-medium">{formatCurrency(essentialExpenses)}</span>
           </div>
           
-          <Button 
+          <ButtonPremium 
+            variant="success"
+            size="md"
             className="w-full" 
-            size="sm"
             onClick={() => navigate('/dashboard/investments', { 
               state: { preselectedCategory: emergencyCategoryId } 
             })}
+            leftIcon={<Plus className="w-4 h-4" />}
           >
-            <Plus className="w-4 h-4 mr-2" />
             Adicionar à Reserva
-          </Button>
+          </ButtonPremium>
         </div>
-      </CardContent>
-    </Card>
+      </CardGlassContent>
+    </CardGlass>
   );
 };
