@@ -1,3 +1,4 @@
+import { useState, useRef } from "react";
 import { GoalsList } from "@/components/GoalsList";
 import { GoalsInsights } from "@/components/GoalsInsights";
 import { GoalsInvestmentComparison } from "@/components/GoalsInvestmentComparison";
@@ -8,6 +9,13 @@ interface GoalsProps {
 }
 
 export const Goals = ({ userId, currency }: GoalsProps) => {
+  const [refreshKey, setRefreshKey] = useState(0);
+  const insightsRef = useRef<{ reload: () => void }>(null);
+
+  const handleGoalChange = () => {
+    setRefreshKey((k) => k + 1);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -17,8 +25,8 @@ export const Goals = ({ userId, currency }: GoalsProps) => {
         </p>
       </div>
 
-      <GoalsList userId={userId} currency={currency} />
-      <GoalsInsights userId={userId} currency={currency} />
+      <GoalsList userId={userId} currency={currency} onGoalChange={handleGoalChange} />
+      <GoalsInsights key={refreshKey} userId={userId} currency={currency} />
       <GoalsInvestmentComparison userId={userId} currency={currency} />
     </div>
   );

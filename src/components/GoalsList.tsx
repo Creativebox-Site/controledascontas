@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollIndicator } from "@/components/ui/scroll-indicator";
 import { Plus, Target, Calendar, DollarSign, Edit, Trash2, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { format, differenceInMonths, addMonths } from "date-fns";
@@ -28,6 +29,7 @@ interface Goal {
 interface GoalsListProps {
   userId?: string;
   currency: string;
+  onGoalChange?: () => void;
 }
 
 const goalTypes = [
@@ -42,7 +44,7 @@ const goalTypes = [
   { value: "other", label: "Outro", icon: "🎯" },
 ];
 
-export const GoalsList = ({ userId, currency }: GoalsListProps) => {
+export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -56,6 +58,7 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
     goal_type: "other",
     icon: "🎯",
   });
+  const formRef = useRef<HTMLFormElement>(null);
 
   const formatCurrencyInput = (value: string): string => {
     // Remove tudo que não é número
@@ -105,8 +108,8 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
     setLoading(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
 
     if (!userId) return;
 
@@ -114,6 +117,11 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
       toast.error("Preencha todos os campos obrigatórios");
       return;
     }
+
+    const isNewGoal = !editingGoal;
+    const previousAmount = editingGoal?.current_amount || 0;
+    const newAmount = parseFloat(parseCurrencyInput(formData.current_amount));
+    const hasNewContribution = newAmount > previousAmount;
 
     const goalData = {
       user_id: userId,
@@ -135,11 +143,18 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
       if (error) {
         toast.error("Erro ao atualizar meta");
       } else {
-        toast.success("Meta atualizada com sucesso!");
+        if (hasNewContribution) {
+          toast.success("Meta atualizada! Atualizando insights...", {
+            duration: 2000,
+          });
+        } else {
+          toast.success("Meta atualizada com sucesso!");
+        }
         setShowForm(false);
         setEditingGoal(null);
         resetForm();
         loadGoals();
+        onGoalChange?.();
       }
     } else {
       const { error } = await supabase.from("goals").insert([goalData]);
@@ -147,10 +162,13 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
       if (error) {
         toast.error("Erro ao criar meta");
       } else {
-        toast.success("Meta criada com sucesso!");
+        toast.success("Meta criada! Atualizando insights...", {
+          duration: 2000,
+        });
         setShowForm(false);
         resetForm();
         loadGoals();
+        onGoalChange?.();
       }
     }
   };
@@ -263,24 +281,46 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
 
   return (
     <div className="space-y-4">
-      <Dialog open={showForm} onOpenChange={setShowForm}>
+      <Dialog open={showForm} onOpenChange={(open) => {
+        setShowForm(open);
+        if (!open) {
+          setEditingGoal(null);
+          resetForm();
+        }
+      }}>
         <DialogTrigger asChild>
-          <Card className="cursor-pointer bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg border-primary">
-            <CardContent className="py-6 sm:py-8">
-              <div className="flex items-center justify-center gap-2 sm:gap-3 text-primary-foreground">
-                <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="text-base sm:text-lg font-bold">Adicionar Nova Meta</span>
-              </div>
-            </CardContent>
-          </Card>
+          <Button
+            variant="outline"
+            className="w-full border-2 border-dashed border-primary/30 hover:border-primary/50 hover:bg-primary/5 transition-all"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Adicionar Nova Meta
+          </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-md w-[95vw] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-base sm:text-lg">
-              {editingGoal ? "Editar Meta" : "Criar Nova Meta"}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <DialogContent 
+          className="max-w-md w-[95vw] max-h-[85vh] overflow-y-auto"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setShowForm(false);
+              setEditingGoal(null);
+              resetForm();
+            }
+            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+              e.preventDefault();
+              handleSubmit();
+            }
+          }}
+        >
+          <ScrollIndicator className="max-h-[75vh]">
+            <DialogHeader>
+              <DialogTitle className="text-base sm:text-lg">
+                {editingGoal ? "Editar Meta" : "Criar Nova Meta"}
+              </DialogTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                Pressione Ctrl+Enter para salvar ou ESC para cancelar
+              </p>
+            </DialogHeader>
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label>Tipo de Meta</Label>
               <Select
@@ -393,6 +433,7 @@ export const GoalsList = ({ userId, currency }: GoalsListProps) => {
               </Button>
             </div>
           </form>
+          </ScrollIndicator>
         </DialogContent>
       </Dialog>
 
