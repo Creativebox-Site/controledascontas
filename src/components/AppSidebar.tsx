@@ -25,7 +25,6 @@ const menuItems = [
   { title: "Financiamento Inteligente", url: "/dashboard/financing", icon: Calculator },
   { title: "Análises e Insights", url: "/dashboard/insights", icon: Lightbulb },
   { title: "Categorias", url: "/dashboard/categories", icon: Tags },
-  { title: "Componentes Premium", url: "/dashboard/premium-demo", icon: Sparkles },
   { title: "Configurações", url: "/dashboard/settings", icon: Settings },
 ];
 
