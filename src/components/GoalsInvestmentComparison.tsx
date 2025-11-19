@@ -19,6 +19,7 @@ interface Goal {
 interface GoalsInvestmentComparisonProps {
   userId?: string;
   currency: string;
+  refreshKey?: number;
 }
 
 interface InvestmentComparison {
@@ -33,6 +34,7 @@ interface InvestmentComparison {
 export const GoalsInvestmentComparison = ({
   userId,
   currency,
+  refreshKey,
 }: GoalsInvestmentComparisonProps) => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [monthlySavings, setMonthlySavings] = useState(0);
@@ -42,7 +44,7 @@ export const GoalsInvestmentComparison = ({
     if (userId) {
       loadData();
     }
-  }, [userId, currency]);
+  }, [userId, currency, refreshKey]);
 
   const loadData = async () => {
     if (!userId) return;

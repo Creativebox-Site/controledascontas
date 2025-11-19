@@ -9,7 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollIndicator } from "@/components/ui/scroll-indicator";
-import { Plus, Target, Calendar, DollarSign, Edit, Trash2, CheckCircle } from "lucide-react";
+import { GoalContributionDialog } from "@/components/GoalContributionDialog";
+import { GoalContributionsHistory } from "@/components/GoalContributionsHistory";
+import { Plus, Target, Calendar, DollarSign, Edit, Trash2, CheckCircle, TrendingUp, History, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { format, differenceInMonths, addMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -46,9 +48,14 @@ const goalTypes = [
 
 export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) => {
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [filteredGoals, setFilteredGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [contributionGoal, setContributionGoal] = useState<Goal | null>(null);
+  const [historyGoal, setHistoryGoal] = useState<Goal | null>(null);
+  const [filterType, setFilterType] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("date");
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -88,6 +95,41 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
       loadGoals();
     }
   }, [userId]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [goals, filterType, sortBy]);
+
+  const applyFilters = () => {
+    let filtered = [...goals];
+
+    // Aplicar filtro de tipo
+    if (filterType === "active") {
+      filtered = filtered.filter((g) => !g.is_completed);
+    } else if (filterType === "completed") {
+      filtered = filtered.filter((g) => g.is_completed);
+    }
+
+    // Aplicar ordenação
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "date":
+          return new Date(a.target_date).getTime() - new Date(b.target_date).getTime();
+        case "progress":
+          const progressA = (a.current_amount / a.target_amount) * 100;
+          const progressB = (b.current_amount / b.target_amount) * 100;
+          return progressB - progressA;
+        case "amount":
+          return b.target_amount - a.target_amount;
+        case "name":
+          return a.name.localeCompare(b.name);
+        default:
+          return 0;
+      }
+    });
+
+    setFilteredGoals(filtered);
+  };
 
   const loadGoals = async () => {
     if (!userId) return;
@@ -448,27 +490,56 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <>
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center mb-4">
+            <div className="flex items-center gap-2 flex-1">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as Metas</SelectItem>
+                  <SelectItem value="active">Ativas</SelectItem>
+                  <SelectItem value="completed">Concluídas</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date">Ordenar por Data</SelectItem>
+                <SelectItem value="progress">Ordenar por Progresso</SelectItem>
+                <SelectItem value="amount">Ordenar por Valor</SelectItem>
+                <SelectItem value="name">Ordenar por Nome</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+        <Card className="animate-fade-in">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Target className="w-4 h-4 sm:w-5 sm:h-5" />
-              Minhas Metas
+              Minhas Metas ({filteredGoals.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3 sm:space-y-4">
-              {goals.map((goal) => {
+              {filteredGoals.map((goal, index) => {
               const progress = getProgressPercentage(goal.current_amount, goal.target_amount);
               const monthsRemaining = getMonthsRemaining(goal.target_date);
 
               return (
                 <div
                   key={goal.id}
-                  className={`p-3 sm:p-4 rounded-lg border ${
+                  className={`p-3 sm:p-4 rounded-lg border transition-all duration-300 hover:shadow-md animate-fade-in ${
                     goal.is_completed
                       ? "bg-success/5 border-success"
                       : "bg-card border-border"
                   }`}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex flex-col sm:flex-row items-start gap-3 mb-3">
                     <div className="flex items-start gap-2 sm:gap-3 flex-1 w-full">
@@ -488,6 +559,26 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
                       </div>
                     </div>
                     <div className="flex gap-1 self-start sm:self-auto">
+                      {!goal.is_completed && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => setContributionGoal(goal)}
+                          className="h-8 gap-1 text-xs"
+                        >
+                          <TrendingUp className="w-3 h-3" />
+                          Aporte
+                        </Button>
+                      )}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => setHistoryGoal(goal)}
+                        className="h-8 w-8"
+                        title="Ver histórico de aportes"
+                      >
+                        <History className="w-3 h-3 sm:w-4 sm:h-4" />
+                      </Button>
                       <Button
                         size="icon"
                         variant="ghost"
@@ -564,6 +655,32 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
           </div>
         </CardContent>
       </Card>
+
+      {contributionGoal && userId && (
+        <GoalContributionDialog
+          goal={contributionGoal}
+          userId={userId}
+          currency={currency}
+          open={!!contributionGoal}
+          onOpenChange={(open) => !open && setContributionGoal(null)}
+          onContributionAdded={() => {
+            loadGoals();
+            onGoalChange?.();
+          }}
+        />
+      )}
+
+      {historyGoal && (
+        <GoalContributionsHistory
+          goalId={historyGoal.id}
+          goalName={historyGoal.name}
+          goalIcon={historyGoal.icon}
+          currency={currency}
+          open={!!historyGoal}
+          onOpenChange={(open) => !open && setHistoryGoal(null)}
+        />
+      )}
+      </>
       )}
     </div>
   );
