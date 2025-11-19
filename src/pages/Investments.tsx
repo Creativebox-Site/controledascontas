@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -34,6 +35,7 @@ export const Investments = ({
   userId,
   currency
 }: InvestmentsProps) => {
+  const location = useLocation();
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [categories, setCategories] = useState<InvestmentCategory[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -52,6 +54,20 @@ export const Investments = ({
     frequency: "monthly",
     repetitions: 12
   });
+
+  // Verificar se veio categoria pré-selecionada
+  useEffect(() => {
+    const state = location.state as { preselectedCategory?: string };
+    if (state?.preselectedCategory && categories.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        category_id: state.preselectedCategory
+      }));
+      setShowForm(true);
+      // Limpar o state após usar
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, categories]);
   useEffect(() => {
     if (userId) {
       loadCategories();
