@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Download, Smartphone, Check, X } from 'lucide-react';
+import { Download, Smartphone, Check, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { ButtonPremium } from '@/components/ui/button-premium';
 import { CardGlass, CardGlassContent, CardGlassHeader, CardGlassTitle } from '@/components/ui/card-glass';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -11,6 +12,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export default function Install() {
+  const navigate = useNavigate();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
@@ -194,13 +196,15 @@ export default function Install() {
             </CardGlass>
           </div>
 
-          {/* Back to App */}
-          <div className="text-center">
+          {/* Back Button */}
+          <div className="text-center space-y-2">
             <ButtonPremium 
               variant="glass" 
-              onClick={() => window.location.href = '/dashboard'}
+              onClick={() => navigate(-1)}
+              className="gap-2"
             >
-              Voltar ao Dashboard
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
             </ButtonPremium>
           </div>
         </div>

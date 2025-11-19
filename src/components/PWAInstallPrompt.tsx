@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Download } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { ButtonPremium } from '@/components/ui/button-premium';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -9,6 +10,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export const PWAInstallPrompt = () => {
+  const navigate = useNavigate();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -28,8 +30,8 @@ export const PWAInstallPrompt = () => {
     
     if (iOS && !isInStandaloneMode) {
       setIsIOS(true);
-      // Show iOS prompt after 3 seconds
-      const timer = setTimeout(() => setShowPrompt(true), 3000);
+      // Show iOS prompt after 1 second
+      const timer = setTimeout(() => setShowPrompt(true), 1000);
       return () => clearTimeout(timer);
     }
 
@@ -37,8 +39,8 @@ export const PWAInstallPrompt = () => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      // Show prompt after 3 seconds
-      setTimeout(() => setShowPrompt(true), 3000);
+      // Show prompt after 1 second
+      setTimeout(() => setShowPrompt(true), 1000);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -50,8 +52,9 @@ export const PWAInstallPrompt = () => {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      // Redirect to install page for detailed instructions
-      window.location.href = '/install';
+      // Navigate to install page for detailed instructions
+      setShowPrompt(false);
+      navigate('/install');
       return;
     }
 
