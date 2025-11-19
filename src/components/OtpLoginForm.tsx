@@ -16,8 +16,41 @@ export function OtpLoginForm() {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [emailExists, setEmailExists] = useState<boolean | null>(null);
   const [requestId] = useState(() => crypto.randomUUID());
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
+
+  const checkEmailExists = async (emailToCheck: string) => {
+    if (!emailToCheck) return;
+    
+    try {
+      emailSchema.parse(emailToCheck);
+    } catch {
+      setEmailExists(null);
+      return;
+    }
+
+    setIsCheckingEmail(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('check-email', {
+        body: { email: emailToCheck },
+      });
+
+      if (error) {
+        console.error("Error checking email:", error);
+        setEmailExists(null);
+      } else {
+        setEmailExists(data?.exists || false);
+      }
+    } catch (error) {
+      console.error("Error checking email:", error);
+      setEmailExists(null);
+    } finally {
+      setIsCheckingEmail(false);
+    }
+  };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +59,12 @@ export function OtpLoginForm() {
       emailSchema.parse(email);
     } catch (error) {
       toast.error("Por favor, insira um email válido");
+      return;
+    }
+
+    // Verificar se o email existe primeiro
+    if (emailExists === null) {
+      await checkEmailExists(email);
       return;
     }
 
@@ -154,31 +193,62 @@ export function OtpLoginForm() {
               type="email"
               placeholder="seu@email.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailExists(null);
+              }}
+              onBlur={() => checkEmailExists(email)}
               className="pl-10"
-              disabled={isLoading}
+              disabled={isLoading || isCheckingEmail}
               required
             />
+            {isCheckingEmail && (
+              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />
+            )}
           </div>
+          
+          {emailExists === true && (
+            <p className="text-xs text-green-600 flex items-center gap-1">
+              <Lock className="w-3 h-3" />
+              Email cadastrado. Continue para receber o código
+            </p>
+          )}
+          
+          {emailExists === false && (
+            <p className="text-xs text-amber-600 flex items-center gap-1">
+              <Mail className="w-3 h-3" />
+              Email não cadastrado. Um código será enviado para criar sua conta
+            </p>
+          )}
         </div>
 
         <Button
           type="submit"
           className="w-full"
-          disabled={isLoading || !email}
+          disabled={isLoading || isCheckingEmail || !email || emailExists === null}
         >
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Enviando código...
             </>
+          ) : isCheckingEmail ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Verificando email...
+            </>
+          ) : emailExists === null ? (
+            "Verificar email"
           ) : (
             "Enviar código"
           )}
         </Button>
 
         <p className="text-sm text-muted-foreground text-center">
-          Você receberá um código de verificação por email
+          {emailExists === false 
+            ? "Vamos criar sua conta e enviar um código de verificação"
+            : "Você receberá um código de verificação por email"
+          }
         </p>
       </form>
     );
