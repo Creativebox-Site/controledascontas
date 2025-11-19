@@ -9,8 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Wallet, Eye, EyeOff, ShieldCheck, Mail, X, Lock } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck, Mail, X, Lock } from "lucide-react";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import logoCreativeBox from "@/assets/logo-creative-box.png";
 import { OtpLoginForm } from "@/components/OtpLoginForm";
 import { FontSizeSelector } from "@/components/FontSizeSelector";
 import { signUpSchema, validatePassword, passwordSchema } from "@/lib/passwordValidation";
@@ -250,11 +251,11 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <Wallet className="w-8 h-8 text-primary" />
+            <div className="w-20 h-20 flex items-center justify-center">
+              <img src={logoCreativeBox} alt="Creative Box Logo" className="w-full h-full object-contain" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Controle Financeiro</CardTitle>
+          <CardTitle className="text-2xl">App Contas | Creative Box</CardTitle>
           <CardDescription>Gerencie suas finanças de forma inteligente</CardDescription>
         </CardHeader>
         <CardContent>
