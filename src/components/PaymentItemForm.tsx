@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { ButtonPremium } from "@/components/ui/button-premium";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -223,7 +223,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-3 animate-fade-in">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Título */}
         <div className="md:col-span-2 space-y-2">
@@ -286,8 +286,8 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
           <Label>Data de Vencimento *</Label>
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                variant="outline"
+              <ButtonPremium
+                variant="glass"
                 className={cn(
                   "w-full justify-start text-left font-normal",
                   !dueDate && "text-muted-foreground"
@@ -295,7 +295,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {dueDate ? format(dueDate, "PPP", { locale: ptBR }) : "Selecione a data"}
-              </Button>
+              </ButtonPremium>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
@@ -433,13 +433,13 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
       </div>
 
       {/* Botões */}
-      <div className="flex gap-3 justify-end">
-        <Button type="button" variant="ghost" onClick={onClose}>
+      <div className="flex gap-3 justify-end animate-fade-in">
+        <ButtonPremium type="button" variant="glass" onClick={onClose}>
           Cancelar
-        </Button>
-        <Button type="submit" disabled={isLoading || !title || !value || !dueDate}>
+        </ButtonPremium>
+        <ButtonPremium type="submit" variant="primary" disabled={isLoading || !title || !value || !dueDate}>
           {isLoading ? "Salvando..." : "Salvar"}
-        </Button>
+        </ButtonPremium>
       </div>
     </form>
   );

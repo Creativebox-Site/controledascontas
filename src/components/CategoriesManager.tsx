@@ -309,7 +309,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
               {editingId ? "Editar Categoria" : "Nova Categoria"}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
             <div className="space-y-2">
               <Label htmlFor="name">Nome</Label>
               <Input
@@ -389,12 +389,12 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
             </div>
 
             <div className="flex gap-2 justify-end">
-              <Button type="button" variant="outline" onClick={resetForm}>
+              <ButtonPremium type="button" variant="glass" onClick={resetForm}>
                 Cancelar
-              </Button>
-              <Button type="submit">
+              </ButtonPremium>
+              <ButtonPremium type="submit" variant="primary">
                 {editingId ? "Atualizar" : "Criar"}
-              </Button>
+              </ButtonPremium>
             </div>
           </form>
         </DialogContent>
