@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { CardGlass, CardGlassContent, CardGlassHeader, CardGlassTitle } from "@/components/ui/card-glass";
 import { ButtonPremium } from "@/components/ui/button-premium";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
