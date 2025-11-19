@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
-import { TrendingUp, TrendingDown, Wallet, PiggyBank, AlertCircle, Calendar, Plus, CreditCard, TrendingUp as InvestmentIcon } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, PiggyBank, AlertCircle, Calendar, Plus, CreditCard, TrendingUp as InvestmentIcon, Target } from "lucide-react";
 import { Sparkline } from "@/components/Sparkline";
 import { DateRangeFilter, DateRange } from "@/components/DateRangeFilter";
 import { ParetoChart } from "@/components/ParetoChart";
@@ -57,6 +57,8 @@ export const FinancialChart = ({
   const [upcomingPaymentsCount, setUpcomingPaymentsCount] = useState(0);
   const [investmentPerformance, setInvestmentPerformance] = useState(0);
   const [investmentPerformanceValue, setInvestmentPerformanceValue] = useState(0);
+  const [goalsCount, setGoalsCount] = useState(0);
+  const [goalsProgress, setGoalsProgress] = useState(0);
 
   // Estados para os dialogs
   const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
@@ -87,11 +89,42 @@ export const FinancialChart = ({
       console.error("Error loading upcoming payments:", error);
     }
   };
+
+  const loadGoals = async () => {
+    if (!userId) return;
+    try {
+      const { data: goals, error } = await supabase
+        .from("goals")
+        .select("*")
+        .eq("user_id", userId);
+
+      if (error || !goals) {
+        return;
+      }
+
+      const activeGoals = goals.filter((g) => !g.is_completed);
+      setGoalsCount(goals.length);
+
+      if (activeGoals.length > 0) {
+        const totalProgress = activeGoals.reduce((sum, goal) => {
+          const progress = Math.min((goal.current_amount / goal.target_amount) * 100, 100);
+          return sum + progress;
+        }, 0);
+        setGoalsProgress(totalProgress / activeGoals.length);
+      } else {
+        setGoalsProgress(0);
+      }
+    } catch (error) {
+      console.error("Error loading goals:", error);
+    }
+  };
+
   useEffect(() => {
     if (userId) {
       loadTransactions();
       fetchExchangeRate();
       loadUpcomingPayments();
+      loadGoals();
     }
   }, [userId, currency, dateRange]);
 
@@ -333,7 +366,7 @@ export const FinancialChart = ({
         <DateRangeFilter onFilterChange={setDateRange} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         {/* Card 1: Saldo Disponível */}
         
 
@@ -399,6 +432,44 @@ export const FinancialChart = ({
               <InvestmentIcon className="h-4 w-4 mr-1 flex-shrink-0" />
               <span>Gerenciar Investimentos</span>
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Card 5: Metas e Sonhos */}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium line-clamp-2">Metas e Sonhos</CardTitle>
+            <Target className="h-5 w-5 text-primary flex-shrink-0" />
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {goalsCount === 0 ? (
+              <>
+                <p className="text-sm text-muted-foreground">Defina suas metas</p>
+                <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm whitespace-normal h-auto py-2" onClick={() => navigate("/dashboard/goals")}>
+                  <Plus className="h-4 w-4 mr-1 flex-shrink-0" />
+                  <span>Criar Primeira Meta</span>
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="space-y-1">
+                  <div className="text-2xl sm:text-3xl font-bold text-primary break-words">
+                    {goalsCount} {goalsCount === 1 ? "Meta" : "Metas"}
+                  </div>
+                  <div className={`text-sm font-medium ${
+                    goalsProgress >= 75 ? "text-success" :
+                    goalsProgress >= 50 ? "text-primary" :
+                    goalsProgress >= 25 ? "text-warning" : "text-muted-foreground"
+                  }`}>
+                    {goalsProgress.toFixed(1)}% de progresso médio
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm whitespace-normal h-auto py-2" onClick={() => navigate("/dashboard/goals")}>
+                  <Target className="h-4 w-4 mr-1 flex-shrink-0" />
+                  <span>Ver Metas</span>
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
