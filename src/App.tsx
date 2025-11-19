@@ -76,8 +76,8 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <PWAInstallPrompt />
       <BrowserRouter>
+        <PWAInstallPrompt />
         <CurrencyProvider>
           <Routes>
             {/* Rota pública de autenticação */}
