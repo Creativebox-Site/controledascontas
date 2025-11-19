@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { Wallet, Eye, EyeOff, ShieldCheck, Mail, X, Lock } from "lucide-react";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import { OtpLoginForm } from "@/components/OtpLoginForm";
 import { signUpSchema, validatePassword, passwordSchema } from "@/lib/passwordValidation";
 
 const Auth = () => {
@@ -244,11 +245,16 @@ const Auth = () => {
           <CardDescription>Gerencie suas finanças de forma inteligente</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Entrar</TabsTrigger>
+          <Tabs defaultValue="otp" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="otp">OTP</TabsTrigger>
+              <TabsTrigger value="login">Senha</TabsTrigger>
               <TabsTrigger value="signup">Cadastrar</TabsTrigger>
             </TabsList>
+            
+            <TabsContent value="otp" className="mt-6">
+              <OtpLoginForm />
+            </TabsContent>
             
             <TabsContent value="login">
               <form onSubmit={handleSignIn} className="space-y-4">
