@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { CardGlass, CardGlassContent, CardGlassHeader, CardGlassTitle } from "@/components/ui/card-glass";
+import { ButtonPremium } from "@/components/ui/button-premium";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -310,14 +310,14 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="py-8">
+      <CardGlass variant="light" elevation="medium">
+        <CardGlassContent className="py-8">
           <div className="animate-pulse space-y-4">
             <div className="h-32 bg-muted rounded"></div>
             <div className="h-32 bg-muted rounded"></div>
           </div>
-        </CardContent>
-      </Card>
+        </CardGlassContent>
+      </CardGlass>
     );
   }
 
@@ -331,13 +331,13 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
         }
       }}>
         <DialogTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full border-2 border-dashed border-primary/30 hover:border-primary/50 hover:bg-primary/5 transition-all"
+          <ButtonPremium
+            variant="glass"
+            className="w-full border-2 border-dashed border-primary/30 hover:border-primary/50"
+            leftIcon={<Plus className="w-4 h-4" />}
           >
-            <Plus className="w-4 h-4 mr-2" />
             Adicionar Nova Meta
-          </Button>
+          </ButtonPremium>
         </DialogTrigger>
         <DialogContent 
           className="max-w-md w-[95vw] max-h-[85vh] overflow-y-auto"
@@ -459,12 +459,13 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
             </div>
 
             <div className="flex gap-2">
-              <Button type="submit" className="flex-1">
+              <ButtonPremium type="submit" variant="primary" size="sm" className="flex-1">
                 {editingGoal ? "Atualizar" : "Criar"} Meta
-              </Button>
-              <Button
+              </ButtonPremium>
+              <ButtonPremium
                 type="button"
-                variant="outline"
+                variant="glass"
+                size="sm"
                 onClick={() => {
                   setShowForm(false);
                   setEditingGoal(null);
@@ -472,7 +473,7 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
                 }}
               >
                 Cancelar
-              </Button>
+              </ButtonPremium>
             </div>
           </form>
           </ScrollIndicator>
@@ -480,52 +481,29 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
       </Dialog>
 
       {goals.length === 0 ? (
-        <Card>
-          <CardContent className="py-8 sm:py-12 text-center">
+        <CardGlass variant="light" elevation="medium">
+          <CardGlassContent className="py-8 sm:py-12 text-center">
             <Target className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-base sm:text-lg font-semibold mb-2">Nenhuma meta cadastrada</h3>
             <p className="text-xs sm:text-sm text-muted-foreground px-4">
               Comece definindo seus objetivos financeiros e acompanhe seu progresso!
             </p>
-          </CardContent>
-        </Card>
+          </CardGlassContent>
+        </CardGlass>
       ) : (
         <>
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center mb-4">
-            <div className="flex items-center gap-2 flex-1">
-              <Filter className="w-4 h-4 text-muted-foreground" />
-              <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as Metas</SelectItem>
-                  <SelectItem value="active">Ativas</SelectItem>
-                  <SelectItem value="completed">Concluídas</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="date">Ordenar por Data</SelectItem>
-                <SelectItem value="progress">Ordenar por Progresso</SelectItem>
-                <SelectItem value="amount">Ordenar por Valor</SelectItem>
-                <SelectItem value="name">Ordenar por Nome</SelectItem>
-              </SelectContent>
-            </Select>
+...
           </div>
 
-        <Card className="animate-fade-in">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+        <CardGlass variant="light" elevation="high" effect="subtle" className="animate-fade-in">
+          <CardGlassHeader>
+            <CardGlassTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Target className="w-4 h-4 sm:w-5 sm:h-5" />
               Minhas Metas ({filteredGoals.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </CardGlassTitle>
+          </CardGlassHeader>
+          <CardGlassContent>
             <div className="space-y-3 sm:space-y-4">
               {filteredGoals.map((goal, index) => {
               const progress = getProgressPercentage(goal.current_amount, goal.target_amount);
@@ -638,23 +616,23 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
                     </div>
 
                     {!goal.is_completed && (
-                      <Button
-                        variant="outline"
+                      <ButtonPremium
+                        variant="success"
                         size="sm"
                         onClick={() => handleToggleComplete(goal)}
                         className="w-full text-xs sm:text-sm"
+                        leftIcon={<CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />}
                       >
-                        <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                         Marcar como Concluída
-                      </Button>
+                      </ButtonPremium>
                     )}
                   </div>
                 </div>
               );
             })}
           </div>
-        </CardContent>
-      </Card>
+        </CardGlassContent>
+      </CardGlass>
 
       {contributionGoal && userId && (
         <GoalContributionDialog
