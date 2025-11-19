@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Eye, EyeOff, ShieldCheck, Mail, X, Lock } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck, Mail, X, Lock, ArrowLeft } from "lucide-react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import logoCreativeBox from "@/assets/logo-creative-box.png";
 import { OtpLoginForm } from "@/components/OtpLoginForm";
@@ -357,103 +358,138 @@ const Auth = () => {
             </TabsContent>
             
             <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Nome Completo</Label>
-                  <Input 
-                    id="signup-name" 
-                    name="fullName" 
-                    type="text" 
-                    placeholder="Seu nome completo" 
-                    required
-                    minLength={2}
-                    maxLength={100}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input 
-                    id="signup-email" 
-                    name="email" 
-                    type="email" 
-                    placeholder="seu@email.com" 
-                    required 
-                    maxLength={255}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Senha</Label>
-                  <div className="relative">
+              {signupStep === 'form' ? (
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
                     <Input 
-                      id="signup-password" 
-                      name="password" 
-                      type={showSignupPassword ? "text" : "password"} 
-                      placeholder="Senha segura" 
+                      id="signup-email" 
+                      name="email" 
+                      type="email" 
+                      placeholder="seu@email.com" 
                       required 
-                      className="pr-10"
-                      value={signupPassword}
-                      onChange={(e) => setSignupPassword(e.target.value)}
+                      maxLength={255}
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Senha</Label>
+                    <div className="relative">
+                      <Input 
+                        id="signup-password" 
+                        name="password" 
+                        type={showSignupPassword ? "text" : "password"} 
+                        placeholder="Senha segura" 
+                        required 
+                        className="pr-10"
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                        onClick={() => setShowSignupPassword(!showSignupPassword)}
+                      >
+                        {showSignupPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                    <PasswordStrengthIndicator password={signupPassword} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password">Confirmar Senha</Label>
+                    <div className="relative">
+                      <Input 
+                        id="confirm-password" 
+                        name="confirmPassword" 
+                        type={showConfirmPassword ? "text" : "password"} 
+                        placeholder="Digite a senha novamente" 
+                        required 
+                        className="pr-10"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                    {confirmPassword && signupPassword !== confirmPassword && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <X className="w-3 h-3" />
+                        As senhas não coincidem
+                      </p>
+                    )}
+                    {confirmPassword && signupPassword === confirmPassword && (
+                      <p className="text-xs text-green-600 flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3" />
+                        Senhas coincidem
+                      </p>
+                    )}
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Criando conta..." : "Criar conta com segurança"}
+                  </Button>
+                </form>
+              ) : (
+                <div className="space-y-6">
+                  <div className="text-center space-y-2">
+                    <div className="flex justify-center mb-4">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Mail className="w-6 h-6 text-primary" />
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold">Verifique seu Email</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Enviamos um código de 6 dígitos para <strong>{signupEmail}</strong>
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex justify-center">
+                      <InputOTP
+                        maxLength={6}
+                        onComplete={handleVerifySignupOtp}
+                      >
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+                    
                     <Button
                       type="button"
                       variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                      onClick={() => setShowSignupPassword(!showSignupPassword)}
+                      className="w-full"
+                      onClick={() => {
+                        setSignupStep('form');
+                        setSignupEmail("");
+                      }}
                     >
-                      {showSignupPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      )}
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Voltar ao formulário
                     </Button>
                   </div>
-                  <PasswordStrengthIndicator password={signupPassword} />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirmar Senha</Label>
-                  <div className="relative">
-                    <Input 
-                      id="confirm-password" 
-                      name="confirmPassword" 
-                      type={showConfirmPassword ? "text" : "password"} 
-                      placeholder="Digite a senha novamente" 
-                      required 
-                      className="pr-10"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </Button>
-                  </div>
-                  {confirmPassword && signupPassword !== confirmPassword && (
-                    <p className="text-xs text-destructive flex items-center gap-1">
-                      <X className="w-3 h-3" />
-                      As senhas não coincidem
-                    </p>
-                  )}
-                  {confirmPassword && signupPassword === confirmPassword && (
-                    <p className="text-xs text-green-600 flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3" />
-                      Senhas coincidem
-                    </p>
-                  )}
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Criando conta..." : "Criar conta com segurança"}
-                </Button>
-              </form>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>
