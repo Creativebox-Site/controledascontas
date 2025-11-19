@@ -538,41 +538,41 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
                     </div>
                     <div className="flex gap-1 self-start sm:self-auto">
                       {!goal.is_completed && (
-                        <Button
+                        <ButtonPremium
                           size="sm"
-                          variant="default"
+                          variant="primary"
                           onClick={() => setContributionGoal(goal)}
                           className="h-8 gap-1 text-xs"
                         >
                           <TrendingUp className="w-3 h-3" />
                           Aporte
-                        </Button>
+                        </ButtonPremium>
                       )}
-                      <Button
-                        size="icon"
-                        variant="ghost"
+                      <ButtonPremium
+                        size="sm"
+                        variant="glass"
                         onClick={() => setHistoryGoal(goal)}
-                        className="h-8 w-8"
+                        className="h-8 w-8 p-0"
                         title="Ver histórico de aportes"
                       >
                         <History className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
+                      </ButtonPremium>
+                      <ButtonPremium
+                        size="sm"
+                        variant="glass"
                         onClick={() => handleEdit(goal)}
-                        className="h-8 w-8"
+                        className="h-8 w-8 p-0"
                       >
                         <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
+                      </ButtonPremium>
+                      <ButtonPremium
+                        size="sm"
+                        variant="glass"
                         onClick={() => handleDelete(goal.id)}
-                        className="h-8 w-8"
+                        className="h-8 w-8 p-0"
                       >
                         <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </Button>
+                      </ButtonPremium>
                     </div>
                   </div>
 
