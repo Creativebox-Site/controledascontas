@@ -366,106 +366,106 @@ export const FinancialChart = ({
         <DateRangeFilter onFilterChange={setDateRange} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
         {/* Card 1: Saldo Disponível */}
         
 
         {/* Card 2: Fluxo de Caixa do Período Filtrado */}
-        <CardGlass className="border-primary/20">
-          <CardGlassHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardGlassTitle className="text-xs sm:text-sm font-medium line-clamp-2">Fluxo de Caixa (Período Filtrado)</CardGlassTitle>
-            <TrendingUp className="h-5 w-5 text-primary flex-shrink-0" />
+        <CardGlass className="border-primary/20" padding="sm">
+          <CardGlassHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
+            <CardGlassTitle className="text-xs font-medium line-clamp-2">Fluxo de Caixa (Período Filtrado)</CardGlassTitle>
+            <TrendingUp className="h-4 w-4 text-primary flex-shrink-0" />
           </CardGlassHeader>
-          <CardGlassContent className="space-y-3">
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs sm:text-sm">
+          <CardGlassContent className="space-y-2">
+            <div className="space-y-0.5">
+              <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Receitas:</span>
                 <span className="font-medium text-success break-words">{formatCurrency(monthlyIncome)}</span>
               </div>
-              <div className="flex items-center justify-between text-xs sm:text-sm">
+              <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Despesas:</span>
                 <span className="font-medium text-destructive break-words">{formatCurrency(monthlyExpense)}</span>
               </div>
             </div>
-            <div className={`text-xl sm:text-2xl font-bold break-words ${monthlyBalance >= 0 ? "text-success" : "text-destructive"}`}>
+            <div className={`text-lg font-bold break-words ${monthlyBalance >= 0 ? "text-success" : "text-destructive"}`}>
               Saldo: {formatCurrency(monthlyBalance)}
             </div>
-            <ButtonPremium variant="primary" size="sm" className="w-full text-xs sm:text-sm whitespace-normal h-auto py-2" onClick={() => setTransactionDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-1 flex-shrink-0" />
+            <ButtonPremium variant="primary" size="sm" className="w-full text-white text-xs whitespace-normal h-auto py-1.5" onClick={() => setTransactionDialogOpen(true)}>
+              <Plus className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
               <span>Lançar Nova Transação</span>
             </ButtonPremium>
           </CardGlassContent>
         </CardGlass>
 
         {/* Card 3: Próximos Pagamentos */}
-        <CardGlass className="border-warning/20 bg-warning/5">
-          <CardGlassHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardGlassTitle className="text-xs sm:text-sm font-medium line-clamp-2">Contas a Pagar Pendentes</CardGlassTitle>
-            <AlertCircle className="h-5 w-5 text-warning flex-shrink-0" />
+        <CardGlass className="border-warning/20 bg-warning/5" padding="sm">
+          <CardGlassHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
+            <CardGlassTitle className="text-xs font-medium line-clamp-2">Contas a Pagar Pendentes</CardGlassTitle>
+            <AlertCircle className="h-4 w-4 text-warning flex-shrink-0" />
           </CardGlassHeader>
-          <CardGlassContent className="space-y-3">
-            <div className="text-2xl sm:text-3xl font-bold text-warning break-words">{formatCurrency(upcomingPayments)}</div>
-            <p className="text-xs sm:text-sm text-muted-foreground">
+          <CardGlassContent className="space-y-2">
+            <div className="text-lg font-bold text-warning break-words">{formatCurrency(upcomingPayments)}</div>
+            <p className="text-xs text-muted-foreground">
               {upcomingPaymentsCount} {upcomingPaymentsCount === 1 ? "Conta Pendente" : "Contas Pendentes"}
             </p>
-            <ButtonPremium variant="primary" size="sm" className="w-full text-xs sm:text-sm whitespace-normal h-auto py-2" onClick={() => navigate("/dashboard/payment-items")}>
-              <CreditCard className="h-4 w-4 mr-1 flex-shrink-0" />
+            <ButtonPremium variant="primary" size="sm" className="w-full text-white text-xs whitespace-normal h-auto py-1.5" onClick={() => navigate("/dashboard/payment-items")}>
+              <CreditCard className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
               <span>Gerenciar Pagamentos</span>
             </ButtonPremium>
           </CardGlassContent>
         </CardGlass>
 
         {/* Card 4: Patrimônio Investido */}
-        <CardGlass className="border-primary/20">
-          <CardGlassHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardGlassTitle className="text-xs sm:text-sm font-medium line-clamp-2">Patrimônio Investido</CardGlassTitle>
-            <PiggyBank className="h-5 w-5 text-primary flex-shrink-0" />
+        <CardGlass className="border-primary/20" padding="sm">
+          <CardGlassHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
+            <CardGlassTitle className="text-xs font-medium line-clamp-2">Patrimônio Investido</CardGlassTitle>
+            <PiggyBank className="h-4 w-4 text-primary flex-shrink-0" />
           </CardGlassHeader>
-          <CardGlassContent className="space-y-3">
-            <div className="text-2xl sm:text-3xl font-bold text-primary break-words">{formatCurrency(totalInvestments)}</div>
-            <div className={`text-xs sm:text-sm font-medium break-words ${investmentPerformance >= 0 ? "text-success" : "text-destructive"}`}>
+          <CardGlassContent className="space-y-2">
+            <div className="text-lg font-bold text-primary break-words">{formatCurrency(totalInvestments)}</div>
+            <div className={`text-xs font-medium break-words ${investmentPerformance >= 0 ? "text-success" : "text-destructive"}`}>
               {investmentPerformance >= 0 ? "↑" : "↓"} {Math.abs(investmentPerformance).toFixed(1)}% (
               {investmentPerformance >= 0 ? "+" : ""}
               {formatCurrency(investmentPerformanceValue)})
             </div>
-            <ButtonPremium variant="primary" size="sm" className="w-full text-xs sm:text-sm whitespace-normal h-auto py-2" onClick={() => navigate("/dashboard/investments")}>
-              <InvestmentIcon className="h-4 w-4 mr-1 flex-shrink-0" />
+            <ButtonPremium variant="primary" size="sm" className="w-full text-white text-xs whitespace-normal h-auto py-1.5" onClick={() => navigate("/dashboard/investments")}>
+              <InvestmentIcon className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
               <span>Gerenciar Investimentos</span>
             </ButtonPremium>
           </CardGlassContent>
         </CardGlass>
 
         {/* Card 5: Metas e Sonhos */}
-        <CardGlass className="border-primary/20 bg-primary/5">
-          <CardGlassHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardGlassTitle className="text-xs sm:text-sm font-medium line-clamp-2">Metas e Sonhos</CardGlassTitle>
-            <Target className="h-5 w-5 text-primary flex-shrink-0" />
+        <CardGlass className="border-primary/20 bg-primary/5" padding="sm">
+          <CardGlassHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
+            <CardGlassTitle className="text-xs font-medium line-clamp-2">Metas e Sonhos</CardGlassTitle>
+            <Target className="h-4 w-4 text-primary flex-shrink-0" />
           </CardGlassHeader>
-          <CardGlassContent className="space-y-3">
+          <CardGlassContent className="space-y-2">
             {goalsCount === 0 ? (
               <>
-                <p className="text-sm text-muted-foreground">Defina suas metas</p>
-                <ButtonPremium variant="primary" size="sm" className="w-full text-xs sm:text-sm whitespace-normal h-auto py-2" onClick={() => navigate("/dashboard/goals")}>
-                  <Plus className="h-4 w-4 mr-1 flex-shrink-0" />
+                <p className="text-xs text-muted-foreground">Defina suas metas</p>
+                <ButtonPremium variant="primary" size="sm" className="w-full text-white text-xs whitespace-normal h-auto py-1.5" onClick={() => navigate("/dashboard/goals")}>
+                  <Plus className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
                   <span>Criar Primeira Meta</span>
                 </ButtonPremium>
               </>
             ) : (
               <>
-                <div className="space-y-1">
-                  <div className="text-2xl sm:text-3xl font-bold text-primary break-words">
+                <div className="space-y-0.5">
+                  <div className="text-lg font-bold text-primary break-words">
                     {goalsCount} {goalsCount === 1 ? "Meta" : "Metas"}
                   </div>
-                  <div className={`text-sm font-medium ${
+                  <div className={`text-xs font-medium ${
                     goalsProgress >= 75 ? "text-success" :
                     goalsProgress >= 50 ? "text-primary" :
                     goalsProgress >= 25 ? "text-warning" : "text-muted-foreground"
                   }`}>
-                    {goalsProgress.toFixed(1)}% de progresso médio
+                    Progresso Médio: {goalsProgress.toFixed(0)}%
                   </div>
                 </div>
-                <ButtonPremium variant="primary" size="sm" className="w-full text-xs sm:text-sm whitespace-normal h-auto py-2" onClick={() => navigate("/dashboard/goals")}>
-                  <Target className="h-4 w-4 mr-1 flex-shrink-0" />
+                <ButtonPremium variant="primary" size="sm" className="w-full text-white text-xs whitespace-normal h-auto py-1.5" onClick={() => navigate("/dashboard/goals")}>
+                  <Target className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
                   <span>Ver Metas</span>
                 </ButtonPremium>
               </>
