@@ -395,35 +395,35 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
         )
       )}
 
-      <Card>
-         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 flex-wrap">
-          <CardTitle className="text-base sm:text-lg">Histórico de Transações</CardTitle>
+      <CardGlass className="animate-fade-in">
+         <CardGlassHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 flex-wrap">
+          <CardGlassTitle className="text-base sm:text-lg">Histórico de Transações</CardGlassTitle>
           <div className="flex gap-2 flex-wrap w-full sm:w-auto">
             {selectedIds.size > 0 && (
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
+                <ButtonPremium
+                  variant="glass"
                   size="sm"
                   onClick={() => setShowBulkEditDialog(true)}
                   className="text-xs sm:text-sm"
                 >
                   <Pencil className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                   Editar ({selectedIds.size})
-                </Button>
-                <Button 
-                  variant="destructive" 
+                </ButtonPremium>
+                <ButtonPremium 
+                  variant="glass" 
                   size="sm" 
                   onClick={handleDeleteSelected} 
-                  className="text-xs sm:text-sm"
+                  className="text-xs sm:text-sm text-destructive"
                 >
                   <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                   Excluir ({selectedIds.size})
-                </Button>
+                </ButtonPremium>
               </div>
             )}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+                <ButtonPremium variant="glass" size="sm" className="text-xs sm:text-sm">
                   <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                   Filtros
                   {(searchText || typeFilter !== "all" || categoryFilter !== "all" || minAmount || maxAmount || essentialFilter !== "all") && (
@@ -431,17 +431,17 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
                       {[searchText, typeFilter !== "all", categoryFilter !== "all", minAmount, maxAmount, essentialFilter !== "all"].filter(Boolean).length}
                     </Badge>
                   )}
-                </Button>
+                </ButtonPremium>
               </PopoverTrigger>
               <PopoverContent className="w-80">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h4 className="font-semibold">Filtros</h4>
                     {(searchText || typeFilter !== "all" || categoryFilter !== "all" || minAmount || maxAmount || essentialFilter !== "all") && (
-                      <Button variant="ghost" size="sm" onClick={clearFilters}>
+                      <ButtonPremium variant="glass" size="sm" onClick={clearFilters}>
                         <X className="w-4 h-4 mr-1" />
                         Limpar
-                      </Button>
+                      </ButtonPremium>
                     )}
                   </div>
 
@@ -553,13 +553,13 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
               </PopoverContent>
             </Popover>
 
-            <Button variant="outline" size="sm" onClick={() => setShowBulkImport(true)}>
+            <ButtonPremium variant="glass" size="sm" onClick={() => setShowBulkImport(true)}>
               <Upload className="w-4 h-4 mr-2" />
               Importar em Lote
-            </Button>
+            </ButtonPremium>
           </div>
-        </CardHeader>
-        <CardContent>
+        </CardGlassHeader>
+        <CardGlassContent>
           {transactions.length > 0 && (
             <div className="mb-4 flex items-center gap-2">
               <Checkbox
@@ -574,18 +574,18 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
           )}
           <div className="space-y-2 sm:space-y-3">
         {transactions.length === 0 ? (
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground text-xs sm:text-sm">
+          <CardGlass variant="light">
+            <CardGlassContent className="py-8 text-center text-muted-foreground text-xs sm:text-sm">
               Nenhuma transação encontrada.
-            </CardContent>
-          </Card>
+            </CardGlassContent>
+          </CardGlass>
         ) : (
           transactions.map((transaction) => {
             const convertedAmount = convertAmount(transaction.amount, transaction.currency);
             const isSelected = selectedIds.has(transaction.id);
             return (
-              <Card key={transaction.id} className={isSelected ? "border-primary" : ""}>
-                <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 py-3 sm:py-4">
+              <CardGlass key={transaction.id} className={isSelected ? "border-primary" : ""} variant="light">
+                <CardGlassContent className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 py-3 sm:py-4">
                   <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto sm:flex-1">
                     <Checkbox
                       checked={isSelected}
@@ -634,57 +634,57 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
                     </span>
                     <div className="flex gap-1 sm:gap-2 flex-shrink-0">
                       {transaction.series_id && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
+                        <ButtonPremium
+                          variant="glass"
+                          size="sm"
                           onClick={() => handleDeleteSeries(transaction.series_id!)}
                           title="Deletar série completa"
-                          className="h-8 w-8"
+                          className="h-8 w-8 p-0"
                         >
                           <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />
-                        </Button>
+                        </ButtonPremium>
                       )}
                       {showEdit && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
+                        <ButtonPremium
+                          variant="glass"
+                          size="sm"
                           onClick={() => {
                             setEditingTransaction(transaction);
                             setShowEditDialog(true);
                           }}
-                          className="h-8 w-8"
+                          className="h-8 w-8 p-0"
                         >
                           <Pencil className="w-3 h-3 sm:w-4 sm:h-4" />
-                        </Button>
+                        </ButtonPremium>
                       )}
                       {!showEdit && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
+                        <ButtonPremium
+                          variant="glass"
+                          size="sm"
                           onClick={() => setEditingTransaction(transaction)}
-                          className="h-8 w-8"
+                          className="h-8 w-8 p-0"
                         >
                           <Pencil className="w-3 h-3 sm:w-4 sm:h-4" />
-                        </Button>
+                        </ButtonPremium>
                       )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
+                      <ButtonPremium
+                        variant="glass"
+                        size="sm"
                         onClick={() => handleDelete(transaction.id)}
-                        className="h-8 w-8"
+                        className="h-8 w-8 p-0"
                       >
                         <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </Button>
+                      </ButtonPremium>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </CardGlassContent>
+              </CardGlass>
             );
           })
         )}
           </div>
-        </CardContent>
-      </Card>
+        </CardGlassContent>
+      </CardGlass>
     </>
   );
 };
