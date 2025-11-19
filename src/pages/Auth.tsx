@@ -100,6 +100,15 @@ const Auth = () => {
     }
 
     if (data.user) {
+      // Verificar se o usuário precisa confirmar o email
+      if (!data.user.email_confirmed_at) {
+        toast.success("Conta criada! Verifique seu email para confirmar o cadastro.");
+        e.currentTarget.reset();
+        setSignupPassword("");
+        setConfirmPassword("");
+        return;
+      }
+      
       toast.success("Conta criada com sucesso! Bem-vindo ao Controle Financeiro.");
       navigate("/");
     }

@@ -10,6 +10,7 @@ import { CurrencySelector } from "@/components/CurrencySelector";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { CoverImage } from "@/components/CoverImage";
+import { EmailVerificationBanner } from "@/components/EmailVerificationBanner";
 import { Overview } from "@/pages/Overview";
 import { Transactions } from "@/pages/Transactions";
 import { Income } from "@/pages/Income";
@@ -78,6 +79,11 @@ const Dashboard = () => {
     return <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>;
+  }
+
+  // Verificar se o email foi confirmado
+  if (user && !user.email_confirmed_at) {
+    return <EmailVerificationBanner email={user.email || ""} />;
   }
   return <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
