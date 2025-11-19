@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => ({
         name: 'Controle das Contas',
         short_name: 'Controle Financeiro',
         description: 'Sistema completo de controle financeiro pessoal com gráficos, categorias personalizáveis e suporte a múltiplas moedas',
-        theme_color: '#4A90E2',
+        theme_color: '#4FC3DC',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
