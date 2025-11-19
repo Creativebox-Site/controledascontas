@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'App Contas <noreply@appcontas.creativebox.com.br>',
+        from: 'App Contas <onboarding@resend.dev>',
         to: email,
         subject: 'Recuperação de Senha - App Contas',
         html: `
