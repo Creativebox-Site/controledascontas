@@ -27,7 +27,7 @@ export const Goals = ({ userId, currency }: GoalsProps) => {
 
       <GoalsList userId={userId} currency={currency} onGoalChange={handleGoalChange} />
       <GoalsInsights key={refreshKey} userId={userId} currency={currency} />
-      <GoalsInvestmentComparison userId={userId} currency={currency} />
+      <GoalsInvestmentComparison userId={userId} currency={currency} refreshKey={refreshKey} />
     </div>
   );
 };

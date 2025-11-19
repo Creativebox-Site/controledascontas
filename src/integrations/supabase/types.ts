@@ -62,6 +62,47 @@ export type Database = {
           },
         ]
       }
+      goal_contributions: {
+        Row: {
+          amount: number
+          contribution_date: string
+          created_at: string
+          goal_id: string
+          id: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          contribution_date?: string
+          created_at?: string
+          goal_id: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          contribution_date?: string
+          created_at?: string
+          goal_id?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_contributions_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goals: {
         Row: {
           created_at: string | null
