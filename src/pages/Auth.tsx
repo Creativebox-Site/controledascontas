@@ -171,20 +171,20 @@ const Auth = () => {
     }
 
     try {
-      // Chamada direta ao Supabase para enviar e-mail de recuperação
-      // Não revela se o e-mail existe para prevenir enumeration attacks
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth`,
+      // Usar edge function personalizada para enviar e-mail com branding
+      const { data, error } = await supabase.functions.invoke('send-password-reset', {
+        body: { email }
       });
 
       setResetLoading(false);
 
-      // Mensagem genérica independente de erro para segurança
       if (error) {
-        console.error("resetPasswordForEmail error:", error);
+        console.error("send-password-reset error:", error);
+        toast.error("Erro ao processar solicitação. Tente novamente mais tarde.");
+        return;
       }
 
-      toast.success("Se este e-mail estiver cadastrado, você receberá um link de recuperação. Verifique sua caixa de entrada e spam.");
+      toast.success(data.message || "Se este e-mail estiver cadastrado, você receberá um link de recuperação. Verifique sua caixa de entrada e spam.");
       setResetDialogOpen(false);
       
       // Limpar o formulário

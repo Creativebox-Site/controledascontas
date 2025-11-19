@@ -194,19 +194,66 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Financia <onboarding@resend.dev>',
+        from: 'App Contas | Creative Box <onboarding@resend.dev>',
         to: email,
-        subject: 'Seu código de verificação',
+        subject: 'Seu código de verificação - App Contas',
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #10b981;">Seu código de verificação</h2>
-            <p>Use o código abaixo para fazer login:</p>
-            <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
-              <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #1f2937;">${code}</span>
-            </div>
-            <p style="color: #6b7280;">Este código expira em 10 minutos.</p>
-            <p style="color: #6b7280; font-size: 14px;">Se você não solicitou este código, ignore este email.</p>
-          </div>
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
+                <tr>
+                  <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
+                      <!-- Header com Logo -->
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #4FC3DC 0%, #3b82f6 100%); padding: 40px 20px; text-align: center;">
+                          <img src="https://cd8343ae-9767-42cb-917a-70fd17803bd0.lovableproject.com/pwa-512x512.png" alt="App Contas" style="width: 80px; height: 80px; margin-bottom: 16px;" />
+                          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">App Contas</h1>
+                          <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Creative Box</p>
+                        </td>
+                      </tr>
+                      
+                      <!-- Conteúdo -->
+                      <tr>
+                        <td style="padding: 40px 30px;">
+                          <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 22px; font-weight: 600;">Seu código de verificação</h2>
+                          <p style="color: #4b5563; margin: 0 0 24px 0; font-size: 16px; line-height: 1.5;">Use o código abaixo para fazer login no App Contas:</p>
+                          
+                          <!-- Código OTP -->
+                          <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px solid #4FC3DC; padding: 24px; border-radius: 12px; text-align: center; margin: 0 0 24px 0;">
+                            <span style="font-size: 36px; font-weight: bold; letter-spacing: 12px; color: #0369a1; display: inline-block;">${code}</span>
+                          </div>
+                          
+                          <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 8px; margin: 0 0 24px 0;">
+                            <p style="color: #92400e; margin: 0; font-size: 14px;">
+                              ⏱️ <strong>Este código expira em 10 minutos.</strong>
+                            </p>
+                          </div>
+                          
+                          <p style="color: #6b7280; margin: 0; font-size: 14px; line-height: 1.5;">Se você não solicitou este código, ignore este email e seu acesso permanecerá seguro.</p>
+                        </td>
+                      </tr>
+                      
+                      <!-- Footer -->
+                      <tr>
+                        <td style="background-color: #f9fafb; padding: 24px 30px; border-top: 1px solid #e5e7eb;">
+                          <p style="color: #9ca3af; margin: 0; font-size: 12px; text-align: center; line-height: 1.5;">
+                            © ${new Date().getFullYear()} App Contas | Creative Box<br/>
+                            Controle financeiro inteligente e seguro
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+          </html>
         `,
       }),
     });
