@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardGlass, CardGlassContent, CardGlassHeader, CardGlassTitle } from "@/components/ui/card-glass";
 import { TrendingUp, Target, Calendar, Sparkles } from "lucide-react";
 import { startOfMonth, endOfMonth, format, differenceInMonths } from "date-fns";
 
@@ -94,11 +94,11 @@ export const GoalsInsights = ({ userId, currency }: GoalsInsightsProps) => {
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="py-8">
+      <CardGlass variant="light" elevation="medium">
+        <CardGlassContent className="py-8">
           <div className="animate-pulse h-24 bg-muted rounded"></div>
-        </CardContent>
-      </Card>
+        </CardGlassContent>
+      </CardGlass>
     );
   }
 
@@ -179,7 +179,10 @@ export const GoalsInsights = ({ userId, currency }: GoalsInsightsProps) => {
   const Icon = mainMessage.icon;
 
   return (
-    <Card
+    <CardGlass
+      variant="light"
+      elevation="high"
+      effect="subtle"
       className={`border-l-4 ${
         mainMessage.type === "success"
           ? "border-l-success bg-success/5"
@@ -188,13 +191,13 @@ export const GoalsInsights = ({ userId, currency }: GoalsInsightsProps) => {
           : "border-l-primary bg-primary/5"
       }`}
     >
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
+      <CardGlassHeader>
+        <CardGlassTitle className="flex items-center gap-2 text-lg">
           <Icon className="w-5 h-5" />
           {mainMessage.title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+        </CardGlassTitle>
+      </CardGlassHeader>
+      <CardGlassContent>
         <p className="text-foreground mb-4">{mainMessage.message}</p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -234,7 +237,7 @@ export const GoalsInsights = ({ userId, currency }: GoalsInsightsProps) => {
             </p>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </CardGlassContent>
+    </CardGlass>
   );
 };

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardGlass, CardGlassContent, CardGlassHeader, CardGlassTitle } from "@/components/ui/card-glass";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Legend } from "recharts";
@@ -271,11 +271,11 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Evolução Personalizada</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <CardGlass variant="light" elevation="medium" effect="subtle">
+      <CardGlassHeader>
+        <CardGlassTitle>Evolução Personalizada</CardGlassTitle>
+      </CardGlassHeader>
+      <CardGlassContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="space-y-2">
             <Label>Data Inicial</Label>
@@ -433,7 +433,7 @@ export const EvolutionChart = ({ userId, currency }: EvolutionChartProps) => {
             Sem dados para exibir no período selecionado
           </div>
         )}
-      </CardContent>
-    </Card>
+      </CardGlassContent>
+    </CardGlass>
   );
 };

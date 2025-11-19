@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Plus, TrendingUp, TrendingDown, PiggyBank } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ButtonPremium } from "@/components/ui/button-premium";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,12 +17,14 @@ export const QuickActionsWidget = () => {
     <div className="fixed bottom-8 right-8 z-50">
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
-          <Button
+          <ButtonPremium
+            variant="primary"
             size="lg"
-            className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all"
+            effect="strong"
+            className="h-14 w-14 rounded-full shadow-glow-primary"
           >
             <Plus className={`h-6 w-6 transition-transform ${isOpen ? 'rotate-45' : ''}`} />
-          </Button>
+          </ButtonPremium>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 bg-background">
           <DropdownMenuItem 
