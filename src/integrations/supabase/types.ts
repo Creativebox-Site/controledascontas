@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      auth_security_events: {
+        Row: {
+          created_at: string | null
+          device_fingerprint: string | null
+          email: string | null
+          event_type: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          request_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          device_fingerprint?: string | null
+          email?: string | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          request_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          device_fingerprint?: string | null
+          email?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          request_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           color: string | null
@@ -61,6 +97,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      email_otps: {
+        Row: {
+          attempts: number | null
+          code_hash: string
+          created_at: string | null
+          device_fingerprint: string | null
+          email: string
+          expires_at: string
+          id: string
+          ip_address: string | null
+          request_id: string
+          salt: string
+          user_agent: string | null
+          verified: boolean | null
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number | null
+          code_hash: string
+          created_at?: string | null
+          device_fingerprint?: string | null
+          email: string
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          request_id: string
+          salt: string
+          user_agent?: string | null
+          verified?: boolean | null
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number | null
+          code_hash?: string
+          created_at?: string | null
+          device_fingerprint?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          request_id?: string
+          salt?: string
+          user_agent?: string | null
+          verified?: boolean | null
+          verified_at?: string | null
+        }
+        Relationships: []
       }
       goal_contributions: {
         Row: {
@@ -189,6 +273,36 @@ export type Database = {
           timezone?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      otp_rate_limits: {
+        Row: {
+          action: string
+          count: number | null
+          created_at: string | null
+          id: string
+          identifier: string
+          type: string
+          window_start: string | null
+        }
+        Insert: {
+          action: string
+          count?: number | null
+          created_at?: string | null
+          id?: string
+          identifier: string
+          type: string
+          window_start?: string | null
+        }
+        Update: {
+          action?: string
+          count?: number | null
+          created_at?: string | null
+          id?: string
+          identifier?: string
+          type?: string
+          window_start?: string | null
         }
         Relationships: []
       }
@@ -547,11 +661,45 @@ export type Database = {
           },
         ]
       }
+      trusted_devices: {
+        Row: {
+          created_at: string | null
+          device_fingerprint: string
+          device_name: string | null
+          id: string
+          ip_address: string | null
+          last_used_at: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_fingerprint: string
+          device_name?: string | null
+          id?: string
+          ip_address?: string | null
+          last_used_at?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_fingerprint?: string
+          device_name?: string | null
+          id?: string
+          ip_address?: string | null
+          last_used_at?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      cleanup_expired_otps: { Args: never; Returns: undefined }
       create_default_categories: {
         Args: { p_user_id: string }
         Returns: undefined
