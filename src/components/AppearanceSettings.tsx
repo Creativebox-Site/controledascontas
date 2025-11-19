@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Image as ImageIcon, Smile, Palette } from "lucide-react";
+import { Image as ImageIcon, Smile } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,8 +8,6 @@ import { toast } from "sonner";
 import { AvatarImageEditor } from "./AvatarImageEditor";
 import { EmojiPickerDialog } from "./EmojiPickerDialog";
 import { CoverImage } from "./CoverImage";
-import { ThemeToggle } from "./ThemeToggle";
-import { ColorEditor } from "./ColorEditor";
 interface AppearanceSettingsProps {
   userId?: string;
 }
@@ -102,11 +100,6 @@ export const AppearanceSettings = ({
   const isEmoji = avatarUrl.length <= 4;
   return <div className="space-y-6">
       <Card>
-        
-        
-      </Card>
-
-      <Card>
         <CardHeader>
           <CardTitle>Foto de Perfil</CardTitle>
           <CardDescription>
@@ -137,23 +130,6 @@ export const AppearanceSettings = ({
             </div>
           </div>
           <input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
-        </CardContent>
-      </Card>
-
-      <ColorEditor />
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <Palette className="w-5 h-5" />
-            Tema
-          </CardTitle>
-          <CardDescription className="text-xs sm:text-sm">
-            Escolha entre temas padrão, daltônicos ou personalizado
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ThemeToggle />
         </CardContent>
       </Card>
 
