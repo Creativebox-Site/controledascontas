@@ -338,14 +338,14 @@ All colors MUST be HSL.
   /* Responsive Design Tokens */
   :root {
     /* Escala tipográfica fluida com ratio 1.125 (major second) */
-    --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);    /* 12-14px */
-    --font-size-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);      /* 14-16px */
-    --font-size-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);      /* 16-18px */
-    --font-size-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);     /* 18-20px */
-    --font-size-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);      /* 20-24px */
-    --font-size-2xl: clamp(1.5rem, 1.3rem + 1vw, 2rem);           /* 24-32px */
-    --font-size-3xl: clamp(1.875rem, 1.6rem + 1.375vw, 2.5rem);   /* 30-40px */
-    --font-size-4xl: clamp(2.25rem, 1.9rem + 1.75vw, 3rem);       /* 36-48px */
+    --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.8125rem);   /* 12-13px */
+    --font-size-sm: clamp(0.875rem, 0.8rem + 0.375vw, 0.9375rem); /* 14-15px */
+    --font-size-base: clamp(1rem, 0.9rem + 0.5vw, 1rem);          /* 16-16px */
+    --font-size-lg: clamp(1.125rem, 1rem + 0.625vw, 1.125rem);    /* 18-18px */
+    --font-size-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.375rem);    /* 20-22px */
+    --font-size-2xl: clamp(1.5rem, 1.3rem + 1vw, 1.75rem);        /* 24-28px */
+    --font-size-3xl: clamp(1.875rem, 1.6rem + 1.375vw, 2.125rem); /* 30-34px */
+    --font-size-4xl: clamp(2.25rem, 1.9rem + 1.75vw, 2.5rem);     /* 36-40px */
     
     /* Line-heights proporcionais */
     --line-height-tight: 1.25;
