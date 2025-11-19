@@ -13,7 +13,6 @@ import { Eye, EyeOff, ShieldCheck, Mail, X, Lock } from "lucide-react";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import logoCreativeBox from "@/assets/logo-creative-box.png";
 import { OtpLoginForm } from "@/components/OtpLoginForm";
-import { FontSizeSelector } from "@/components/FontSizeSelector";
 import { signUpSchema, validatePassword, passwordSchema } from "@/lib/passwordValidation";
 
 const Auth = () => {
@@ -245,9 +244,6 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
-      <div className="absolute top-4 right-4">
-        <FontSizeSelector />
-      </div>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center">

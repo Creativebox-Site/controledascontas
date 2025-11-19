@@ -8,8 +8,6 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { ProfileMenu } from "@/components/ProfileMenu";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { FontSizeSelector } from "@/components/FontSizeSelector";
 import { CoverImage } from "@/components/CoverImage";
 import { EmailVerificationBanner } from "@/components/EmailVerificationBanner";
 import { Overview } from "@/pages/Overview";
@@ -104,8 +102,6 @@ const Dashboard = () => {
               </div>
               <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto justify-end">
                 <CurrencySelector value={preferredCurrency} onChange={setPreferredCurrency} userId={user?.id} />
-                <FontSizeSelector />
-                <ThemeToggle />
                 <ProfileMenu userId={user?.id} />
               </div>
             </div>

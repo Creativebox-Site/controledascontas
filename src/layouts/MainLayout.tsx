@@ -1,13 +1,11 @@
 import { useNavigate, Outlet } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { ProfileMenu } from "@/components/ProfileMenu";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { FontSizeSelector } from "@/components/FontSizeSelector";
+import { AppearanceCustomizer } from "@/components/AppearanceCustomizer";
 import { CoverImage } from "@/components/CoverImage";
 import { EmailVerificationBanner } from "@/components/EmailVerificationBanner";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -62,8 +60,7 @@ export const MainLayout = () => {
                   value={currency}
                   onChange={setCurrency}
                 />
-                <FontSizeSelector />
-                <ThemeToggle />
+                <AppearanceCustomizer />
                 <ProfileMenu />
               </div>
             </div>
