@@ -96,9 +96,19 @@ export function OtpLoginForm() {
       }
     } catch (error: any) {
       console.error("Error sending OTP:", error);
-      toast.error("Erro ao enviar código", {
-        description: error.message || "Tente novamente em alguns instantes",
-      });
+      
+      // Verificar se é erro do Resend em modo de teste
+      const errorMsg = error.message || "";
+      if (errorMsg.includes("validation_error") || errorMsg.includes("testing emails")) {
+        toast.error("Email não pode ser enviado", {
+          description: "O sistema de email está em modo de teste. Contate o administrador.",
+          duration: 6000,
+        });
+      } else {
+        toast.error("Erro ao enviar código", {
+          description: error.message || "Tente novamente em alguns instantes",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
