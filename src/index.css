@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Font size variants */
+:root.font-size-small {
+  font-size: 14px;
+}
+
+:root.font-size-medium {
+  font-size: 16px;
+}
+
+:root.font-size-large {
+  font-size: 18px;
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
