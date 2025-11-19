@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardGlass, CardGlassContent, CardGlassHeader, CardGlassTitle } from "@/components/ui/card-glass";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Calendar, DollarSign, Sparkles } from "lucide-react";
 import { differenceInMonths, addMonths, format } from "date-fns";
@@ -161,11 +161,11 @@ export const GoalsInvestmentComparison = ({
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="py-8">
+      <CardGlass variant="light" elevation="medium">
+        <CardGlassContent className="py-8">
           <div className="animate-pulse h-64 bg-muted rounded"></div>
-        </CardContent>
-      </Card>
+        </CardGlassContent>
+      </CardGlass>
     );
   }
 
@@ -174,18 +174,18 @@ export const GoalsInvestmentComparison = ({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <CardGlass variant="gradient" elevation="high" effect="subtle">
+      <CardGlassHeader>
+        <CardGlassTitle className="flex items-center gap-2">
           <TrendingUp className="w-5 h-5" />
           Alcance Suas Metas Mais Rápido com Investimentos
-        </CardTitle>
+        </CardGlassTitle>
         <p className="text-sm text-muted-foreground mt-2">
           Com sua economia mensal de {formatCurrency(monthlySavings)}, veja quanto tempo
           você economiza investindo ao invés de apenas guardar dinheiro
         </p>
-      </CardHeader>
-      <CardContent>
+      </CardGlassHeader>
+      <CardGlassContent>
         <Tabs defaultValue={goals[0]?.id} className="w-full">
           <TabsList className="w-full grid" style={{ gridTemplateColumns: `repeat(${Math.min(goals.length, 3)}, 1fr)` }}>
             {goals.map((goal) => (
@@ -319,7 +319,7 @@ export const GoalsInvestmentComparison = ({
             passadas não garantem retornos futuros.
           </p>
         </div>
-      </CardContent>
-    </Card>
+      </CardGlassContent>
+    </CardGlass>
   );
 };

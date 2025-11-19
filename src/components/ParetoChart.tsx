@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardGlass, CardGlassContent, CardGlassHeader, CardGlassTitle } from "@/components/ui/card-glass";
 import {
   ComposedChart,
   Bar,
@@ -130,27 +130,27 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
 
   if (paretoData.data.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Onde está indo 80% do meu dinheiro?</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <CardGlass variant="light" elevation="medium">
+        <CardGlassHeader>
+          <CardGlassTitle>Onde está indo 80% do meu dinheiro?</CardGlassTitle>
+        </CardGlassHeader>
+        <CardGlassContent>
           <div className="h-[400px] flex items-center justify-center text-muted-foreground">
             Sem dados de despesas para exibir
           </div>
-        </CardContent>
-      </Card>
+        </CardGlassContent>
+      </CardGlass>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <CardGlass variant="light" elevation="high" effect="subtle">
+      <CardGlassHeader>
         <div className="flex items-center justify-between gap-4 flex-wrap">
-          <CardTitle className="flex items-center gap-2">
+          <CardGlassTitle className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-warning" />
             Onde está indo 80% do meu dinheiro?
-          </CardTitle>
+          </CardGlassTitle>
           
           <Select value={expenseFilter} onValueChange={(value) => setExpenseFilter(value as any)}>
             <SelectTrigger className="w-[220px] bg-background">
@@ -163,8 +163,8 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
             </SelectContent>
           </Select>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      </CardGlassHeader>
+      <CardGlassContent className="space-y-4">
         {isMobile ? (
           // Visualização Mobile/Tablet - Lista das categorias principais
           <div className="space-y-3">
@@ -183,8 +183,8 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
             </div>
 
             {paretoData.data.filter(item => item.isFocus).map((item, index) => (
-              <Card key={index} className="border-l-4" style={{ borderLeftColor: item.color }}>
-                <CardContent className="p-4">
+              <CardGlass key={index} variant="light" padding="sm" className="border-l-4" style={{ borderLeftColor: item.color }}>
+                <CardGlassContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
@@ -201,8 +201,8 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
                       <span>Acumulado</span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </CardGlassContent>
+              </CardGlass>
             ))}
           </div>
         ) : (
@@ -303,7 +303,7 @@ export const ParetoChart = ({ categoryData, formatCurrency }: ParetoChartProps) 
             </div>
           </>
         )}
-      </CardContent>
-    </Card>
+      </CardGlassContent>
+    </CardGlass>
   );
 };

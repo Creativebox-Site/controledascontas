@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardGlass, CardGlassContent, CardGlassHeader, CardGlassTitle } from "@/components/ui/card-glass";
 import {
   AreaChart,
   Area,
@@ -111,25 +111,25 @@ export const MonthlyEvolutionChart = ({
 
   if (monthlyData.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Evolução Mensal</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <CardGlass variant="light" elevation="medium">
+        <CardGlassHeader>
+          <CardGlassTitle>Evolução Mensal</CardGlassTitle>
+        </CardGlassHeader>
+        <CardGlassContent>
           <div className="h-[400px] flex items-center justify-center text-muted-foreground">
             Sem dados para exibir
           </div>
-        </CardContent>
-      </Card>
+        </CardGlassContent>
+      </CardGlass>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Evolução Mensal - Composição Financeira</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <CardGlass variant="light" elevation="medium" effect="subtle">
+      <CardGlassHeader>
+        <CardGlassTitle>Evolução Mensal - Composição Financeira</CardGlassTitle>
+      </CardGlassHeader>
+      <CardGlassContent className="space-y-4">
         <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <Info className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
@@ -207,7 +207,7 @@ export const MonthlyEvolutionChart = ({
             )}
           </AreaChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+      </CardGlassContent>
+    </CardGlass>
   );
 };
