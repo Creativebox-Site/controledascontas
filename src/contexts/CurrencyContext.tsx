@@ -38,12 +38,17 @@ export const CurrencyProvider = ({ children }: CurrencyProviderProps) => {
       setUser(session?.user ?? null);
       
       // Não redirecionar em rotas públicas
-      const publicRoutes = ['/auth', '/install'];
+      const publicRoutes = ['/auth', '/install', '/onboarding'];
       const currentPath = window.location.pathname;
       const isPublicRoute = publicRoutes.some(route => currentPath.startsWith(route));
       
       if (!session && !isPublicRoute) {
         navigate("/auth");
+      }
+      
+      // Verificar onboarding após login
+      if (session?.user && !isPublicRoute) {
+        checkOnboarding(session.user.id);
       }
     });
 
@@ -53,17 +58,38 @@ export const CurrencyProvider = ({ children }: CurrencyProviderProps) => {
       setLoading(false);
       
       // Não redirecionar em rotas públicas
-      const publicRoutes = ['/auth', '/install'];
+      const publicRoutes = ['/auth', '/install', '/onboarding'];
       const currentPath = window.location.pathname;
       const isPublicRoute = publicRoutes.some(route => currentPath.startsWith(route));
       
       if (!session && !isPublicRoute) {
         navigate("/auth");
       }
+      
+      // Verificar onboarding após login
+      if (session?.user && !isPublicRoute) {
+        checkOnboarding(session.user.id);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+  
+  const checkOnboarding = async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', userId)
+        .single();
+      
+      if (data && !data.onboarding_completed) {
+        navigate('/onboarding');
+      }
+    } catch (error) {
+      console.error('Error checking onboarding:', error);
+    }
+  };
 
   useEffect(() => {
     if (user) {
