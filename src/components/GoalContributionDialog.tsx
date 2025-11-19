@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { ButtonPremium } from "@/components/ui/button-premium";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -150,7 +150,7 @@ export const GoalContributionDialog = ({
             </p>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <form onSubmit={handleSubmit} className="space-y-4 mt-4 animate-fade-in">
             <div>
               <Label>Valor do Aporte *</Label>
               <div className="relative">
@@ -197,17 +197,17 @@ export const GoalContributionDialog = ({
             </div>
 
             <div className="flex gap-2 pt-2">
-              <Button type="submit" className="flex-1">
+              <ButtonPremium type="submit" variant="primary" className="flex-1">
                 <DollarSign className="w-4 h-4 mr-2" />
                 Registrar Aporte
-              </Button>
-              <Button
+              </ButtonPremium>
+              <ButtonPremium
                 type="button"
-                variant="outline"
+                variant="glass"
                 onClick={() => onOpenChange(false)}
               >
                 Cancelar
-              </Button>
+              </ButtonPremium>
             </div>
           </form>
         </ScrollIndicator>

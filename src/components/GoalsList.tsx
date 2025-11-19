@@ -362,7 +362,7 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
                 Pressione Ctrl+Enter para salvar ou ESC para cancelar
               </p>
             </DialogHeader>
-            <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
             <div>
               <Label>Tipo de Meta</Label>
               <Select
@@ -458,7 +458,7 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
               />
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 animate-fade-in">
               <ButtonPremium type="submit" variant="primary" size="sm" className="flex-1">
                 {editingGoal ? "Atualizar" : "Criar"} Meta
               </ButtonPremium>

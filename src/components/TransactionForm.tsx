@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
+import { ButtonPremium } from "@/components/ui/button-premium";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -312,7 +312,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-3 animate-fade-in">
           {!defaultType && (
             <div className="space-y-2">
               <Label>Tipo</Label>
@@ -536,16 +536,16 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
             )}
           </div>
 
-          <div className="flex gap-2">
-            <Button type="submit" className="flex-1">
+          <div className="flex gap-2 animate-fade-in">
+            <ButtonPremium type="submit" variant="primary" className="flex-1">
               {transaction 
                 ? (convertToRecurring ? "Converter em Série" : "Atualizar")
                 : (isRecurring ? "Criar Série" : "Criar")
               }
-            </Button>
-          <Button type="button" variant="outline" onClick={onClose}>
+            </ButtonPremium>
+          <ButtonPremium type="button" variant="glass" onClick={onClose}>
             Cancelar
-          </Button>
+          </ButtonPremium>
         </div>
       </form>
   );
