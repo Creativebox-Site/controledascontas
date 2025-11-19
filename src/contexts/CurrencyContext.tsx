@@ -36,7 +36,13 @@ export const CurrencyProvider = ({ children }: CurrencyProviderProps) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (!session) {
+      
+      // Não redirecionar em rotas públicas
+      const publicRoutes = ['/auth', '/install'];
+      const currentPath = window.location.pathname;
+      const isPublicRoute = publicRoutes.some(route => currentPath.startsWith(route));
+      
+      if (!session && !isPublicRoute) {
         navigate("/auth");
       }
     });
@@ -45,7 +51,13 @@ export const CurrencyProvider = ({ children }: CurrencyProviderProps) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-      if (!session) {
+      
+      // Não redirecionar em rotas públicas
+      const publicRoutes = ['/auth', '/install'];
+      const currentPath = window.location.pathname;
+      const isPublicRoute = publicRoutes.some(route => currentPath.startsWith(route));
+      
+      if (!session && !isPublicRoute) {
         navigate("/auth");
       }
     });
