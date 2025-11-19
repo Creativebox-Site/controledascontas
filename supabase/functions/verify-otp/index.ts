@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
       .eq('verified', false)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (otpError || !otpData) {
       console.log('OTP not found or already verified');
@@ -146,22 +146,6 @@ Deno.serve(async (req) => {
       })
       .eq('id', otpData.id);
 
-    // Registrar dispositivo confiável se fornecido
-    if (deviceFingerprint) {
-      const { data: existingDevice } = await supabase
-        .from('trusted_devices')
-        .select('id')
-        .eq('device_fingerprint', deviceFingerprint)
-        .single();
-
-      if (existingDevice) {
-        await supabase
-          .from('trusted_devices')
-          .update({ last_used_at: new Date().toISOString() })
-          .eq('id', existingDevice.id);
-      }
-    }
-
     // Registrar evento de sucesso
     await supabase.from('auth_security_events').insert({
       email,
@@ -173,12 +157,13 @@ Deno.serve(async (req) => {
 
     console.log(`OTP verified successfully for ${email}`);
 
-    // Buscar ou criar usuário
-    const { data: { user }, error: authError } = await supabase.auth.admin.getUserById(email);
+    // Buscar usuário por email
+    const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
     
-    let userId = user?.id;
+    let existingUser = users?.find(u => u.email === email);
+    let userId = existingUser?.id;
 
-    if (!user) {
+    if (!existingUser) {
       // Criar novo usuário
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
         email,
@@ -194,6 +179,23 @@ Deno.serve(async (req) => {
       }
 
       userId = newUser.user?.id;
+    }
+
+    // Registrar dispositivo confiável se fornecido
+    if (deviceFingerprint && userId) {
+      const { data: existingDevice } = await supabase
+        .from('trusted_devices')
+        .select('id')
+        .eq('device_fingerprint', deviceFingerprint)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (existingDevice) {
+        await supabase
+          .from('trusted_devices')
+          .update({ last_used_at: new Date().toISOString() })
+          .eq('id', existingDevice.id);
+      }
     }
 
     // Gerar session token
