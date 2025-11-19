@@ -30,6 +30,10 @@ const Auth = () => {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  
+  // Wizard state
+  const [signupStep, setSignupStep] = useState<'form' | 'otp'>('form');
+  const [signupEmail, setSignupEmail] = useState("");
 
   useEffect(() => {
     // Detectar se o usuário veio de um link de recuperação de senha
@@ -54,38 +58,25 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
-
+    
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    const confirmPassword = formData.get("confirmPassword") as string;
-    const fullName = formData.get("fullName") as string;
-
-    // Validação com zod
-    try {
-      signUpSchema.parse({ fullName, email, password, confirmPassword });
-    } catch (error: any) {
-      setLoading(false);
-      const firstError = error.errors?.[0]?.message || "Erro na validação dos dados";
-      toast.error(firstError);
+    const confirmPasswordValue = formData.get("confirmPassword") as string;
+    
+    // Validação: senha deve ser igual à confirmação
+    if (password !== confirmPasswordValue) {
+      toast.error("As senhas não coincidem");
       return;
     }
-
-    // Validação extra de senha forte
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.isValid) {
-      setLoading(false);
-      toast.error(passwordValidation.errors[0]);
-      return;
-    }
+    
+    setLoading(true);
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/`,
-        data: { full_name: fullName }
+        emailRedirectTo: `${window.location.origin}/`
       }
     });
 
@@ -101,16 +92,31 @@ const Auth = () => {
     }
 
     if (data.user) {
-      // Verificar se o usuário precisa confirmar o email
-      if (!data.user.email_confirmed_at) {
-        toast.success("Conta criada! Verifique seu email para confirmar o cadastro.");
-        e.currentTarget.reset();
-        setSignupPassword("");
-        setConfirmPassword("");
-        return;
-      }
-      
-      toast.success("Conta criada com sucesso! Bem-vindo ao Controle Financeiro.");
+      // Mudar para etapa OTP sem fazer login
+      setSignupEmail(email);
+      setSignupStep('otp');
+      toast.success("Código enviado com sucesso");
+    }
+  };
+  
+  const handleVerifySignupOtp = async (token: string) => {
+    setLoading(true);
+    
+    const { data, error } = await supabase.auth.verifyOtp({
+      email: signupEmail,
+      token,
+      type: 'signup'
+    });
+    
+    setLoading(false);
+    
+    if (error) {
+      toast.error("Código inválido ou expirado");
+      return;
+    }
+    
+    if (data.user) {
+      toast.success("Cadastro validado com sucesso!");
       navigate("/");
     }
   };
