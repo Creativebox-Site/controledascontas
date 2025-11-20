@@ -43,7 +43,7 @@ export const MainLayout = () => {
         <div className="flex-1 flex flex-col w-full">
           {/* Header fixo */}
           <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-3 sm:px-4 py-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-4 sm:px-6 md:px-8 py-3">
               <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
                 <SidebarTrigger />
                 <div className="flex items-center gap-2">
@@ -71,7 +71,7 @@ export const MainLayout = () => {
           <CoverImage userId={user?.id} />
 
           {/* Área de conteúdo - renderiza as páginas filhas */}
-          <main className="flex-1 w-full">
+          <main className="flex-1 w-full px-4 sm:px-6 md:px-8 py-6">
             <Outlet />
           </main>
         </div>
