@@ -28,18 +28,24 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Obter a URL base da aplicação
-    const origin = req.headers.get('origin') || 'https://bmcpznzahqahiujyfkuj.lovableproject.com';
-    const redirectTo = `${origin}/update-password`;
-
-    // Gerar token de recuperação
-    const { data, error } = await supabase.auth.admin.generateLink({
+    // Obter a URL base da aplicação - usar a URL do header origin se disponível
+    // Caso contrário, não especificar redirectTo e deixar o Supabase usar o Site URL configurado
+    const origin = req.headers.get('origin');
+    
+    const generateLinkOptions: any = {
       type: 'recovery',
       email: email,
-      options: {
-        redirectTo: redirectTo
-      }
-    });
+    };
+    
+    // Só adicionar redirectTo se houver um origin válido no header
+    if (origin && !origin.includes('.lovableproject.com')) {
+      generateLinkOptions.options = {
+        redirectTo: `${origin}/update-password`
+      };
+    }
+
+    // Gerar token de recuperação
+    const { data, error } = await supabase.auth.admin.generateLink(generateLinkOptions);
 
     if (error) {
       console.error('Error generating recovery link:', error);
