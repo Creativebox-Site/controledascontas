@@ -15,7 +15,6 @@ import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicato
 import logoCreativeBox from "@/assets/logo-creative-box.png";
 import { OtpLoginForm } from "@/components/OtpLoginForm";
 import { signUpSchema, validatePassword, passwordSchema } from "@/lib/passwordValidation";
-
 const Auth = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -31,58 +30,56 @@ const Auth = () => {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
-  
+
   // Wizard state
   const [signupStep, setSignupStep] = useState<'form' | 'otp'>('form');
   const [signupEmail, setSignupEmail] = useState("");
-
   useEffect(() => {
     // Detectar se o usuário veio de um link de recuperação de senha
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const type = hashParams.get('type');
-    
     if (type === 'recovery') {
       setUpdatePasswordDialogOpen(true);
     }
 
     // Ouvir eventos do Supabase para detectar PASSWORD_RECOVERY (mais robusto)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: {
+        subscription
+      }
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setUpdatePasswordDialogOpen(true);
       }
     });
-
     return () => {
       subscription.unsubscribe();
     };
   }, []);
-
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const confirmPasswordValue = formData.get("confirmPassword") as string;
-    
+
     // Validação: senha deve ser igual à confirmação
     if (password !== confirmPasswordValue) {
       toast.error("As senhas não coincidem");
       return;
     }
-    
     setLoading(true);
-
-    const { data, error } = await supabase.auth.signUp({
+    const {
+      data,
+      error
+    } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/`
       }
     });
-
     setLoading(false);
-
     if (error) {
       if (error.message.includes("already registered")) {
         toast.error("Este email já está cadastrado. Tente fazer login.");
@@ -91,7 +88,6 @@ const Auth = () => {
       }
       return;
     }
-
     if (data.user) {
       // Mudar para etapa OTP sem fazer login
       setSignupEmail(email);
@@ -99,48 +95,44 @@ const Auth = () => {
       toast.success("Código enviado com sucesso");
     }
   };
-  
   const handleVerifySignupOtp = async (token: string) => {
     setLoading(true);
-    
-    const { data, error } = await supabase.auth.verifyOtp({
+    const {
+      data,
+      error
+    } = await supabase.auth.verifyOtp({
       email: signupEmail,
       token,
       type: 'signup'
     });
-    
     setLoading(false);
-    
     if (error) {
       toast.error("Código inválido ou expirado");
       return;
     }
-    
     if (data.user) {
       toast.success("Cadastro validado com sucesso!");
       navigate("/");
     }
   };
-
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-
     if (!email || !password) {
       toast.error("Por favor, preencha email e senha");
       setLoading(false);
       return;
     }
-
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const {
+      data,
+      error
+    } = await supabase.auth.signInWithPassword({
       email,
-      password,
+      password
     });
-
     if (error) {
       setLoading(false);
       if (error.message.includes("Invalid login credentials")) {
@@ -150,19 +142,15 @@ const Auth = () => {
       }
       return;
     }
-
     setLoading(false);
     toast.success("Login realizado com sucesso! Bem-vindo de volta.");
     navigate("/");
   };
-
   const handlePasswordReset = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setResetLoading(true);
-
     const formData = new FormData(e.currentTarget);
     const email = (formData.get("reset-email") as string || "").trim();
-
     if (!email) {
       toast.error("Email é obrigatório");
       setResetLoading(false);
@@ -176,24 +164,25 @@ const Auth = () => {
       setResetLoading(false);
       return;
     }
-
     try {
       // Usar edge function personalizada para enviar e-mail com branding
-      const { data, error } = await supabase.functions.invoke('send-password-reset', {
-        body: { email }
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          email
+        }
       });
-
       setResetLoading(false);
-
       if (error) {
         console.error("send-password-reset error:", error);
         toast.error("Erro ao processar solicitação. Tente novamente mais tarde.");
         return;
       }
-
       toast.success(data.message || "Se este e-mail estiver cadastrado, você receberá um link de recuperação. Verifique sua caixa de entrada e spam.");
       setResetDialogOpen(false);
-      
+
       // Limpar o formulário
       (e.target as HTMLFormElement).reset();
     } catch (error: any) {
@@ -202,17 +191,14 @@ const Auth = () => {
       toast.error("Erro ao processar solicitação. Tente novamente mais tarde.");
     }
   };
-
   const handleUpdatePassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-
     if (!newPassword || !confirmNewPassword) {
       toast.error("Preencha todos os campos");
       setLoading(false);
       return;
     }
-
     if (newPassword !== confirmNewPassword) {
       toast.error("As senhas não coincidem");
       setLoading(false);
@@ -228,29 +214,25 @@ const Auth = () => {
       setLoading(false);
       return;
     }
-
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
+    const {
+      error
+    } = await supabase.auth.updateUser({
+      password: newPassword
     });
-
     setLoading(false);
-
     if (error) {
       toast.error("Erro ao atualizar senha: " + error.message);
       return;
     }
-
     toast.success("Senha atualizada com sucesso! Faça login com sua nova senha.");
     setUpdatePasswordDialogOpen(false);
     setNewPassword("");
     setConfirmNewPassword("");
-    
+
     // Limpar o hash da URL
     window.history.replaceState(null, "", window.location.pathname);
   };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
+  return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center">
@@ -258,7 +240,7 @@ const Auth = () => {
               <img src={logoCreativeBox} alt="Creative Box Logo" className="w-full h-full object-contain" />
             </div>
           </div>
-          <CardTitle className="text-2xl animate-fade-in">App Contas | Creative Box</CardTitle>
+          <CardTitle className="text-2xl animate-fade-in">App Controle | Creative Box</CardTitle>
           <CardDescription>Gerencie suas finanças de forma inteligente</CardDescription>
         </CardHeader>
         <CardContent>
@@ -283,26 +265,9 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="login-password">Senha</Label>
                   <div className="relative">
-                    <Input 
-                      id="login-password" 
-                      name="password" 
-                      type={showLoginPassword ? "text" : "password"} 
-                      placeholder="••••••" 
-                      required 
-                      className="pr-10"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                      onClick={() => setShowLoginPassword(!showLoginPassword)}
-                    >
-                      {showLoginPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      )}
+                    <Input id="login-password" name="password" type={showLoginPassword ? "text" : "password"} placeholder="••••••" required className="pr-10" />
+                    <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowLoginPassword(!showLoginPassword)}>
+                      {showLoginPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                     </Button>
                   </div>
                 </div>
@@ -329,13 +294,7 @@ const Auth = () => {
                       <form onSubmit={handlePasswordReset} className="space-y-4">
                         <div className="space-y-2">
                           <Label htmlFor="reset-email">Email cadastrado</Label>
-                          <Input 
-                            id="reset-email" 
-                            name="reset-email" 
-                            type="email" 
-                            placeholder="seu@email.com" 
-                            required 
-                          />
+                          <Input id="reset-email" name="reset-email" type="email" placeholder="seu@email.com" required />
                         </div>
                         <Alert>
                           <ShieldCheck className="h-4 w-4" />
@@ -359,8 +318,7 @@ const Auth = () => {
             </TabsContent>
             
             <TabsContent value="signup">
-              {signupStep === 'form' ? (
-                <form onSubmit={handleSignUp} className="space-y-4">
+              {signupStep === 'form' ? <form onSubmit={handleSignUp} className="space-y-4">
                   <Alert className="mb-4">
                     <AlertDescription className="text-xs text-muted-foreground">
                       Já tem uma conta? Use a aba <strong>Senha</strong> para fazer login.
@@ -368,40 +326,14 @@ const Auth = () => {
                   </Alert>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
-                    <Input 
-                      id="signup-email" 
-                      name="email" 
-                      type="email" 
-                      placeholder="seu@email.com"
-                      required 
-                      maxLength={255}
-                    />
+                    <Input id="signup-email" name="email" type="email" placeholder="seu@email.com" required maxLength={255} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Senha</Label>
                     <div className="relative">
-                      <Input 
-                        id="signup-password" 
-                        name="password" 
-                        type={showSignupPassword ? "text" : "password"} 
-                        placeholder="Senha segura" 
-                        required 
-                        className="pr-10"
-                        value={signupPassword}
-                        onChange={(e) => setSignupPassword(e.target.value)}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                        onClick={() => setShowSignupPassword(!showSignupPassword)}
-                      >
-                        {showSignupPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        )}
+                      <Input id="signup-password" name="password" type={showSignupPassword ? "text" : "password"} placeholder="Senha segura" required className="pr-10" value={signupPassword} onChange={e => setSignupPassword(e.target.value)} />
+                      <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowSignupPassword(!showSignupPassword)}>
+                        {showSignupPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                       </Button>
                     </div>
                     <PasswordStrengthIndicator password={signupPassword} />
@@ -409,49 +341,24 @@ const Auth = () => {
                   <div className="space-y-2">
                     <Label htmlFor="confirm-password">Confirmar Senha</Label>
                     <div className="relative">
-                      <Input 
-                        id="confirm-password" 
-                        name="confirmPassword" 
-                        type={showConfirmPassword ? "text" : "password"} 
-                        placeholder="Digite a senha novamente" 
-                        required 
-                        className="pr-10"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      >
-                        {showConfirmPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        )}
+                      <Input id="confirm-password" name="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Digite a senha novamente" required className="pr-10" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+                      <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                       </Button>
                     </div>
-                    {confirmPassword && signupPassword !== confirmPassword && (
-                      <p className="text-xs text-destructive flex items-center gap-1">
+                    {confirmPassword && signupPassword !== confirmPassword && <p className="text-xs text-destructive flex items-center gap-1">
                         <X className="w-3 h-3" />
                         As senhas não coincidem
-                      </p>
-                    )}
-                    {confirmPassword && signupPassword === confirmPassword && (
-                      <p className="text-xs text-green-600 flex items-center gap-1">
+                      </p>}
+                    {confirmPassword && signupPassword === confirmPassword && <p className="text-xs text-green-600 flex items-center gap-1">
                         <ShieldCheck className="w-3 h-3" />
                         Senhas coincidem
-                      </p>
-                    )}
+                      </p>}
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Criando conta..." : "Criar conta com segurança"}
                   </Button>
-                </form>
-              ) : (
-                <div className="space-y-6">
+                </form> : <div className="space-y-6">
                   <div className="text-center space-y-2">
                     <div className="flex justify-center mb-4">
                       <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -466,10 +373,7 @@ const Auth = () => {
                   
                   <div className="space-y-4">
                     <div className="flex justify-center">
-                      <InputOTP
-                        maxLength={6}
-                        onComplete={handleVerifySignupOtp}
-                      >
+                      <InputOTP maxLength={6} onComplete={handleVerifySignupOtp}>
                         <InputOTPGroup>
                           <InputOTPSlot index={0} />
                           <InputOTPSlot index={1} />
@@ -481,21 +385,15 @@ const Auth = () => {
                       </InputOTP>
                     </div>
                     
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="w-full"
-                      onClick={() => {
-                        setSignupStep('form');
-                        setSignupEmail("");
-                      }}
-                    >
+                    <Button type="button" variant="ghost" className="w-full" onClick={() => {
+                  setSignupStep('form');
+                  setSignupEmail("");
+                }}>
                       <ArrowLeft className="w-4 h-4 mr-2" />
                       Voltar ao formulário
                     </Button>
                   </div>
-                </div>
-              )}
+                </div>}
             </TabsContent>
             
             <TabsContent value="otp" className="mt-6">
@@ -528,27 +426,9 @@ const Auth = () => {
             <div className="space-y-2">
               <Label htmlFor="new-password">Nova Senha</Label>
               <div className="relative">
-                <Input
-                  id="new-password"
-                  type={showNewPassword ? "text" : "password"}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Digite sua nova senha"
-                  required
-                  className="pr-10"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                >
-                  {showNewPassword ? (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                  )}
+                <Input id="new-password" type={showNewPassword ? "text" : "password"} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Digite sua nova senha" required className="pr-10" />
+                <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowNewPassword(!showNewPassword)}>
+                  {showNewPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                 </Button>
               </div>
               <PasswordStrengthIndicator password={newPassword} />
@@ -557,41 +437,19 @@ const Auth = () => {
             <div className="space-y-2">
               <Label htmlFor="confirm-new-password">Confirmar Nova Senha</Label>
               <div className="relative">
-                <Input
-                  id="confirm-new-password"
-                  type={showConfirmNewPassword ? "text" : "password"}
-                  value={confirmNewPassword}
-                  onChange={(e) => setConfirmNewPassword(e.target.value)}
-                  placeholder="Digite a senha novamente"
-                  required
-                  className="pr-10"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                  onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
-                >
-                  {showConfirmNewPassword ? (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                  )}
+                <Input id="confirm-new-password" type={showConfirmNewPassword ? "text" : "password"} value={confirmNewPassword} onChange={e => setConfirmNewPassword(e.target.value)} placeholder="Digite a senha novamente" required className="pr-10" />
+                <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}>
+                  {showConfirmNewPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                 </Button>
               </div>
-              {confirmNewPassword && newPassword !== confirmNewPassword && (
-                <p className="text-xs text-destructive flex items-center gap-1">
+              {confirmNewPassword && newPassword !== confirmNewPassword && <p className="text-xs text-destructive flex items-center gap-1">
                   <X className="w-3 h-3" />
                   As senhas não coincidem
-                </p>
-              )}
-              {confirmNewPassword && newPassword === confirmNewPassword && (
-                <p className="text-xs text-green-600 flex items-center gap-1">
+                </p>}
+              {confirmNewPassword && newPassword === confirmNewPassword && <p className="text-xs text-green-600 flex items-center gap-1">
                   <ShieldCheck className="w-3 h-3" />
                   Senhas coincidem
-                </p>
-              )}
+                </p>}
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
@@ -600,8 +458,6 @@ const Auth = () => {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>;
 };
-
 export default Auth;
