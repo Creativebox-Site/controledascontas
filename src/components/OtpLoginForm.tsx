@@ -83,7 +83,15 @@ export function OtpLoginForm() {
         },
       });
 
-      if (error) throw error;
+      // Tratamento especial para rate limit (429)
+      if (error) {
+        // Tentar extrair mensagem de erro do body
+        const errorData = data as any;
+        if (errorData?.error) {
+          throw new Error(errorData.error);
+        }
+        throw error;
+      }
 
       if (data?.success) {
         setExpiresAt(data.expiresAt);
@@ -97,16 +105,26 @@ export function OtpLoginForm() {
     } catch (error: any) {
       console.error("Error sending OTP:", error);
       
-      // Verificar se é erro do Resend em modo de teste
       const errorMsg = error.message || "";
-      if (errorMsg.includes("validation_error") || errorMsg.includes("testing emails")) {
+      
+      // Tratamento específico para rate limit
+      if (errorMsg.includes("Muitas tentativas") || errorMsg.includes("rate limit")) {
+        toast.error("Muitas tentativas de envio", {
+          description: "Por favor, aguarde alguns minutos antes de tentar novamente.",
+          duration: 8000,
+        });
+      }
+      // Verificar se é erro do Resend em modo de teste
+      else if (errorMsg.includes("validation_error") || errorMsg.includes("testing emails")) {
         toast.error("Email não pode ser enviado", {
           description: "O sistema de email está em modo de teste. Contate o administrador.",
           duration: 6000,
         });
-      } else {
+      } 
+      // Erro genérico
+      else {
         toast.error("Erro ao enviar código", {
-          description: error.message || "Tente novamente em alguns instantes",
+          description: errorMsg || "Tente novamente em alguns instantes",
         });
       }
     } finally {
@@ -137,7 +155,15 @@ export function OtpLoginForm() {
         },
       });
 
-      if (error) throw error;
+      // Tratamento especial para erros
+      if (error) {
+        // Tentar extrair mensagem de erro do body
+        const errorData = data as any;
+        if (errorData?.error) {
+          throw new Error(errorData.error);
+        }
+        throw error;
+      }
 
       if (data?.success && data.sessionUrl) {
         toast.success("Login realizado com sucesso!");
@@ -149,8 +175,19 @@ export function OtpLoginForm() {
       }
     } catch (error: any) {
       console.error("Error verifying OTP:", error);
+      
+      const errorMsg = error.message || "";
+      let description = "Verifique o código e tente novamente";
+      
+      // Mensagens específicas baseadas no erro
+      if (errorMsg.includes("tentativas")) {
+        description = errorMsg;
+      } else if (errorMsg.includes("expirado")) {
+        description = "Solicite um novo código";
+      }
+      
       toast.error("Código inválido", {
-        description: error.message || "Verifique o código e tente novamente",
+        description,
       });
       setOtp("");
     } finally {
