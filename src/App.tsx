@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Install from "./pages/Install";
 import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
+import UpdatePassword from "./pages/UpdatePassword";
 import { MainLayout } from "./layouts/MainLayout";
 import { CurrencyProvider, useCurrency } from "./contexts/CurrencyContext";
 import { Overview } from "./pages/Overview";
@@ -85,6 +86,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/install" element={<Install />} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/update-password" element={<UpdatePassword />} />
 
             {/* Rotas protegidas com MainLayout */}
             <Route element={<MainLayout />}>
