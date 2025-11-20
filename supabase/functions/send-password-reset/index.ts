@@ -89,9 +89,9 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'App Contas <acesso@appcontas.creativebox.com.br>',
+        from: 'App Controle <acesso@appcontrole.creativebox.com.br>',
         to: email,
-        subject: 'Recuperação de Senha - App Contas',
+        subject: 'Recuperação de Senha - App Controle',
         html: `
           <!DOCTYPE html>
           <html>
@@ -107,8 +107,8 @@ Deno.serve(async (req) => {
                       <!-- Header com Logo -->
                       <tr>
                         <td style="background: linear-gradient(135deg, #4FC3DC 0%, #3b82f6 100%); padding: 40px 20px; text-align: center;">
-                          <img src="https://cd8343ae-9767-42cb-917a-70fd17803bd0.lovableproject.com/pwa-512x512.png" alt="App Contas" style="width: 80px; height: 80px; margin-bottom: 16px;" />
-                          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">App Contas</h1>
+                          <img src="https://cd8343ae-9767-42cb-917a-70fd17803bd0.lovableproject.com/pwa-512x512.png" alt="App Controle" style="width: 80px; height: 80px; margin-bottom: 16px;" />
+                          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">App Controle</h1>
                           <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Creative Box</p>
                         </td>
                       </tr>
@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
                       <tr>
                         <td style="padding: 40px 30px;">
                           <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 22px; font-weight: 600;">Recuperação de Senha</h2>
-                          <p style="color: #4b5563; margin: 0 0 24px 0; font-size: 16px; line-height: 1.5;">Recebemos uma solicitação para redefinir sua senha do App Contas. Clique no botão abaixo para criar uma nova senha:</p>
+                          <p style="color: #4b5563; margin: 0 0 24px 0; font-size: 16px; line-height: 1.5;">Recebemos uma solicitação para redefinir sua senha do App Controle. Clique no botão abaixo para criar uma nova senha:</p>
                           
                           <!-- Botão de Ação -->
                           <div style="text-align: center; margin: 0 0 32px 0;">
@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
                       <tr>
                         <td style="background-color: #f9fafb; padding: 24px 30px; border-top: 1px solid #e5e7eb;">
                           <p style="color: #9ca3af; margin: 0; font-size: 12px; text-align: center; line-height: 1.5;">
-                            © ${new Date().getFullYear()} App Contas | Creative Box<br/>
+                            © ${new Date().getFullYear()} App Controle | Creative Box<br/>
                             Controle financeiro inteligente e seguro
                           </p>
                         </td>
