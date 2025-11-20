@@ -262,19 +262,20 @@ const Auth = () => {
           <CardDescription>Gerencie suas finanças de forma inteligente</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="otp" className="w-full">
+          <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="otp">OTP</TabsTrigger>
               <TabsTrigger value="login">Senha</TabsTrigger>
               <TabsTrigger value="signup">Cadastrar</TabsTrigger>
+              <TabsTrigger value="otp">OTP</TabsTrigger>
             </TabsList>
-            
-            <TabsContent value="otp" className="mt-6">
-              <OtpLoginForm />
-            </TabsContent>
             
             <TabsContent value="login">
               <form onSubmit={handleSignIn} className="space-y-4">
+                <Alert className="mb-4">
+                  <AlertDescription className="text-xs text-muted-foreground">
+                    Não tem uma conta ainda? Use a aba <strong>Cadastrar</strong> para criar sua conta.
+                  </AlertDescription>
+                </Alert>
                 <div className="space-y-2">
                   <Label htmlFor="login-email">Email</Label>
                   <Input id="login-email" name="email" type="email" placeholder="seu@email.com" required />
@@ -360,13 +361,18 @@ const Auth = () => {
             <TabsContent value="signup">
               {signupStep === 'form' ? (
                 <form onSubmit={handleSignUp} className="space-y-4">
+                  <Alert className="mb-4">
+                    <AlertDescription className="text-xs text-muted-foreground">
+                      Já tem uma conta? Use a aba <strong>Senha</strong> para fazer login.
+                    </AlertDescription>
+                  </Alert>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
                     <Input 
                       id="signup-email" 
                       name="email" 
                       type="email" 
-                      placeholder="seu@email.com" 
+                      placeholder="seu@email.com"
                       required 
                       maxLength={255}
                     />
@@ -490,6 +496,15 @@ const Auth = () => {
                   </div>
                 </div>
               )}
+            </TabsContent>
+            
+            <TabsContent value="otp" className="mt-6">
+              <Alert className="mb-4">
+                <AlertDescription className="text-xs text-muted-foreground">
+                  Login alternativo sem senha. Receba um código por email para acessar sua conta.
+                </AlertDescription>
+              </Alert>
+              <OtpLoginForm />
             </TabsContent>
           </Tabs>
         </CardContent>
