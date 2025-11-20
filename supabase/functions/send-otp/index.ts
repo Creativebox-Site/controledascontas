@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'App Contas <noreply@appcontas.creativebox.com.br>',
+        from: 'App Contas <acesso@appcontas.creativebox.com.br>',
         to: email,
         subject: 'Seu código de verificação - App Contas',
         html: `

@@ -28,10 +28,17 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Obter a URL base da aplicação
+    const origin = req.headers.get('origin') || 'https://bmcpznzahqahiujyfkuj.lovableproject.com';
+    const redirectTo = `${origin}/update-password`;
+
     // Gerar token de recuperação
     const { data, error } = await supabase.auth.admin.generateLink({
       type: 'recovery',
       email: email,
+      options: {
+        redirectTo: redirectTo
+      }
     });
 
     if (error) {
@@ -76,7 +83,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'App Contas <noreply@appcontas.creativebox.com.br>',
+        from: 'App Contas <acesso@appcontas.creativebox.com.br>',
         to: email,
         subject: 'Recuperação de Senha - App Contas',
         html: `
