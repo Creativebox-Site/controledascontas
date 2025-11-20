@@ -39,7 +39,7 @@ export const MainLayout = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar onSignOut={handleSignOut} />
-        
+
         <div className="flex-1 flex flex-col w-full">
           {/* Header fixo */}
           <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
@@ -47,20 +47,13 @@ export const MainLayout = () => {
               <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
                 <SidebarTrigger />
                 <div className="flex items-center gap-2">
-                  <img 
-                    src={logoCreativeBox} 
-                    alt="Creative Box" 
-                    className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
-                  />
-                  <h1 className="text-base sm:text-xl font-bold truncate">App Contas</h1>
+                  <img src={logoCreativeBox} alt="Creative Box" className="w-6 h-6 sm:w-8 sm:h-8 object-contain" />
+                  <h1 className="text-base sm:text-xl font-bold truncate">App Controle</h1>
                 </div>
               </div>
 
               <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto justify-end">
-                <CurrencySelector
-                  value={currency}
-                  onChange={setCurrency}
-                />
+                <CurrencySelector value={currency} onChange={setCurrency} />
                 <AppearanceCustomizer />
                 <ProfileMenu />
               </div>
@@ -76,7 +69,7 @@ export const MainLayout = () => {
           </main>
         </div>
       </div>
-      
+
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />
     </SidebarProvider>
