@@ -100,7 +100,7 @@ export default function Onboarding() {
 
         if (error) throw error;
 
-        toast.success("Tutorial concluído! Bem-vindo ao App Contas 🎉");
+        toast.success("Tutorial concluído! Bem-vindo ao App Controle 🎉");
         navigate("/dashboard");
       }
     } catch (error) {
@@ -119,7 +119,7 @@ export default function Onboarding() {
           <div className="flex justify-center">
             <img src={logoCreativeBox} alt="Creative Box" className="w-16 h-16 object-contain" />
           </div>
-          <h1 className="text-3xl font-bold">App Contas</h1>
+          <h1 className="text-3xl font-bold">App Controle</h1>
         </div>
 
         {/* Progress */}
