@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { BulkImport } from "@/components/BulkImport";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface TransactionBulkImportProps {
   userId?: string;
@@ -14,9 +16,43 @@ export const TransactionBulkImport = ({
   onClose, 
   onImportComplete 
 }: TransactionBulkImportProps) => {
+  const [resolvedUserId, setResolvedUserId] = useState<string | undefined>(userId);
+
+  // Auth Fallback: Resolve userId from session if not provided
+  useEffect(() => {
+    const resolveUserId = async () => {
+      console.log("🔐 TransactionBulkImport - Contexto de Auth:", { 
+        propUserId: userId, 
+        resolvedUserId
+      });
+
+      if (userId) {
+        console.log("✅ userId recebido via props:", userId);
+        setResolvedUserId(userId);
+        return;
+      }
+
+      // Fallback: tentar obter da sessão ativa
+      console.log("🔄 Buscando userId da sessão ativa...");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        console.log("✅ userId resolvido da sessão:", user.id);
+        setResolvedUserId(user.id);
+      } else {
+        console.error("❌ Não foi possível resolver userId - sem sessão ativa");
+      }
+    };
+
+    resolveUserId();
+  }, [userId]);
   
   const handleBulkImport = async (data: any[]) => {
-    if (!userId) return;
+    if (!resolvedUserId) {
+      console.error("❌ Tentativa de importar sem userId resolvido - bloqueado");
+      toast.error("Erro: usuário não identificado. Não é possível importar.");
+      return;
+    }
 
     console.log("📊 Dados recebidos para importação:", data);
 
@@ -24,7 +60,7 @@ export const TransactionBulkImport = ({
     const { data: categories } = await supabase
       .from("categories")
       .select("*")
-      .eq("user_id", userId);
+      .eq("user_id", resolvedUserId);
 
     const transactionsToInsert = data.map((row, index) => {
       console.log(`Linha ${index + 1}:`, row);
@@ -76,7 +112,7 @@ export const TransactionBulkImport = ({
       }
 
       const transaction = {
-        user_id: userId,
+        user_id: resolvedUserId,
         description: row.descricao || '',
         amount: amountValue,
         type: transactionType,
