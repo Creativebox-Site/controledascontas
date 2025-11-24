@@ -167,9 +167,11 @@ export function TrustedDevices() {
           {devices.length === 0 ? (
             <Alert>
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Nenhum dispositivo registrado. Faça login com OTP para registrar este dispositivo.
-              </AlertDescription>
+              <Alert className="mb-4">
+                <AlertDescription className="text-xs text-muted-foreground">
+                  Nenhum dispositivo registrado. Faça login para registrar este dispositivo automaticamente.
+                </AlertDescription>
+              </Alert>
             </Alert>
           ) : (
             <div className="space-y-3">
