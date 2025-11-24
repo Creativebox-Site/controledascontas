@@ -65,17 +65,48 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
   const [maxAmount, setMaxAmount] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("created_at_desc");
   const [essentialFilter, setEssentialFilter] = useState<string>("all");
+  const [resolvedUserId, setResolvedUserId] = useState<string | undefined>(userId);
+
+  // Auth Fallback: Resolve userId from session if not provided
+  useEffect(() => {
+    const resolveUserId = async () => {
+      console.log("🔐 TransactionList - Contexto de Auth:", { 
+        propUserId: userId, 
+        resolvedUserId
+      });
+
+      if (userId) {
+        console.log("✅ userId recebido via props:", userId);
+        setResolvedUserId(userId);
+        return;
+      }
+
+      // Fallback: tentar obter da sessão ativa
+      console.log("🔄 Buscando userId da sessão ativa...");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        console.log("✅ userId resolvido da sessão:", user.id);
+        setResolvedUserId(user.id);
+      } else {
+        console.error("❌ Não foi possível resolver userId - sem sessão ativa");
+        toast.error("Erro: usuário não autenticado");
+      }
+    };
+
+    resolveUserId();
+  }, [userId]);
 
   useEffect(() => {
-    if (userId) {
+    if (resolvedUserId) {
       loadCategories();
       loadTransactions();
       fetchExchangeRate();
     }
-  }, [userId, filterType, refreshKey, searchText, typeFilter, categoryFilter, minAmount, maxAmount, sortBy, essentialFilter]);
+  }, [resolvedUserId, filterType, refreshKey, searchText, typeFilter, categoryFilter, minAmount, maxAmount, sortBy, essentialFilter]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!resolvedUserId) return;
 
     // Reload quando a aba fica visível novamente
     const handleVisibilityChange = () => {
@@ -94,7 +125,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
           event: '*',
           schema: 'public',
           table: 'transactions',
-          filter: `user_id=eq.${userId}`
+          filter: `user_id=eq.${resolvedUserId}`
         },
         () => {
           loadTransactions();
@@ -106,7 +137,7 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [resolvedUserId]);
 
   const fetchExchangeRate = async () => {
     try {
@@ -119,10 +150,17 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
   };
 
   const loadCategories = async () => {
+    if (!resolvedUserId) {
+      console.error("❌ TransactionList: resolvedUserId está undefined - abortando loadCategories");
+      return;
+    }
+
+    console.log("📥 TransactionList loadCategories:", { resolvedUserId });
+
     let query = supabase
       .from("categories")
       .select("id, name, is_essential")
-      .eq("user_id", userId);
+      .eq("user_id", resolvedUserId);
 
     // Filtrar por tipo se filterType estiver definido
     if (filterType) {
@@ -137,10 +175,17 @@ export const TransactionList = ({ userId, currency, filterType, showEdit, refres
   };
 
   const loadTransactions = async () => {
+    if (!resolvedUserId) {
+      console.error("❌ TransactionList: resolvedUserId está undefined - abortando loadTransactions");
+      return;
+    }
+
+    console.log("📥 TransactionList loadTransactions:", { resolvedUserId });
+
     let query = supabase
       .from("transactions")
       .select("*, categories(id, name, color, is_essential)")
-      .eq("user_id", userId);
+      .eq("user_id", resolvedUserId);
     
     if (filterType) {
       query = query.eq("type", filterType);

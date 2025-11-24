@@ -17,21 +17,59 @@ export const EmergencyFund = ({ userId, currency }: EmergencyFundProps) => {
   const [currentReserve, setCurrentReserve] = useState(0);
   const [loading, setLoading] = useState(true);
   const [emergencyCategoryId, setEmergencyCategoryId] = useState<string | null>(null);
+  const [resolvedUserId, setResolvedUserId] = useState<string | undefined>(userId);
+
+  // Auth Fallback: Resolve userId from session if not provided
+  useEffect(() => {
+    const resolveUserId = async () => {
+      console.log("🔐 EmergencyFund - Contexto de Auth:", { 
+        propUserId: userId, 
+        resolvedUserId
+      });
+
+      if (userId) {
+        console.log("✅ userId recebido via props:", userId);
+        setResolvedUserId(userId);
+        return;
+      }
+
+      // Fallback: tentar obter da sessão ativa
+      console.log("🔄 Buscando userId da sessão ativa...");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        console.log("✅ userId resolvido da sessão:", user.id);
+        setResolvedUserId(user.id);
+      } else {
+        console.error("❌ Não foi possível resolver userId - sem sessão ativa");
+      }
+    };
+
+    resolveUserId();
+  }, [userId]);
 
   useEffect(() => {
-    if (userId) {
+    if (resolvedUserId) {
       loadData();
     }
-  }, [userId, currency]);
+  }, [resolvedUserId, currency]);
 
   const loadData = async () => {
+    if (!resolvedUserId) {
+      console.error("❌ EmergencyFund: resolvedUserId está undefined - abortando loadData");
+      setLoading(false);
+      return;
+    }
+
+    console.log("📥 EmergencyFund loadData:", { resolvedUserId });
+
     setLoading(true);
 
     // Get essential categories
     const { data: categories } = await supabase
       .from("categories")
       .select("id")
-      .eq("user_id", userId)
+      .eq("user_id", resolvedUserId)
       .eq("type", "expense")
       .eq("is_essential", true);
 
@@ -45,7 +83,7 @@ export const EmergencyFund = ({ userId, currency }: EmergencyFundProps) => {
       const { data: expenses } = await supabase
         .from("transactions")
         .select("amount")
-        .eq("user_id", userId)
+        .eq("user_id", resolvedUserId)
         .eq("type", "expense")
         .eq("currency", currency)
         .in("category_id", categoryIds)
@@ -63,7 +101,7 @@ export const EmergencyFund = ({ userId, currency }: EmergencyFundProps) => {
     const { data: investmentCategory } = await supabase
       .from("categories")
       .select("id")
-      .eq("user_id", userId)
+      .eq("user_id", resolvedUserId)
       .eq("name", "Reserva de emergência")
       .eq("type", "investment")
       .maybeSingle();
@@ -74,7 +112,7 @@ export const EmergencyFund = ({ userId, currency }: EmergencyFundProps) => {
       const { data: reserves } = await supabase
         .from("transactions")
         .select("amount")
-        .eq("user_id", userId)
+        .eq("user_id", resolvedUserId)
         .eq("currency", currency)
         .eq("category_id", investmentCategory.id);
 

@@ -56,6 +56,7 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
   const [historyGoal, setHistoryGoal] = useState<Goal | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("date");
+  const [resolvedUserId, setResolvedUserId] = useState<string | undefined>(userId);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -90,11 +91,41 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
     return (parseInt(numbers) / 100).toString();
   };
 
+  // Auth Fallback: Resolve userId from session if not provided
   useEffect(() => {
-    if (userId) {
+    const resolveUserId = async () => {
+      console.log("🔐 GoalsList - Contexto de Auth:", { 
+        propUserId: userId, 
+        resolvedUserId
+      });
+
+      if (userId) {
+        console.log("✅ userId recebido via props:", userId);
+        setResolvedUserId(userId);
+        return;
+      }
+
+      // Fallback: tentar obter da sessão ativa
+      console.log("🔄 Buscando userId da sessão ativa...");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        console.log("✅ userId resolvido da sessão:", user.id);
+        setResolvedUserId(user.id);
+      } else {
+        console.error("❌ Não foi possível resolver userId - sem sessão ativa");
+        toast.error("Erro: usuário não autenticado");
+      }
+    };
+
+    resolveUserId();
+  }, [userId]);
+
+  useEffect(() => {
+    if (resolvedUserId) {
       loadGoals();
     }
-  }, [userId]);
+  }, [resolvedUserId]);
 
   useEffect(() => {
     applyFilters();
@@ -132,12 +163,18 @@ export const GoalsList = ({ userId, currency, onGoalChange }: GoalsListProps) =>
   };
 
   const loadGoals = async () => {
-    if (!userId) return;
+    if (!resolvedUserId) {
+      console.error("❌ GoalsList: resolvedUserId está undefined - abortando loadGoals");
+      setLoading(false);
+      return;
+    }
+
+    console.log("📥 GoalsList loadGoals:", { resolvedUserId });
 
     const { data, error } = await supabase
       .from("goals")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", resolvedUserId)
       .order("is_completed", { ascending: true })
       .order("target_date", { ascending: true });
 
