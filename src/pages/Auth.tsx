@@ -89,10 +89,9 @@ const Auth = () => {
       return;
     }
     if (data.user) {
-      // Mudar para etapa OTP sem fazer login
-      setSignupEmail(email);
-      setSignupStep('otp');
-      toast.success("Código enviado com sucesso");
+      // Como auto_confirm_email está ativo, usuário já está autenticado
+      toast.success("Conta criada com sucesso! Bem-vindo!");
+      navigate("/");
     }
   };
   const handleVerifySignupOtp = async (token: string) => {
