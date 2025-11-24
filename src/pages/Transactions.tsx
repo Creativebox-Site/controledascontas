@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ButtonPremium } from "@/components/ui/button-premium";
 import { TransactionList } from "@/components/TransactionList";
 import { TransactionForm } from "@/components/TransactionForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, TrendingDown, DollarSign } from "lucide-react";
+import { Plus } from "lucide-react";
 
 interface TransactionsProps {
   userId?: string;
@@ -47,33 +48,33 @@ export const Transactions = ({ userId, currency }: TransactionsProps) => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-3xl font-bold">Transações</h2>
         <div className="flex flex-wrap gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
+          <ButtonPremium 
+            variant="success" 
+            size="md"
             onClick={() => openNewTransaction("income")}
-            className="gap-2"
+            leftIcon={<Plus className="w-4 h-4" />}
+            disabled={!userId}
           >
-            <TrendingUp className="w-4 h-4" />
             Nova Receita
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
+          </ButtonPremium>
+          <ButtonPremium 
+            variant="primary" 
+            size="md"
             onClick={() => openNewTransaction("expense")}
-            className="gap-2"
+            leftIcon={<Plus className="w-4 h-4" />}
+            disabled={!userId}
           >
-            <TrendingDown className="w-4 h-4" />
             Nova Despesa
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
+          </ButtonPremium>
+          <ButtonPremium 
+            variant="sunset" 
+            size="md"
             onClick={() => openNewTransaction("investment")}
-            className="gap-2"
+            leftIcon={<Plus className="w-4 h-4" />}
+            disabled={!userId}
           >
-            <DollarSign className="w-4 h-4" />
             Novo Investimento
-          </Button>
+          </ButtonPremium>
           <Button variant="destructive" size="sm" onClick={handleResetData}>
             Resetar Dados
           </Button>
