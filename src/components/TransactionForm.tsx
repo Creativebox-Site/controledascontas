@@ -83,6 +83,11 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
   }, [transaction?.category_id, categories]);
 
   const loadCategories = async () => {
+    if (!userId) {
+      console.error("userId is undefined");
+      return;
+    }
+
     const { data, error } = await supabase
       .from("categories")
       .select("*")
@@ -91,6 +96,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
       .order("name", { ascending: true });
 
     if (error) {
+      console.error("Error loading categories:", error);
       toast.error("Erro ao carregar categorias");
       return;
     }

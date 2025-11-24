@@ -63,7 +63,10 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
   }, [userId]);
 
   const loadCategories = async () => {
-    if (!userId) return;
+    if (!userId) {
+      console.error("userId is undefined in PaymentItemForm");
+      return;
+    }
 
     const { data, error } = await supabase
       .from("categories")
@@ -74,6 +77,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
 
     if (error) {
       console.error("Error loading categories:", error);
+      toast.error("Erro ao carregar categorias");
     } else {
       const allCategories = data || [];
       setCategories(allCategories);
