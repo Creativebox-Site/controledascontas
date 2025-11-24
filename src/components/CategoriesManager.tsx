@@ -32,6 +32,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
   const [filterParentId, setFilterParentId] = useState<string>("all");
+  const [resolvedUserId, setResolvedUserId] = useState<string | undefined>(userId);
   const [formData, setFormData] = useState({
     name: "",
     type: "expense",
@@ -39,25 +40,64 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
     parent_id: null as string | null,
   });
 
+  // Auth Fallback: Resolve userId from session if not provided
   useEffect(() => {
-    if (userId) {
-      loadCategories();
-    }
+    const resolveUserId = async () => {
+      console.log("🔐 CategoriesManager - Contexto de Auth:", { 
+        propUserId: userId, 
+        resolvedUserId
+      });
+
+      if (userId) {
+        console.log("✅ userId recebido via props:", userId);
+        setResolvedUserId(userId);
+        return;
+      }
+
+      // Fallback: tentar obter da sessão ativa
+      console.log("🔄 Buscando userId da sessão ativa...");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        console.log("✅ userId resolvido da sessão:", user.id);
+        setResolvedUserId(user.id);
+      } else {
+        console.error("❌ Não foi possível resolver userId - sem sessão ativa");
+        toast.error("Erro: usuário não autenticado");
+      }
+    };
+
+    resolveUserId();
   }, [userId]);
 
+  useEffect(() => {
+    if (resolvedUserId) {
+      loadCategories();
+    }
+  }, [resolvedUserId]);
+
   const loadCategories = async () => {
+    if (!resolvedUserId) {
+      console.error("❌ CategoriesManager: resolvedUserId está undefined - abortando busca");
+      return;
+    }
+
+    console.log("📥 CategoriesManager loadCategories:", { resolvedUserId });
+
     const { data, error } = await supabase
       .from("categories")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", resolvedUserId)
       .order("parent_id", { ascending: true, nullsFirst: true })
       .order("name");
 
     if (error) {
+      console.error("❌ Erro ao carregar categorias:", error);
       toast.error("Erro ao carregar categorias");
       return;
     }
 
+    console.log("✅ Categorias carregadas:", data?.length || 0);
     setCategories(data || []);
   };
 
@@ -88,17 +128,26 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
         loadCategories();
       }
     } else {
+      if (!resolvedUserId) {
+        console.error("❌ Tentativa de criar categoria sem userId resolvido - bloqueado");
+        toast.error("Erro: usuário não identificado. Não é possível criar categoria.");
+        return;
+      }
+
+      console.log("💾 Criando categoria:", { resolvedUserId, formData });
+
       const { error } = await supabase.from("categories").insert([
         {
           name: formData.name,
           type: formData.type,
           color: formData.color,
           parent_id: formData.parent_id,
-          user_id: userId,
+          user_id: resolvedUserId,
         },
       ]);
 
       if (error) {
+        console.error("❌ Erro ao criar categoria:", error);
         toast.error("Erro ao criar categoria");
       } else {
         toast.success("Categoria criada!");
@@ -144,10 +193,16 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
   };
 
   const handleBulkImport = async (data: any[]) => {
-    if (!userId) return;
+    if (!resolvedUserId) {
+      console.error("❌ Tentativa de importar sem userId resolvido - bloqueado");
+      toast.error("Erro: usuário não identificado. Não é possível importar.");
+      return;
+    }
+
+    console.log("📥 Importação em lote:", { resolvedUserId, count: data.length });
 
     const categoriesToInsert = data.map(row => ({
-      user_id: userId,
+      user_id: resolvedUserId,
       name: row.nome,
       type: row.tipo === "receita" ? "income" : "expense",
       is_essential: row.essencial,
@@ -159,6 +214,7 @@ export const CategoriesManager = ({ userId }: CategoriesManagerProps) => {
       .insert(categoriesToInsert);
 
     if (error) {
+      console.error("❌ Erro ao importar categorias:", error);
       toast.error("Erro ao importar categorias");
       throw error;
     } else {

@@ -57,25 +57,60 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
   const [selectedPaymentId, setSelectedPaymentId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [resolvedUserId, setResolvedUserId] = useState<string | undefined>(userId);
+
+  // Auth Fallback: Resolve userId from session if not provided
+  useEffect(() => {
+    const resolveUserId = async () => {
+      console.log("🔐 PaymentItemForm - Contexto de Auth:", { 
+        propUserId: userId, 
+        resolvedUserId
+      });
+
+      if (userId) {
+        console.log("✅ userId recebido via props:", userId);
+        setResolvedUserId(userId);
+        return;
+      }
+
+      console.log("🔄 Buscando userId da sessão ativa...");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        console.log("✅ userId resolvido da sessão:", user.id);
+        setResolvedUserId(user.id);
+      } else {
+        console.error("❌ Não foi possível resolver userId - sem sessão ativa");
+        toast.error("Erro: usuário não autenticado");
+      }
+    };
+
+    resolveUserId();
+  }, [userId]);
 
   useEffect(() => {
-    console.log("🔍 PaymentItemForm useEffect disparado:", { userId });
-    if (userId) {
+    console.log("🔍 PaymentItemForm useEffect disparado:", { 
+      propUserId: userId,
+      resolvedUserId 
+    });
+    
+    if (resolvedUserId) {
       loadCategories();
       loadExistingPayments();
     } else {
-      console.warn("⚠️ userId não está definido no PaymentItemForm, aguardando...");
+      console.warn("⚠️ resolvedUserId não está definido no PaymentItemForm, aguardando...");
     }
-  }, [userId]);
+  }, [resolvedUserId]);
 
   const loadCategories = async () => {
     console.log("📥 PaymentItemForm loadCategories iniciado:", { 
-      userId,
+      propUserId: userId,
+      resolvedUserId,
       timestamp: new Date().toISOString() 
     });
 
-    if (!userId) {
-      console.error("❌ userId está undefined no PaymentItemForm - abortando busca");
+    if (!resolvedUserId) {
+      console.error("❌ resolvedUserId está undefined no PaymentItemForm - abortando busca");
       toast.error("Erro: usuário não identificado");
       return;
     }
@@ -84,13 +119,13 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
     try {
       console.log("🔄 Executando query Supabase (PaymentItemForm)...", {
         table: "categories",
-        filters: { user_id: userId, type: "expense" }
+        filters: { user_id: resolvedUserId, type: "expense" }
       });
 
       const { data, error } = await supabase
         .from("categories")
         .select("id, name, color, parent_id")
-        .eq("user_id", userId)
+        .eq("user_id", resolvedUserId)
         .eq("type", "expense")
         .order("name");
 
@@ -108,7 +143,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
         console.log("✅ Categorias carregadas (PaymentItemForm):", allCategories.length);
         
         if (allCategories.length === 0) {
-          console.warn("⚠️ Nenhuma categoria de despesa encontrada para userId:", userId);
+          console.warn("⚠️ Nenhuma categoria de despesa encontrada para resolvedUserId:", resolvedUserId);
           toast.info("Nenhuma categoria de despesa encontrada");
         }
 
@@ -141,17 +176,22 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
   };
 
   const loadExistingPayments = async () => {
-    if (!userId) return;
+    if (!resolvedUserId) {
+      console.error("❌ resolvedUserId está undefined - abortando loadExistingPayments");
+      return;
+    }
+
+    console.log("📥 Carregando pagamentos existentes para resolvedUserId:", resolvedUserId);
 
     const { data, error } = await supabase
       .from("transactions")
       .select("id, description, amount, category_id, series_id, categories(name, color)")
-      .eq("user_id", userId)
+      .eq("user_id", resolvedUserId)
       .eq("type", "expense")
       .order("description");
 
     if (error) {
-      console.error("Error loading expenses:", error);
+      console.error("❌ Error loading expenses:", error);
     } else {
       // Agrupar transações recorrentes (mesma series_id) e mostrar apenas uma por série
       const uniquePayments = (data || []).reduce((acc: any[], payment) => {
@@ -168,6 +208,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
         return acc;
       }, []);
       
+      console.log("✅ Pagamentos existentes carregados:", uniquePayments.length);
       setExistingPayments(uniquePayments);
     }
   };
@@ -215,10 +256,25 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId || !title || !value || !dueDate) {
+
+    // Validação de segurança: bloquear se não houver userId resolvido
+    if (!resolvedUserId) {
+      console.error("❌ Tentativa de salvar sem userId resolvido - bloqueado");
+      toast.error("Erro: usuário não identificado. Não é possível salvar.");
+      return;
+    }
+
+    if (!title || !value || !dueDate) {
       toast.error("Preencha os campos obrigatórios");
       return;
     }
+
+    console.log("💾 handleSubmit PaymentItemForm:", {
+      propUserId: userId,
+      resolvedUserId,
+      title,
+      value
+    });
 
     setIsLoading(true);
 
@@ -226,7 +282,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
       const { data: paymentItem, error: itemError } = await supabase
         .from("payment_items")
         .insert({
-          user_id: userId,
+          user_id: resolvedUserId,
           title,
           value: parseFloat(value),
           due_date: dueDate.toISOString(),
