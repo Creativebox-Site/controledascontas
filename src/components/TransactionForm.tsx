@@ -63,7 +63,12 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
   });
 
   useEffect(() => {
-    loadCategories();
+    console.log("🔍 TransactionForm useEffect disparado:", { userId, type: formData.type });
+    if (userId) {
+      loadCategories();
+    } else {
+      console.warn("⚠️ userId não está definido, aguardando...");
+    }
   }, [formData.type, userId]);
   
   // Restaurar categoria pai quando editar
@@ -84,13 +89,25 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
   }, [transaction?.category_id, categories]);
 
   const loadCategories = async () => {
+    console.log("📥 loadCategories iniciado:", { 
+      userId, 
+      type: formData.type,
+      timestamp: new Date().toISOString() 
+    });
+
     if (!userId) {
-      console.error("userId is undefined");
+      console.error("❌ userId está undefined - abortando busca");
+      toast.error("Erro: usuário não identificado");
       return;
     }
 
     setIsLoadingCategories(true);
     try {
+      console.log("🔄 Executando query Supabase...", {
+        table: "categories",
+        filters: { user_id: userId, type: formData.type }
+      });
+
       const { data, error } = await supabase
         .from("categories")
         .select("*")
@@ -98,20 +115,43 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
         .eq("type", formData.type)
         .order("name", { ascending: true });
 
+      console.log("📊 Resposta Supabase:", { 
+        data, 
+        error,
+        dataLength: data?.length || 0 
+      });
+
       if (error) {
-        console.error("Error loading categories:", error);
-        toast.error("Erro ao carregar categorias");
+        console.error("❌ Erro Supabase:", error);
+        toast.error("Erro ao carregar categorias: " + error.message);
         return;
       }
 
       const allCategories = data || [];
+      console.log("✅ Categorias carregadas:", allCategories.length);
+      
+      if (allCategories.length === 0) {
+        console.warn("⚠️ Nenhuma categoria encontrada para:", { 
+          userId, 
+          type: formData.type 
+        });
+        toast.info(`Nenhuma categoria de ${formData.type === 'income' ? 'receita' : formData.type === 'expense' ? 'despesa' : 'investimento'} encontrada`);
+      }
+
       setCategories(allCategories);
       
-      // Separar categorias pai (sem parent_id) e subcategorias
-      const parents = allCategories.filter(cat => !cat.parent_id);
+      // Separar categorias pai (sem parent_id - tanto null quanto string vazia)
+      const parents = allCategories.filter(cat => !cat.parent_id || cat.parent_id === '');
+      console.log("👨‍👦 Categorias pai filtradas:", parents.length);
+      console.log("📋 Categorias pai:", parents.map(p => ({ id: p.id, name: p.name })));
+      
       setParentCategories(parents);
+    } catch (err) {
+      console.error("💥 Exceção não tratada:", err);
+      toast.error("Erro inesperado ao carregar categorias");
     } finally {
       setIsLoadingCategories(false);
+      console.log("🏁 loadCategories finalizado");
     }
   };
 
