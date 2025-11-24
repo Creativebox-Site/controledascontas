@@ -44,6 +44,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
   const [selectedParentId, setSelectedParentId] = useState<string>("");
   const [isRecurring, setIsRecurring] = useState(false);
   const [convertToRecurring, setConvertToRecurring] = useState(false);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [formData, setFormData] = useState({
     description: transaction?.description || "",
     amount: transaction?.amount || 0,
@@ -88,25 +89,30 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
       return;
     }
 
-    const { data, error } = await supabase
-      .from("categories")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("type", formData.type)
-      .order("name", { ascending: true });
+    setIsLoadingCategories(true);
+    try {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("type", formData.type)
+        .order("name", { ascending: true });
 
-    if (error) {
-      console.error("Error loading categories:", error);
-      toast.error("Erro ao carregar categorias");
-      return;
+      if (error) {
+        console.error("Error loading categories:", error);
+        toast.error("Erro ao carregar categorias");
+        return;
+      }
+
+      const allCategories = data || [];
+      setCategories(allCategories);
+      
+      // Separar categorias pai (sem parent_id) e subcategorias
+      const parents = allCategories.filter(cat => !cat.parent_id);
+      setParentCategories(parents);
+    } finally {
+      setIsLoadingCategories(false);
     }
-
-    const allCategories = data || [];
-    setCategories(allCategories);
-    
-    // Separar categorias pai (sem parent_id) e subcategorias
-    const parents = allCategories.filter(cat => !cat.parent_id);
-    setParentCategories(parents);
   };
 
   const handleParentCategoryChange = (parentId: string) => {
@@ -324,9 +330,12 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
               <Label>Tipo</Label>
               <Select
                 value={formData.type}
-                onValueChange={(value: "income" | "expense" | "investment") =>
-                  setFormData({ ...formData, type: value, category_id: "" })
-                }
+                onValueChange={(value: "income" | "expense" | "investment") => {
+                  // Cascading Reset: Reset all dependent fields
+                  setFormData({ ...formData, type: value, category_id: "" });
+                  setSelectedParentId("");
+                  setSubCategories([]);
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -345,16 +354,21 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
             <Select
               value={selectedParentId}
               onValueChange={handleParentCategoryChange}
+              disabled={isLoadingCategories}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecione a categoria..." />
+                <SelectValue placeholder={isLoadingCategories ? "Carregando..." : "Selecione a categoria..."} />
               </SelectTrigger>
               <SelectContent>
-                {parentCategories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </SelectItem>
-                ))}
+                {parentCategories.length === 0 ? (
+                  <div className="p-2 text-sm text-muted-foreground">Nenhuma categoria disponível</div>
+                ) : (
+                  parentCategories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -367,16 +381,21 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
                 onValueChange={(value) =>
                   setFormData({ ...formData, category_id: value })
                 }
+                disabled={isLoadingCategories}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione a subcategoria..." />
+                  <SelectValue placeholder={isLoadingCategories ? "Carregando..." : "Selecione a subcategoria..."} />
                 </SelectTrigger>
                 <SelectContent>
-                  {subCategories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
+                  {subCategories.length === 0 ? (
+                    <div className="p-2 text-sm text-muted-foreground">Nenhuma subcategoria disponível</div>
+                  ) : (
+                    subCategories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>

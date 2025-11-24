@@ -12,40 +12,46 @@ export const Categories = ({ userId }: CategoriesProps) => {
 
   useEffect(() => {
     const initializeCategories = async () => {
-      if (userId) {
-        setCurrentUserId(userId);
-        
-        // Check if user has categories
-        const { data, error } = await supabase
-          .from('categories')
-          .select('id')
-          .eq('user_id', userId)
-          .limit(1);
-
-        // If no categories, create default ones
-        if (!error && (!data || data.length === 0)) {
-          const { error: createError } = await supabase.rpc('create_default_categories', {
-            p_user_id: userId
-          });
-
-          if (createError) {
-            console.error('Error creating default categories:', createError);
-            toast.error('Erro ao criar categorias padrão');
-          } else {
-            toast.success('Categorias padrão criadas!');
-          }
-        }
-      } else {
-        // Fallback: get current user if userId not provided
+      let userIdToUse = userId;
+      
+      // If userId not provided, get current user
+      if (!userIdToUse) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          userIdToUse = user.id;
           setCurrentUserId(user.id);
+        }
+      } else {
+        setCurrentUserId(userId);
+      }
+
+      // Only proceed if we have a userId
+      if (!userIdToUse) return;
+        
+      // Check if user has categories
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('user_id', userIdToUse)
+        .limit(1);
+
+      // If no categories, create default ones
+      if (!error && (!data || data.length === 0)) {
+        const { error: createError } = await supabase.rpc('create_default_categories', {
+          p_user_id: userIdToUse
+        });
+
+        if (createError) {
+          console.error('Error creating default categories:', createError);
+          toast.error('Erro ao criar categorias padrão');
+        } else {
+          toast.success('Categorias padrão criadas!');
         }
       }
     };
 
     initializeCategories();
-  }, [userId]);
+  }, [userId, currentUserId]);
 
   return (
     <div className="space-y-6">

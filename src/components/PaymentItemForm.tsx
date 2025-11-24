@@ -56,6 +56,7 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
   const [existingPayments, setExistingPayments] = useState<any[]>([]);
   const [selectedPaymentId, setSelectedPaymentId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   useEffect(() => {
     loadCategories();
@@ -68,27 +69,33 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
       return;
     }
 
-    const { data, error } = await supabase
-      .from("categories")
-      .select("id, name, color, parent_id")
-      .eq("user_id", userId)
-      .eq("type", "expense")
-      .order("name");
+    setIsLoadingCategories(true);
+    try {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, name, color, parent_id")
+        .eq("user_id", userId)
+        .eq("type", "expense")
+        .order("name");
 
-    if (error) {
-      console.error("Error loading categories:", error);
-      toast.error("Erro ao carregar categorias");
-    } else {
-      const allCategories = data || [];
-      setCategories(allCategories);
-      
-      // Separar categorias pai (sem parent_id)
-      const parents = allCategories.filter(cat => !cat.parent_id);
-      setParentCategories(parents);
+      if (error) {
+        console.error("Error loading categories:", error);
+        toast.error("Erro ao carregar categorias");
+      } else {
+        const allCategories = data || [];
+        setCategories(allCategories);
+        
+        // Separar categorias pai (sem parent_id)
+        const parents = allCategories.filter(cat => !cat.parent_id);
+        setParentCategories(parents);
+      }
+    } finally {
+      setIsLoadingCategories(false);
     }
   };
 
   const handleParentCategoryChange = (parentId: string) => {
+    // Cascading Reset: Reset dependent fields
     setSelectedParentId(parentId);
     setCategoryId(undefined);
     
@@ -320,23 +327,27 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
           <Select 
             value={selectedParentId} 
             onValueChange={handleParentCategoryChange}
-            disabled={!!selectedPaymentId}
+            disabled={!!selectedPaymentId || isLoadingCategories}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Selecione a categoria..." />
+              <SelectValue placeholder={isLoadingCategories ? "Carregando..." : "Selecione a categoria..."} />
             </SelectTrigger>
             <SelectContent>
-              {parentCategories.map((cat) => (
-                <SelectItem key={cat.id} value={cat.id}>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: cat.color }}
-                    />
-                    {cat.name}
-                  </div>
-                </SelectItem>
-              ))}
+              {parentCategories.length === 0 ? (
+                <div className="p-2 text-sm text-muted-foreground">Nenhuma categoria disponível</div>
+              ) : (
+                parentCategories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: cat.color }}
+                      />
+                      {cat.name}
+                    </div>
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -348,23 +359,27 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
             <Select 
               value={categoryId} 
               onValueChange={setCategoryId}
-              disabled={!!selectedPaymentId}
+              disabled={!!selectedPaymentId || isLoadingCategories}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecione a subcategoria..." />
+                <SelectValue placeholder={isLoadingCategories ? "Carregando..." : "Selecione a subcategoria..."} />
               </SelectTrigger>
               <SelectContent>
-                {subCategories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: cat.color }}
-                      />
-                      {cat.name}
-                    </div>
-                  </SelectItem>
-                ))}
+                {subCategories.length === 0 ? (
+                  <div className="p-2 text-sm text-muted-foreground">Nenhuma subcategoria disponível</div>
+                ) : (
+                  subCategories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: cat.color }}
+                        />
+                        {cat.name}
+                      </div>
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
