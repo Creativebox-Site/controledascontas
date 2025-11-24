@@ -168,19 +168,35 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
       console.log("✅ Categorias carregadas:", allCategories.length);
       
       if (allCategories.length === 0) {
-        console.warn("⚠️ Nenhuma categoria encontrada para:", { 
-          userId, 
-          type: formData.type 
+        console.warn("⚠️ Nenhuma categoria encontrada - criando categorias padrão...");
+        toast.info("Criando categorias padrão...");
+        
+        // Tentar criar categorias padrão
+        const { error: createError } = await supabase.rpc('create_default_categories', {
+          p_user_id: resolvedUserId
         });
-        toast.info(`Nenhuma categoria de ${formData.type === 'income' ? 'receita' : formData.type === 'expense' ? 'despesa' : 'investimento'} encontrada`);
+
+        if (createError) {
+          console.error('❌ Erro ao criar categorias padrão:', createError);
+          toast.error('Erro ao criar categorias: ' + createError.message);
+        } else {
+          console.log('✅ Categorias padrão criadas, recarregando...');
+          // Recarregar categorias após criação
+          setTimeout(() => loadCategories(), 1000);
+          return;
+        }
       }
 
       setCategories(allCategories);
       
-      // Separar categorias pai (sem parent_id - tanto null quanto string vazia)
-      const parents = allCategories.filter(cat => !cat.parent_id || cat.parent_id === '');
+      // Separar categorias pai (sem parent_id)
+      const parents = allCategories.filter(cat => !cat.parent_id);
       console.log("👨‍👦 Categorias pai filtradas:", parents.length);
-      console.log("📋 Categorias pai:", parents.map(p => ({ id: p.id, name: p.name })));
+      console.log("📋 Categorias pai:", parents.map(p => ({ id: p.id, name: p.name, parent_id: p.parent_id })));
+      
+      // Separar todas as subcategorias
+      const subs = allCategories.filter(cat => cat.parent_id);
+      console.log("👶 Subcategorias totais:", subs.length);
       
       setParentCategories(parents);
     } catch (err) {
