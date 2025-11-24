@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TransactionList } from "@/components/TransactionList";
+import { TransactionForm } from "@/components/TransactionForm";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 
 interface TransactionsProps {
   userId?: string;
@@ -9,6 +13,10 @@ interface TransactionsProps {
 }
 
 export const Transactions = ({ userId, currency }: TransactionsProps) => {
+  const [showNewTransaction, setShowNewTransaction] = useState(false);
+  const [transactionType, setTransactionType] = useState<"income" | "expense" | "investment">("expense");
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const handleResetData = async () => {
     if (!userId) return;
     
@@ -29,16 +37,71 @@ export const Transactions = ({ userId, currency }: TransactionsProps) => {
     }
   };
 
+  const openNewTransaction = (type: "income" | "expense" | "investment") => {
+    setTransactionType(type);
+    setShowNewTransaction(true);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-3xl font-bold">Transações</h2>
-        <Button variant="destructive" onClick={handleResetData}>
-          Resetar Dados
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => openNewTransaction("income")}
+            className="gap-2"
+          >
+            <TrendingUp className="w-4 h-4" />
+            Nova Receita
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => openNewTransaction("expense")}
+            className="gap-2"
+          >
+            <TrendingDown className="w-4 h-4" />
+            Nova Despesa
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => openNewTransaction("investment")}
+            className="gap-2"
+          >
+            <DollarSign className="w-4 h-4" />
+            Novo Investimento
+          </Button>
+          <Button variant="destructive" size="sm" onClick={handleResetData}>
+            Resetar Dados
+          </Button>
+        </div>
       </div>
 
-      <TransactionList userId={userId} currency={currency} showEdit />
+      <Dialog open={showNewTransaction} onOpenChange={setShowNewTransaction}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {transactionType === "income" && "Nova Receita"}
+              {transactionType === "expense" && "Nova Despesa"}
+              {transactionType === "investment" && "Novo Investimento"}
+            </DialogTitle>
+          </DialogHeader>
+          <TransactionForm
+            userId={userId}
+            currency={currency}
+            defaultType={transactionType}
+            onClose={() => {
+              setShowNewTransaction(false);
+              setRefreshKey(prev => prev + 1);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <TransactionList userId={userId} currency={currency} showEdit refreshKey={refreshKey} />
     </div>
   );
 };
