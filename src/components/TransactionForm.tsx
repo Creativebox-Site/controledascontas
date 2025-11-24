@@ -45,6 +45,7 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
   const [isRecurring, setIsRecurring] = useState(false);
   const [convertToRecurring, setConvertToRecurring] = useState(false);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [resolvedUserId, setResolvedUserId] = useState<string | undefined>(userId);
   const [formData, setFormData] = useState({
     description: transaction?.description || "",
     amount: transaction?.amount || 0,
@@ -62,14 +63,49 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
     repetitions: 12,
   });
 
+  // Auth Fallback: Resolve userId from session if not provided
   useEffect(() => {
-    console.log("🔍 TransactionForm useEffect disparado:", { userId, type: formData.type });
-    if (userId) {
+    const resolveUserId = async () => {
+      console.log("🔐 Contexto de Auth:", { 
+        propUserId: userId, 
+        resolvedUserId
+      });
+
+      if (userId) {
+        console.log("✅ userId recebido via props:", userId);
+        setResolvedUserId(userId);
+        return;
+      }
+
+      // Fallback: tentar obter da sessão ativa
+      console.log("🔄 Buscando userId da sessão ativa...");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        console.log("✅ userId resolvido da sessão:", user.id);
+        setResolvedUserId(user.id);
+      } else {
+        console.error("❌ Não foi possível resolver userId - sem sessão ativa");
+        toast.error("Erro: usuário não autenticado");
+      }
+    };
+
+    resolveUserId();
+  }, [userId]);
+
+  useEffect(() => {
+    console.log("🔍 TransactionForm useEffect disparado:", { 
+      propUserId: userId, 
+      resolvedUserId, 
+      type: formData.type 
+    });
+    
+    if (resolvedUserId) {
       loadCategories();
     } else {
-      console.warn("⚠️ userId não está definido, aguardando...");
+      console.warn("⚠️ resolvedUserId não está definido, aguardando...");
     }
-  }, [formData.type, userId]);
+  }, [formData.type, resolvedUserId]);
   
   // Restaurar categoria pai quando editar
   useEffect(() => {
@@ -90,13 +126,14 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
 
   const loadCategories = async () => {
     console.log("📥 loadCategories iniciado:", { 
-      userId, 
+      propUserId: userId,
+      resolvedUserId, 
       type: formData.type,
       timestamp: new Date().toISOString() 
     });
 
-    if (!userId) {
-      console.error("❌ userId está undefined - abortando busca");
+    if (!resolvedUserId) {
+      console.error("❌ resolvedUserId está undefined - abortando busca");
       toast.error("Erro: usuário não identificado");
       return;
     }
@@ -105,13 +142,13 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
     try {
       console.log("🔄 Executando query Supabase...", {
         table: "categories",
-        filters: { user_id: userId, type: formData.type }
+        filters: { user_id: resolvedUserId, type: formData.type }
       });
 
       const { data, error } = await supabase
         .from("categories")
         .select("*")
-        .eq("user_id", userId)
+        .eq("user_id", resolvedUserId)
         .eq("type", formData.type)
         .order("name", { ascending: true });
 
@@ -167,14 +204,27 @@ export const TransactionForm = ({ userId, transaction, onClose, onSaved, currenc
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validação de segurança: bloquear se não houver userId resolvido
+    if (!resolvedUserId) {
+      console.error("❌ Tentativa de salvar sem userId resolvido - bloqueado");
+      toast.error("Erro: usuário não identificado. Não é possível salvar.");
+      return;
+    }
+
     if (!formData.amount || !formData.category_id) {
       toast.error("Preencha o valor e a categoria");
       return;
     }
 
+    console.log("💾 handleSubmit:", {
+      propUserId: userId,
+      resolvedUserId,
+      formData
+    });
+
     const dataToSave = {
       ...formData,
-      user_id: userId,
+      user_id: resolvedUserId,
     };
 
     if (transaction) {
