@@ -59,18 +59,34 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   useEffect(() => {
-    loadCategories();
-    loadExistingPayments();
+    console.log("🔍 PaymentItemForm useEffect disparado:", { userId });
+    if (userId) {
+      loadCategories();
+      loadExistingPayments();
+    } else {
+      console.warn("⚠️ userId não está definido no PaymentItemForm, aguardando...");
+    }
   }, [userId]);
 
   const loadCategories = async () => {
+    console.log("📥 PaymentItemForm loadCategories iniciado:", { 
+      userId,
+      timestamp: new Date().toISOString() 
+    });
+
     if (!userId) {
-      console.error("userId is undefined in PaymentItemForm");
+      console.error("❌ userId está undefined no PaymentItemForm - abortando busca");
+      toast.error("Erro: usuário não identificado");
       return;
     }
 
     setIsLoadingCategories(true);
     try {
+      console.log("🔄 Executando query Supabase (PaymentItemForm)...", {
+        table: "categories",
+        filters: { user_id: userId, type: "expense" }
+      });
+
       const { data, error } = await supabase
         .from("categories")
         .select("id, name, color, parent_id")
@@ -78,19 +94,39 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
         .eq("type", "expense")
         .order("name");
 
+      console.log("📊 Resposta Supabase (PaymentItemForm):", { 
+        data, 
+        error,
+        dataLength: data?.length || 0 
+      });
+
       if (error) {
-        console.error("Error loading categories:", error);
-        toast.error("Erro ao carregar categorias");
+        console.error("❌ Erro Supabase (PaymentItemForm):", error);
+        toast.error("Erro ao carregar categorias: " + error.message);
       } else {
         const allCategories = data || [];
+        console.log("✅ Categorias carregadas (PaymentItemForm):", allCategories.length);
+        
+        if (allCategories.length === 0) {
+          console.warn("⚠️ Nenhuma categoria de despesa encontrada para userId:", userId);
+          toast.info("Nenhuma categoria de despesa encontrada");
+        }
+
         setCategories(allCategories);
         
-        // Separar categorias pai (sem parent_id)
-        const parents = allCategories.filter(cat => !cat.parent_id);
+        // Separar categorias pai (sem parent_id - tanto null quanto string vazia)
+        const parents = allCategories.filter(cat => !cat.parent_id || cat.parent_id === '');
+        console.log("👨‍👦 Categorias pai filtradas (PaymentItemForm):", parents.length);
+        console.log("📋 Categorias pai (PaymentItemForm):", parents.map(p => ({ id: p.id, name: p.name })));
+        
         setParentCategories(parents);
       }
+    } catch (err) {
+      console.error("💥 Exceção não tratada (PaymentItemForm):", err);
+      toast.error("Erro inesperado ao carregar categorias");
     } finally {
       setIsLoadingCategories(false);
+      console.log("🏁 loadCategories finalizado (PaymentItemForm)");
     }
   };
 
