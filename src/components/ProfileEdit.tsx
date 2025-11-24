@@ -33,20 +33,56 @@ export const ProfileEdit = ({ userId }: ProfileEditProps) => {
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
+  const [resolvedUserId, setResolvedUserId] = useState<string | undefined>(userId);
 
+  // Auth Fallback: Resolve userId from session if not provided
   useEffect(() => {
-    if (userId) {
-      loadProfile();
-    }
+    const resolveUserId = async () => {
+      console.log("🔐 ProfileEdit - Contexto de Auth:", { 
+        propUserId: userId, 
+        resolvedUserId
+      });
+
+      if (userId) {
+        console.log("✅ userId recebido via props:", userId);
+        setResolvedUserId(userId);
+        return;
+      }
+
+      // Fallback: tentar obter da sessão ativa
+      console.log("🔄 Buscando userId da sessão ativa...");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        console.log("✅ userId resolvido da sessão:", user.id);
+        setResolvedUserId(user.id);
+      } else {
+        console.error("❌ Não foi possível resolver userId - sem sessão ativa");
+        toast.error("Erro: usuário não autenticado");
+      }
+    };
+
+    resolveUserId();
   }, [userId]);
 
+  useEffect(() => {
+    if (resolvedUserId) {
+      loadProfile();
+    }
+  }, [resolvedUserId]);
+
   const loadProfile = async () => {
-    if (!userId) return;
+    if (!resolvedUserId) {
+      console.error("❌ ProfileEdit: resolvedUserId está undefined - abortando loadProfile");
+      return;
+    }
+
+    console.log("📥 ProfileEdit loadProfile:", { resolvedUserId });
 
     const { data, error} = await supabase
       .from("profiles")
       .select("full_name, avatar_url, birth_date, phone, zip_code, street, number, complement, neighborhood, city, state")
-      .eq("id", userId)
+      .eq("id", resolvedUserId)
       .single();
 
     if (error) {
@@ -72,7 +108,13 @@ export const ProfileEdit = ({ userId }: ProfileEditProps) => {
   };
 
   const handleSave = async () => {
-    if (!userId) return;
+    if (!resolvedUserId) {
+      console.error("❌ Tentativa de salvar perfil sem userId resolvido - bloqueado");
+      toast.error("Erro: usuário não identificado. Não é possível salvar perfil.");
+      return;
+    }
+
+    console.log("💾 Salvando perfil:", { resolvedUserId });
 
     const { error } = await supabase
       .from("profiles")
@@ -89,7 +131,7 @@ export const ProfileEdit = ({ userId }: ProfileEditProps) => {
         city: profile.city,
         state: profile.state,
       })
-      .eq("id", userId);
+      .eq("id", resolvedUserId);
 
     if (error) {
       toast.error("Erro ao salvar perfil");

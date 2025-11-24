@@ -25,20 +25,38 @@ export const ProfileMenu = ({ userId }: ProfileMenuProps) => {
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
+  const [resolvedUserId, setResolvedUserId] = useState<string | undefined>(userId);
 
+  // Auth Fallback: Resolve userId from session if not provided
   useEffect(() => {
-    if (userId) {
-      loadAvatar();
-    }
+    const resolveUserId = async () => {
+      if (userId) {
+        setResolvedUserId(userId);
+        return;
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setResolvedUserId(user.id);
+      }
+    };
+
+    resolveUserId();
   }, [userId]);
 
+  useEffect(() => {
+    if (resolvedUserId) {
+      loadAvatar();
+    }
+  }, [resolvedUserId]);
+
   const loadAvatar = async () => {
-    if (!userId) return;
+    if (!resolvedUserId) return;
 
     const { data, error } = await supabase
       .from("profiles")
       .select("avatar_url")
-      .eq("id", userId)
+      .eq("id", resolvedUserId)
       .single();
 
     if (error) {
@@ -70,13 +88,16 @@ export const ProfileMenu = ({ userId }: ProfileMenuProps) => {
   };
 
   const handleSaveAvatar = async (croppedBlob: Blob) => {
-    if (!userId) return;
+    if (!resolvedUserId) {
+      toast.error("Erro: usuário não identificado");
+      return;
+    }
 
     setUploading(true);
     try {
       const fileExt = "jpg";
-      const fileName = `${userId}-${Date.now()}.${fileExt}`;
-      const filePath = `${userId}/${fileName}`;
+      const fileName = `${resolvedUserId}-${Date.now()}.${fileExt}`;
+      const filePath = `${resolvedUserId}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
@@ -91,7 +112,7 @@ export const ProfileMenu = ({ userId }: ProfileMenuProps) => {
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ avatar_url: publicUrl })
-        .eq("id", userId);
+        .eq("id", resolvedUserId);
 
       if (updateError) throw updateError;
 
@@ -106,12 +127,15 @@ export const ProfileMenu = ({ userId }: ProfileMenuProps) => {
   };
 
   const handleSelectEmoji = async (emoji: string) => {
-    if (!userId) return;
+    if (!resolvedUserId) {
+      toast.error("Erro: usuário não identificado");
+      return;
+    }
 
     const { error } = await supabase
       .from("profiles")
       .update({ avatar_url: emoji })
-      .eq("id", userId);
+      .eq("id", resolvedUserId);
 
     if (error) {
       toast.error("Erro ao atualizar emoji");

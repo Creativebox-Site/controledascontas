@@ -48,18 +48,58 @@ export const PaymentItemsList = ({
   const [isLoading, setIsLoading] = useState(true);
   const [monthlyStats, setMonthlyStats] = useState({ total: 0, count: 0 });
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [resolvedUserId, setResolvedUserId] = useState<string | undefined>(userId);
+
+  // Auth Fallback: Resolve userId from session if not provided
+  useEffect(() => {
+    const resolveUserId = async () => {
+      console.log("🔐 PaymentItemsList - Contexto de Auth:", { 
+        propUserId: userId, 
+        resolvedUserId
+      });
+
+      if (userId) {
+        console.log("✅ userId recebido via props:", userId);
+        setResolvedUserId(userId);
+        return;
+      }
+
+      // Fallback: tentar obter da sessão ativa
+      console.log("🔄 Buscando userId da sessão ativa...");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        console.log("✅ userId resolvido da sessão:", user.id);
+        setResolvedUserId(user.id);
+      } else {
+        console.error("❌ Não foi possível resolver userId - sem sessão ativa");
+        toast.error("Erro: usuário não autenticado");
+      }
+    };
+
+    resolveUserId();
+  }, [userId]);
 
   useEffect(() => {
-    loadItems();
-  }, [userId, refreshKey]);
+    if (resolvedUserId) {
+      loadItems();
+    }
+  }, [resolvedUserId, refreshKey]);
 
   const loadItems = async () => {
-    if (!userId) return;
+    if (!resolvedUserId) {
+      console.error("❌ PaymentItemsList: resolvedUserId está undefined - abortando loadItems");
+      setIsLoading(false);
+      return;
+    }
+
+    console.log("📥 PaymentItemsList loadItems:", { resolvedUserId });
+
     setIsLoading(true);
     const { data, error } = await supabase
       .from("payment_items")
       .select("*, categories(name, color), payment_reminders(id)")
-      .eq("user_id", userId)
+      .eq("user_id", resolvedUserId)
       .order("due_date", { ascending: true });
 
     if (error) {
@@ -95,10 +135,16 @@ export const PaymentItemsList = ({
   };
 
   const addToTransactions = async (item: PaymentItem) => {
-    if (!userId) return;
+    if (!resolvedUserId) {
+      console.error("❌ Tentativa de adicionar transação sem userId resolvido - bloqueado");
+      toast.error("Erro: usuário não identificado. Não é possível adicionar transação.");
+      return;
+    }
+
+    console.log("💾 Adicionando transação:", { resolvedUserId });
 
     const { error } = await supabase.from("transactions").insert({
-      user_id: userId,
+      user_id: resolvedUserId,
       amount: item.value,
       description: item.title,
       type: "expense",
