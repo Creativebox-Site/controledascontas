@@ -38,6 +38,7 @@ export const FinancialChart = ({
   const [balance, setBalance] = useState(0);
   const [totalValue, setTotalValue] = useState(0);
   const [exchangeRate, setExchangeRate] = useState<number>(5.0);
+  const [resolvedUserId, setResolvedUserId] = useState<string | undefined>(userId);
   const [dateRange, setDateRange] = useState<DateRange>({
     from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     to: new Date()
@@ -62,6 +63,36 @@ export const FinancialChart = ({
 
   // Estados para os dialogs
   const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
+
+  // Auth Fallback: Resolve userId from session if not provided
+  useEffect(() => {
+    const resolveUserId = async () => {
+      console.log("🔐 FinancialChart - Contexto de Auth:", { 
+        propUserId: userId, 
+        resolvedUserId
+      });
+
+      if (userId) {
+        console.log("✅ userId recebido via props:", userId);
+        setResolvedUserId(userId);
+        return;
+      }
+
+      // Fallback: tentar obter da sessão ativa
+      console.log("🔄 Buscando userId da sessão ativa...");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        console.log("✅ userId resolvido da sessão:", user.id);
+        setResolvedUserId(user.id);
+      } else {
+        console.error("❌ Não foi possível resolver userId - sem sessão ativa");
+      }
+    };
+
+    resolveUserId();
+  }, [userId]);
+
   const fetchExchangeRate = async () => {
     try {
       const response = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
@@ -72,12 +103,12 @@ export const FinancialChart = ({
     }
   };
   const loadUpcomingPayments = async () => {
-    if (!userId) return;
+    if (!resolvedUserId) return;
     try {
       const {
         data,
         error
-      } = await supabase.from("payment_items").select("value").eq("user_id", userId).eq("status", "pending");
+      } = await supabase.from("payment_items").select("value").eq("user_id", resolvedUserId).eq("status", "pending");
       if (error) {
         console.error("Error loading upcoming payments:", error);
         return;
@@ -91,12 +122,12 @@ export const FinancialChart = ({
   };
 
   const loadGoals = async () => {
-    if (!userId) return;
+    if (!resolvedUserId) return;
     try {
       const { data: goals, error } = await supabase
         .from("goals")
         .select("*")
-        .eq("user_id", userId);
+        .eq("user_id", resolvedUserId);
 
       if (error || !goals) {
         return;
@@ -120,22 +151,22 @@ export const FinancialChart = ({
   };
 
   useEffect(() => {
-    if (userId) {
+    if (resolvedUserId) {
       loadTransactions();
       fetchExchangeRate();
       loadUpcomingPayments();
       loadGoals();
     }
-  }, [userId, currency, dateRange]);
+  }, [resolvedUserId, currency, dateRange]);
 
   // Realtime subscription para contas a pagar
   useEffect(() => {
-    if (!userId) return;
+    if (!resolvedUserId) return;
     const channel = supabase.channel('payment-items-changes').on('postgres_changes', {
       event: '*',
       schema: 'public',
       table: 'payment_items',
-      filter: `user_id=eq.${userId}`
+      filter: `user_id=eq.${resolvedUserId}`
     }, () => {
       loadUpcomingPayments();
       loadTransactions();
@@ -143,7 +174,7 @@ export const FinancialChart = ({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [resolvedUserId]);
   const convertAmount = (amount: number, transactionCurrency: string) => {
     if (currency === transactionCurrency) return amount;
     if (currency === "BRL" && transactionCurrency === "USD") {
@@ -164,10 +195,17 @@ export const FinancialChart = ({
     });
   };
   const loadTransactions = async () => {
+    if (!resolvedUserId) {
+      console.error("❌ FinancialChart: resolvedUserId está undefined - abortando loadTransactions");
+      return;
+    }
+
+    console.log("📥 FinancialChart loadTransactions:", { resolvedUserId });
+
     const {
       data,
       error
-    } = await supabase.from("transactions").select("*, categories(name, color, is_essential)").eq("user_id", userId);
+    } = await supabase.from("transactions").select("*, categories(name, color, is_essential)").eq("user_id", resolvedUserId);
     if (error) {
       console.error("Error loading transactions:", error);
       return;

@@ -44,6 +44,7 @@ export const Investments = ({
   const [loading, setLoading] = useState(true);
   const [isRecurring, setIsRecurring] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [resolvedUserId, setResolvedUserId] = useState<string | undefined>(userId);
   const [formData, setFormData] = useState({
     category_id: "",
     description: "",
@@ -54,6 +55,36 @@ export const Investments = ({
     frequency: "monthly",
     repetitions: 12
   });
+
+  // Auth Fallback: Resolve userId from session if not provided
+  useEffect(() => {
+    const resolveUserId = async () => {
+      console.log("🔐 Investments - Contexto de Auth:", { 
+        propUserId: userId, 
+        resolvedUserId
+      });
+
+      if (userId) {
+        console.log("✅ userId recebido via props:", userId);
+        setResolvedUserId(userId);
+        return;
+      }
+
+      // Fallback: tentar obter da sessão ativa
+      console.log("🔄 Buscando userId da sessão ativa...");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        console.log("✅ userId resolvido da sessão:", user.id);
+        setResolvedUserId(user.id);
+      } else {
+        console.error("❌ Não foi possível resolver userId - sem sessão ativa");
+        toast.error("Erro: usuário não autenticado");
+      }
+    };
+
+    resolveUserId();
+  }, [userId]);
 
   // Verificar se veio categoria pré-selecionada
   useEffect(() => {
@@ -68,17 +99,25 @@ export const Investments = ({
       window.history.replaceState({}, document.title);
     }
   }, [location.state, categories]);
+
   useEffect(() => {
-    if (userId) {
+    if (resolvedUserId) {
       loadCategories();
       loadInvestments();
     }
-  }, [userId]);
+  }, [resolvedUserId]);
   const loadCategories = async () => {
+    if (!resolvedUserId) {
+      console.error("❌ Investments: resolvedUserId está undefined - abortando loadCategories");
+      return;
+    }
+
+    console.log("📥 Investments loadCategories:", { resolvedUserId });
+
     const {
       data,
       error
-    } = await supabase.from("categories").select("id, name, color").eq("user_id", userId).eq("type", "investment").order("name");
+    } = await supabase.from("categories").select("id, name, color").eq("user_id", resolvedUserId).eq("type", "investment").order("name");
     if (error) {
       toast.error("Erro ao carregar categorias");
       return;
@@ -92,7 +131,7 @@ export const Investments = ({
     }
   };
   useEffect(() => {
-    if (!userId) return;
+    if (!resolvedUserId) return;
 
     // Reload quando a aba fica visível novamente
     const handleVisibilityChange = () => {
@@ -105,7 +144,7 @@ export const Investments = ({
       event: '*',
       schema: 'public',
       table: 'transactions',
-      filter: `user_id=eq.${userId}`
+      filter: `user_id=eq.${resolvedUserId}`
     }, () => {
       loadInvestments();
     }).subscribe();
@@ -113,18 +152,26 @@ export const Investments = ({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [resolvedUserId]);
   const loadInvestments = async () => {
+    if (!resolvedUserId) {
+      console.error("❌ Investments: resolvedUserId está undefined - abortando loadInvestments");
+      setLoading(false);
+      return;
+    }
+
+    console.log("📥 Investments loadInvestments:", { resolvedUserId });
+
     setLoading(true);
     const {
       data: investmentCategories
-    } = await supabase.from("categories").select("id, name").eq("user_id", userId).eq("type", "investment");
+    } = await supabase.from("categories").select("id, name").eq("user_id", resolvedUserId).eq("type", "investment");
     if (investmentCategories) {
       const categoryIds = investmentCategories.map(c => c.id);
       const categoryMap = Object.fromEntries(investmentCategories.map(c => [c.id, c.name]));
       const {
         data: transactions
-      } = await supabase.from("transactions").select("*").eq("user_id", userId).in("category_id", categoryIds).order("date", {
+      } = await supabase.from("transactions").select("*").eq("user_id", resolvedUserId).in("category_id", categoryIds).order("date", {
         ascending: false
       });
       if (transactions) {
@@ -155,11 +202,20 @@ export const Investments = ({
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!resolvedUserId) {
+      console.error("❌ Tentativa de criar investimento sem userId resolvido - bloqueado");
+      toast.error("Erro: usuário não identificado. Não é possível criar investimento.");
+      return;
+    }
+
     const amount = Number(displayValue) / 100;
     if (!amount || !formData.category_id) {
       toast.error("Preencha o valor e a categoria");
       return;
     }
+
+    console.log("💾 Criando investimento:", { resolvedUserId, amount, formData });
     if (isRecurring) {
       const loadingToast = toast.loading("Inserindo investimentos recorrentes...");
 
@@ -178,7 +234,7 @@ export const Investments = ({
           investmentDate = addYears(startDate, i);
         }
         investments.push({
-          user_id: userId,
+          user_id: resolvedUserId,
           category_id: formData.category_id,
           amount: amount,
           description: formData.description,
@@ -212,7 +268,7 @@ export const Investments = ({
       const {
         error
       } = await supabase.from("transactions").insert({
-        user_id: userId,
+        user_id: resolvedUserId,
         category_id: formData.category_id,
         amount: amount,
         description: formData.description,
@@ -239,17 +295,23 @@ export const Investments = ({
     }
   };
   const handleBulkImport = async (data: any[]) => {
-    if (!userId) return;
+    if (!resolvedUserId) {
+      console.error("❌ Tentativa de importar sem userId resolvido - bloqueado");
+      toast.error("Erro: usuário não identificado. Não é possível importar.");
+      return;
+    }
+
+    console.log("📥 Importação em lote:", { resolvedUserId, count: data.length });
 
     // Para cada investimento, precisamos criar uma transação
     for (const row of data) {
       // Buscar a categoria
       const {
         data: category
-      } = await supabase.from("categories").select("id").eq("user_id", userId).eq("name", row.categoria).maybeSingle();
+      } = await supabase.from("categories").select("id").eq("user_id", resolvedUserId).eq("name", row.categoria).maybeSingle();
       if (category) {
         await supabase.from("transactions").insert({
-          user_id: userId,
+          user_id: resolvedUserId,
           category_id: category.id,
           amount: row.valor,
           description: row.categoria,
