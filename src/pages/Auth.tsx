@@ -9,10 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Eye, EyeOff, ShieldCheck, Mail, X, Lock, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck, Mail, X } from "lucide-react";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import logoCreativeBox from "@/assets/logo-creative-box.png";
-import { signUpSchema, validatePassword, passwordSchema } from "@/lib/passwordValidation";
+import { signUpSchema, validatePassword } from "@/lib/passwordValidation";
 const Auth = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -23,18 +23,14 @@ const Auth = () => {
   const [resetLoading, setResetLoading] = useState(false);
   const [signupPassword, setSignupPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [updatePasswordDialogOpen, setUpdatePasswordDialogOpen] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
   useEffect(() => {
     // Detectar se o usuário veio de um link de recuperação de senha
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const type = hashParams.get('type');
     if (type === 'recovery') {
-      setUpdatePasswordDialogOpen(true);
+      navigate('/update-password');
+      return;
     }
 
     // Ouvir eventos do Supabase para detectar PASSWORD_RECOVERY (mais robusto)
@@ -44,13 +40,13 @@ const Auth = () => {
       }
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
-        setUpdatePasswordDialogOpen(true);
+        navigate('/update-password');
       }
     });
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -165,47 +161,7 @@ const Auth = () => {
       toast.error("Erro ao processar solicitação. Tente novamente mais tarde.");
     }
   };
-  const handleUpdatePassword = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    if (!newPassword || !confirmNewPassword) {
-      toast.error("Preencha todos os campos");
-      setLoading(false);
-      return;
-    }
-    if (newPassword !== confirmNewPassword) {
-      toast.error("As senhas não coincidem");
-      setLoading(false);
-      return;
-    }
-
-    // Validar senha com os mesmos requisitos do cadastro
-    try {
-      passwordSchema.parse(newPassword);
-    } catch (error: any) {
-      const errorMessage = error.errors?.[0]?.message || "Senha não atende aos requisitos de segurança";
-      toast.error(errorMessage);
-      setLoading(false);
-      return;
-    }
-    const {
-      error
-    } = await supabase.auth.updateUser({
-      password: newPassword
-    });
-    setLoading(false);
-    if (error) {
-      toast.error("Erro ao atualizar senha: " + error.message);
-      return;
-    }
-    toast.success("Senha atualizada com sucesso! Faça login com sua nova senha.");
-    setUpdatePasswordDialogOpen(false);
-    setNewPassword("");
-    setConfirmNewPassword("");
-
-    // Limpar o hash da URL
-    window.history.replaceState(null, "", window.location.pathname);
-  };
+  
   return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
@@ -336,57 +292,6 @@ const Auth = () => {
           </Tabs>
         </CardContent>
       </Card>
-
-      {/* Dialog de atualização de senha após clicar no link do email */}
-      <Dialog open={updatePasswordDialogOpen} onOpenChange={setUpdatePasswordDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <div className="flex justify-center mb-3">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Lock className="w-6 h-6 text-primary" />
-              </div>
-            </div>
-            <DialogTitle className="text-center">Redefinir Senha</DialogTitle>
-            <DialogDescription className="text-center">
-              Digite sua nova senha com segurança
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleUpdatePassword} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="new-password">Nova Senha</Label>
-              <div className="relative">
-                <Input id="new-password" type={showNewPassword ? "text" : "password"} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Digite sua nova senha" required className="pr-10" />
-                <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowNewPassword(!showNewPassword)}>
-                  {showNewPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
-                </Button>
-              </div>
-              <PasswordStrengthIndicator password={newPassword} />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirm-new-password">Confirmar Nova Senha</Label>
-              <div className="relative">
-                <Input id="confirm-new-password" type={showConfirmNewPassword ? "text" : "password"} value={confirmNewPassword} onChange={e => setConfirmNewPassword(e.target.value)} placeholder="Digite a senha novamente" required className="pr-10" />
-                <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}>
-                  {showConfirmNewPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
-                </Button>
-              </div>
-              {confirmNewPassword && newPassword !== confirmNewPassword && <p className="text-xs text-destructive flex items-center gap-1">
-                  <X className="w-3 h-3" />
-                  As senhas não coincidem
-                </p>}
-              {confirmNewPassword && newPassword === confirmNewPassword && <p className="text-xs text-green-600 flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3" />
-                  Senhas coincidem
-                </p>}
-            </div>
-
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Atualizando..." : "Atualizar Senha"}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>;
 };
 export default Auth;

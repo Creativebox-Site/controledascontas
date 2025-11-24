@@ -60,12 +60,15 @@ export default function UpdatePassword() {
 
       if (error) throw error;
 
-      toast.success("Senha atualizada com sucesso!");
+      toast.success("Senha atualizada com sucesso! Faça login novamente.");
       
-      // Aguardar um momento e redirecionar para o dashboard
+      // Deslogar o usuário para forçar novo login limpo
+      await supabase.auth.signOut();
+      
+      // Redirecionar para a página de login
       setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
+        navigate("/auth");
+      }, 1500);
     } catch (error: any) {
       console.error("Error updating password:", error);
       toast.error(error.message || "Erro ao atualizar senha");
@@ -99,7 +102,7 @@ export default function UpdatePassword() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <Alert>
               <AlertDescription className="text-xs text-muted-foreground">
-                Após redefinir sua senha, você será redirecionado automaticamente para o dashboard.
+                Após redefinir sua senha, você será desconectado e precisará fazer login novamente com a nova senha.
               </AlertDescription>
             </Alert>
 
