@@ -27,50 +27,65 @@ import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 
 const queryClient = new QueryClient();
 
-// Wrappers com currency
+// Wrappers com currency e userId
 const OverviewWithCurrency = () => {
-  const { currency } = useCurrency();
-  return <Overview currency={currency} />;
+  const { currency, user } = useCurrency();
+  console.log("🔍 App.tsx - OverviewWithCurrency:", { userId: user?.id, currency });
+  return <Overview userId={user?.id} currency={currency} />;
 };
 
 const TransactionsWithCurrency = () => {
-  const { currency } = useCurrency();
-  return <Transactions currency={currency} />;
+  const { currency, user } = useCurrency();
+  console.log("🔍 App.tsx - TransactionsWithCurrency:", { userId: user?.id, currency });
+  return <Transactions userId={user?.id} currency={currency} />;
 };
 
 const ExpensesWithCurrency = () => {
-  const { currency } = useCurrency();
-  return <Expenses currency={currency} />;
+  const { currency, user } = useCurrency();
+  console.log("🔍 App.tsx - ExpensesWithCurrency:", { userId: user?.id, currency });
+  return <Expenses userId={user?.id} currency={currency} />;
 };
 
 const IncomeWithCurrency = () => {
-  const { currency } = useCurrency();
-  return <Income currency={currency} />;
+  const { currency, user } = useCurrency();
+  console.log("🔍 App.tsx - IncomeWithCurrency:", { userId: user?.id, currency });
+  return <Income userId={user?.id} currency={currency} />;
 };
 
 const PaymentItemsWithCurrency = () => {
-  const { currency } = useCurrency();
-  return <PaymentItems currency={currency} />;
+  const { currency, user } = useCurrency();
+  console.log("🔍 App.tsx - PaymentItemsWithCurrency:", { userId: user?.id, currency });
+  return <PaymentItems userId={user?.id} currency={currency} />;
 };
 
 const InvestmentsWithCurrency = () => {
-  const { currency } = useCurrency();
-  return <Investments currency={currency} />;
+  const { currency, user } = useCurrency();
+  console.log("🔍 App.tsx - InvestmentsWithCurrency:", { userId: user?.id, currency });
+  return <Investments userId={user?.id} currency={currency} />;
 };
 
 const GoalsWithCurrency = () => {
-  const { currency } = useCurrency();
-  return <Goals currency={currency} />;
+  const { currency, user } = useCurrency();
+  console.log("🔍 App.tsx - GoalsWithCurrency:", { userId: user?.id, currency });
+  return <Goals userId={user?.id} currency={currency} />;
 };
 
 const FinancingWithCurrency = () => {
-  const { currency } = useCurrency();
+  const { currency, user } = useCurrency();
+  console.log("🔍 App.tsx - FinancingWithCurrency:", { userId: user?.id, currency });
   return <Financing currency={currency} />;
 };
 
 const InsightsWithCurrency = () => {
-  const { currency } = useCurrency();
-  return <Insights currency={currency} />;
+  const { currency, user } = useCurrency();
+  console.log("🔍 App.tsx - InsightsWithCurrency:", { userId: user?.id, currency });
+  return <Insights userId={user?.id} currency={currency} />;
+};
+
+const CategoriesWithContext = () => {
+  const { user } = useCurrency();
+  console.log("🔍 App.tsx - CategoriesWithContext:", { userId: user?.id });
+  return <Categories userId={user?.id} />;
 };
 
 const App = () => (
@@ -100,7 +115,7 @@ const App = () => (
               <Route path="/dashboard/goals" element={<GoalsWithCurrency />} />
               <Route path="/dashboard/financing" element={<FinancingWithCurrency />} />
               <Route path="/dashboard/insights" element={<InsightsWithCurrency />} />
-              <Route path="/dashboard/categories" element={<Categories />} />
+              <Route path="/dashboard/categories" element={<CategoriesWithContext />} />
               <Route path="/dashboard/settings" element={<Settings />} />
               <Route path="/dashboard/profile" element={<Profile />} />
             </Route>
