@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Plus } from "lucide-react";
 import { TransactionList } from "@/components/TransactionList";
 import { TransactionForm } from "@/components/TransactionForm";
+import { toast } from "sonner";
 
 interface IncomeProps {
   userId?: string;
@@ -14,6 +15,15 @@ export const Income = ({ userId, currency }: IncomeProps) => {
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const handleOpenForm = () => {
+    if (!userId) {
+      toast.error("Aguarde, carregando dados do usuário...");
+      console.error("❌ Tentativa de abrir formulário sem userId");
+      return;
+    }
+    setShowTransactionForm(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -21,8 +31,9 @@ export const Income = ({ userId, currency }: IncomeProps) => {
         <ButtonPremium 
           variant="success" 
           size="md" 
-          onClick={() => setShowTransactionForm(true)}
+          onClick={handleOpenForm}
           leftIcon={<Plus className="w-4 h-4" />}
+          disabled={!userId}
         >
           Nova Receita
         </ButtonPremium>

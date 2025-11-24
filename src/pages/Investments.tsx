@@ -401,7 +401,18 @@ export const Investments = ({
             <Upload className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
             <span className="whitespace-nowrap">Inserir Dados em Lote</span>
           </Button>
-          <Button onClick={() => setShowForm(true)} className="w-full sm:w-auto text-xs sm:text-sm">
+          <Button 
+            onClick={() => {
+              if (!resolvedUserId) {
+                toast.error("Aguarde, carregando dados do usuário...");
+                console.error("❌ Tentativa de abrir formulário sem userId");
+                return;
+              }
+              setShowForm(true);
+            }}
+            disabled={!resolvedUserId}
+            className="w-full sm:w-auto text-xs sm:text-sm"
+          >
             <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
             <span className="whitespace-nowrap">Novo Investimento</span>
           </Button>
