@@ -138,24 +138,44 @@ export const PaymentItemForm = ({ userId, currency, onClose, onSaved }: PaymentI
       if (error) {
         console.error("❌ Erro Supabase (PaymentItemForm):", error);
         toast.error("Erro ao carregar categorias: " + error.message);
-      } else {
-        const allCategories = data || [];
-        console.log("✅ Categorias carregadas (PaymentItemForm):", allCategories.length);
-        
-        if (allCategories.length === 0) {
-          console.warn("⚠️ Nenhuma categoria de despesa encontrada para resolvedUserId:", resolvedUserId);
-          toast.info("Nenhuma categoria de despesa encontrada");
-        }
-
-        setCategories(allCategories);
-        
-        // Separar categorias pai (sem parent_id - tanto null quanto string vazia)
-        const parents = allCategories.filter(cat => !cat.parent_id || cat.parent_id === '');
-        console.log("👨‍👦 Categorias pai filtradas (PaymentItemForm):", parents.length);
-        console.log("📋 Categorias pai (PaymentItemForm):", parents.map(p => ({ id: p.id, name: p.name })));
-        
-        setParentCategories(parents);
+        return;
       }
+
+      const allCategories = data || [];
+      console.log("✅ Categorias carregadas (PaymentItemForm):", allCategories.length);
+      
+      if (allCategories.length === 0) {
+        console.warn("⚠️ Nenhuma categoria de despesa encontrada - criando categorias padrão...");
+        toast.info("Criando categorias padrão...");
+        
+        // Tentar criar categorias padrão
+        const { error: createError } = await supabase.rpc('create_default_categories', {
+          p_user_id: resolvedUserId
+        });
+
+        if (createError) {
+          console.error('❌ Erro ao criar categorias padrão:', createError);
+          toast.error('Erro ao criar categorias: ' + createError.message);
+        } else {
+          console.log('✅ Categorias padrão criadas, recarregando...');
+          // Recarregar categorias após criação
+          setTimeout(() => loadCategories(), 1000);
+          return;
+        }
+      }
+
+      setCategories(allCategories);
+      
+      // Separar categorias pai (sem parent_id)
+      const parents = allCategories.filter(cat => !cat.parent_id);
+      console.log("👨‍👦 Categorias pai filtradas (PaymentItemForm):", parents.length);
+      console.log("📋 Categorias pai (PaymentItemForm):", parents.map(p => ({ id: p.id, name: p.name, parent_id: p.parent_id })));
+      
+      // Separar todas as subcategorias
+      const subs = allCategories.filter(cat => cat.parent_id);
+      console.log("👶 Subcategorias totais (PaymentItemForm):", subs.length);
+      
+      setParentCategories(parents);
     } catch (err) {
       console.error("💥 Exceção não tratada (PaymentItemForm):", err);
       toast.error("Erro inesperado ao carregar categorias");
