@@ -96,10 +96,29 @@ export const FinancialChart = ({
   const fetchExchangeRate = async () => {
     try {
       const response = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
+      if (!response.ok) {
+        throw new Error(`Exchange rate API returned ${response.status}`);
+      }
       const data = await response.json();
-      setExchangeRate(data.rates.BRL);
+      // Validate response structure
+      if (
+        typeof data === 'object' &&
+        data !== null &&
+        'rates' in data &&
+        typeof data.rates === 'object' &&
+        data.rates !== null &&
+        'BRL' in data.rates &&
+        typeof data.rates.BRL === 'number' &&
+        data.rates.BRL > 0
+      ) {
+        setExchangeRate(data.rates.BRL);
+      } else {
+        console.error("Invalid exchange rate response structure");
+        // Keep default fallback value
+      }
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
+      // Keep default fallback value of 5.0
     }
   };
   const loadUpcomingPayments = async () => {
