@@ -12,6 +12,27 @@ interface VerifyOtpRequest {
   deviceFingerprint?: string;
 }
 
+// ===== INPUT VALIDATION HELPERS =====
+function validateEmail(email: string): boolean {
+  if (!email || email.length > 254) return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function sanitizeForLog(input: string): string {
+  return input.replace(/[\r\n]/g, '').substring(0, 100);
+}
+
+function validateOtpCode(code: string): boolean {
+  if (!code || code.length !== 6) return false;
+  return /^\d{6}$/.test(code);
+}
+
+function validateStringLength(value: string | undefined, maxLength: number): boolean {
+  if (!value) return true; // Optional fields are valid if empty
+  return value.length <= maxLength;
+}
+
 // Hash do código com salt
 async function hashCode(code: string, salt: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -29,9 +50,38 @@ Deno.serve(async (req) => {
   try {
     const { email, code, requestId, deviceFingerprint }: VerifyOtpRequest = await req.json();
 
+    // ===== INPUT VALIDATION =====
     if (!email || !code || !requestId) {
       return new Response(
         JSON.stringify({ error: 'Email, código e requestId são obrigatórios' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!validateEmail(email)) {
+      return new Response(
+        JSON.stringify({ error: 'Formato de email inválido' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!validateOtpCode(code)) {
+      return new Response(
+        JSON.stringify({ error: 'Código deve ter exatamente 6 dígitos' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!validateStringLength(requestId, 255)) {
+      return new Response(
+        JSON.stringify({ error: 'requestId muito longo' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!validateStringLength(deviceFingerprint, 255)) {
+      return new Response(
+        JSON.stringify({ error: 'deviceFingerprint muito longo' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -155,7 +205,7 @@ Deno.serve(async (req) => {
       metadata: { verified_at: new Date().toISOString() },
     });
 
-    console.log(`OTP verified successfully for ${email}`);
+    console.log(`OTP verified successfully for ${sanitizeForLog(email)}`);
 
     // Buscar usuário por email
     const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();

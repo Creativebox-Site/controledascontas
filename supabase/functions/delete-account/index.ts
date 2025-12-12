@@ -5,24 +5,62 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// ===== RATE LIMITING =====
-// In-memory rate limiting to prevent abuse and DoS attacks
-const attempts = new Map<string, { count: number; resetAt: number }>();
+// ===== INPUT VALIDATION HELPERS =====
+function sanitizeForLog(input: string): string {
+  return input.replace(/[\r\n]/g, '').substring(0, 100);
+}
 
-function checkRateLimit(ip: string, maxAttempts = 3, windowMs = 3600000): boolean {
-  const now = Date.now();
-  const record = attempts.get(ip);
+// ===== DATABASE-BACKED RATE LIMITING =====
+async function checkDatabaseRateLimit(
+  supabase: any,
+  identifier: string,
+  action: string,
+  maxAttempts: number,
+  windowMs: number
+): Promise<boolean> {
+  const windowStart = new Date(Date.now() - windowMs).toISOString();
   
-  if (!record || now > record.resetAt) {
-    attempts.set(ip, { count: 1, resetAt: now + windowMs });
+  // Get current rate limit record
+  const { data: existing, error: selectError } = await supabase
+    .from('otp_rate_limits')
+    .select('*')
+    .eq('identifier', identifier)
+    .eq('type', 'ip')
+    .eq('action', action)
+    .gte('window_start', windowStart)
+    .maybeSingle();
+
+  if (selectError) {
+    console.error('Rate limit check error:', selectError);
+    return true; // Allow on error to not block legitimate users
+  }
+
+  if (!existing) {
+    // No record or expired, create new one
+    await supabase
+      .from('otp_rate_limits')
+      .upsert({
+        identifier,
+        type: 'ip',
+        action,
+        count: 1,
+        window_start: new Date().toISOString()
+      }, {
+        onConflict: 'identifier,type,action'
+      });
     return true;
   }
-  
-  if (record.count >= maxAttempts) {
-    return false;
+
+  if (existing.count >= maxAttempts) {
+    return false; // Rate limited
   }
-  
-  record.count++;
+
+  // Increment counter
+  await supabase
+    .from('otp_rate_limits')
+    .update({ count: existing.count + 1 })
+    .eq('id', existing.id);
+
   return true;
 }
 
@@ -33,29 +71,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // ===== RATE LIMITING CHECK =====
-    // Limit to 3 requests per hour per IP (stricter for account deletion)
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
-               req.headers.get('x-real-ip') || 
-               'unknown';
-    
-    if (!checkRateLimit(ip, 3, 3600000)) {
-      console.log(`Rate limit exceeded for IP: ${ip}`);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Muitas tentativas. Por favor, tente novamente mais tarde.',
-          retryAfter: '1 hour'
-        }),
-        {
-          status: 429,
-          headers: { 
-            'Content-Type': 'application/json',
-            'Retry-After': '3600',
-            ...corsHeaders 
-          },
-        }
-      );
-    }
     // Get the authorization header from the request
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
@@ -63,7 +78,6 @@ Deno.serve(async (req) => {
     }
 
     // Create a client with the user's token to validate authentication
-    const token = authHeader.replace('Bearer ', '')
     const userClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -88,7 +102,7 @@ Deno.serve(async (req) => {
       throw new Error('Usuário não encontrado')
     }
 
-    // Create admin client for deletion operations
+    // Create admin client for deletion operations and rate limiting
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -100,7 +114,35 @@ Deno.serve(async (req) => {
       }
     )
 
-    console.log(`Iniciando exclusão da conta do usuário: ${user.id}`)
+    // ===== DATABASE-BACKED RATE LIMITING CHECK =====
+    // Limit to 3 requests per hour per user (stricter for account deletion)
+    const isAllowed = await checkDatabaseRateLimit(
+      supabaseClient,
+      user.id,
+      'delete_account',
+      3,
+      3600000 // 1 hour
+    );
+
+    if (!isAllowed) {
+      console.log(`Rate limit exceeded for user: ${sanitizeForLog(user.id)}`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Muitas tentativas. Por favor, tente novamente mais tarde.',
+          retryAfter: '1 hour'
+        }),
+        {
+          status: 429,
+          headers: { 
+            'Content-Type': 'application/json',
+            'Retry-After': '3600',
+            ...corsHeaders 
+          },
+        }
+      );
+    }
+
+    console.log(`Iniciando exclusão da conta do usuário: ${sanitizeForLog(user.id)}`)
 
     // Delete all user data in order (respecting foreign key constraints)
     // 1. Delete transactions
@@ -155,7 +197,7 @@ Deno.serve(async (req) => {
       throw new Error('Erro ao deletar usuário')
     }
 
-    console.log(`Conta do usuário ${user.id} deletada com sucesso`)
+    console.log(`Conta do usuário ${sanitizeForLog(user.id)} deletada com sucesso`)
 
     return new Response(
       JSON.stringify({ 
