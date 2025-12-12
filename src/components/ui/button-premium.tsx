@@ -11,7 +11,7 @@ const buttonPremiumVariants = cva(
         success: "bg-income text-white hover:opacity-90 active:opacity-80 focus-visible:outline-income",
         expense: "bg-expense text-white hover:opacity-90 active:opacity-80 focus-visible:outline-expense",
         investment: "bg-investment text-white hover:opacity-90 active:opacity-80 focus-visible:outline-investment",
-        glass: "bg-secondary text-secondary-foreground border border-border hover:bg-muted active:bg-muted/80 focus-visible:outline-primary",
+        glass: "bg-muted text-foreground border border-border hover:bg-muted/80 active:bg-muted/60 focus-visible:outline-primary",
       },
       size: {
         sm: "px-3 py-2 text-xs rounded-md",
