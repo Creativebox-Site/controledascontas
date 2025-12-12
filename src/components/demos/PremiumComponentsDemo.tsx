@@ -43,11 +43,11 @@ export function PremiumComponentsDemo() {
               <ButtonPremium variant="success" rightIcon={<Heart className="h-4 w-4" />}>
                 Success
               </ButtonPremium>
-              <ButtonPremium variant="sunset" leftIcon={<Zap className="h-4 w-4" />}>
-                Sunset
+              <ButtonPremium variant="expense" leftIcon={<Zap className="h-4 w-4" />}>
+                Expense
               </ButtonPremium>
-              <ButtonPremium variant="ocean" rightIcon={<Rocket className="h-4 w-4" />}>
-                Ocean
+              <ButtonPremium variant="investment" rightIcon={<Rocket className="h-4 w-4" />}>
+                Investment
               </ButtonPremium>
               <ButtonPremium variant="glass">
                 Glass
@@ -71,7 +71,7 @@ export function PremiumComponentsDemo() {
               <ButtonPremium size="md" variant="success">
                 Medium
               </ButtonPremium>
-              <ButtonPremium size="lg" variant="sunset">
+              <ButtonPremium size="lg" variant="expense">
                 Large
               </ButtonPremium>
             </div>
@@ -93,7 +93,7 @@ export function PremiumComponentsDemo() {
               <ButtonPremium effect="default" variant="success">
                 Default
               </ButtonPremium>
-              <ButtonPremium effect="strong" variant="ocean">
+              <ButtonPremium effect="strong" variant="investment">
                 Strong
               </ButtonPremium>
             </div>
@@ -279,7 +279,7 @@ export function PremiumComponentsDemo() {
 
                 <Tooltip3D>
                   <Tooltip3DTrigger asChild>
-                    <ButtonPremium variant="sunset" size="sm">
+                    <ButtonPremium variant="expense" size="sm">
                       Success Tooltip
                     </ButtonPremium>
                   </Tooltip3DTrigger>

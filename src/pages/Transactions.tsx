@@ -67,7 +67,7 @@ export const Transactions = ({ userId, currency }: TransactionsProps) => {
             Nova Despesa
           </ButtonPremium>
           <ButtonPremium 
-            variant="sunset" 
+            variant="investment" 
             size="md"
             onClick={() => openNewTransaction("investment")}
             leftIcon={<Plus className="w-4 h-4" />}
