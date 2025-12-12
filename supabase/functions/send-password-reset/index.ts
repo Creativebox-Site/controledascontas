@@ -9,6 +9,17 @@ interface PasswordResetRequest {
   email: string;
 }
 
+// ===== INPUT VALIDATION HELPERS =====
+function validateEmail(email: string): boolean {
+  if (!email || email.length > 254) return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function sanitizeForLog(input: string): string {
+  return input.replace(/[\r\n]/g, '').substring(0, 100);
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -17,9 +28,17 @@ Deno.serve(async (req) => {
   try {
     const { email }: PasswordResetRequest = await req.json();
 
+    // ===== INPUT VALIDATION =====
     if (!email || !email.trim()) {
       return new Response(
         JSON.stringify({ error: 'Email é obrigatório' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!validateEmail(email.trim())) {
+      return new Response(
+        JSON.stringify({ error: 'Formato de email inválido' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -34,7 +53,7 @@ Deno.serve(async (req) => {
     
     const generateLinkOptions: any = {
       type: 'recovery',
-      email: email,
+      email: email.trim(),
     };
     
     // Só adicionar redirectTo se houver um origin válido no header
@@ -90,7 +109,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         from: 'App Controle <acesso@appcontrole.creativebox.com.br>',
-        to: email,
+        to: email.trim(),
         subject: 'Recuperação de Senha - App Controle',
         html: `
           <!DOCTYPE html>
@@ -172,7 +191,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Password recovery email sent successfully to ${email}`);
+    console.log(`Password recovery email sent successfully to ${sanitizeForLog(email)}`);
 
     return new Response(
       JSON.stringify({ 

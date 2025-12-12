@@ -13,6 +13,22 @@ interface SendOtpRequest {
   ipAddress?: string;
 }
 
+// ===== INPUT VALIDATION HELPERS =====
+function validateEmail(email: string): boolean {
+  if (!email || email.length > 254) return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function sanitizeForLog(input: string): string {
+  return input.replace(/[\r\n]/g, '').substring(0, 100);
+}
+
+function validateStringLength(value: string | undefined, maxLength: number): boolean {
+  if (!value) return true; // Optional fields are valid if empty
+  return value.length <= maxLength;
+}
+
 // Gerar código OTP de 6 dígitos
 function generateOtpCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -45,7 +61,7 @@ async function checkRateLimit(supabase: any, identifier: string, type: string): 
 
   // Limite: 5 tentativas por hora
   if (hoursDiff < 1 && data.count >= 5) {
-    console.log(`Rate limit exceeded for ${type}: ${identifier}`);
+    console.log(`Rate limit exceeded for ${type}: ${sanitizeForLog(identifier)}`);
     return false;
   }
 
@@ -97,9 +113,31 @@ Deno.serve(async (req) => {
   try {
     const { email, requestId, deviceFingerprint, userAgent, ipAddress }: SendOtpRequest = await req.json();
 
+    // ===== INPUT VALIDATION =====
     if (!email || !requestId) {
       return new Response(
         JSON.stringify({ error: 'Email e requestId são obrigatórios' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!validateEmail(email)) {
+      return new Response(
+        JSON.stringify({ error: 'Formato de email inválido' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!validateStringLength(requestId, 255)) {
+      return new Response(
+        JSON.stringify({ error: 'requestId muito longo' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!validateStringLength(deviceFingerprint, 255)) {
+      return new Response(
+        JSON.stringify({ error: 'deviceFingerprint muito longo' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -279,7 +317,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`OTP sent successfully to ${email}`);
+    console.log(`OTP sent successfully to ${sanitizeForLog(email)}`);
 
     return new Response(
       JSON.stringify({ 
