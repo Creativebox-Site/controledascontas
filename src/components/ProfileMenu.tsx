@@ -100,13 +100,13 @@ export const ProfileMenu = ({ userId }: ProfileMenuProps) => {
       const filePath = `${resolvedUserId}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("avatars")
+        .from("profiles")
         .upload(filePath, croppedBlob);
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
-        .from("avatars")
+        .from("profiles")
         .getPublicUrl(filePath);
 
       const { error: updateError } = await supabase
