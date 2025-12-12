@@ -412,6 +412,36 @@ export type Database = {
           },
         ]
       }
+      profile_access_audit: {
+        Row: {
+          accessed_at: string
+          accessed_fields: string[] | null
+          action: string
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          accessed_at?: string
+          accessed_fields?: string[] | null
+          action: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          accessed_at?: string
+          accessed_fields?: string[] | null
+          action?: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -703,6 +733,7 @@ export type Database = {
     }
     Functions: {
       cleanup_expired_otps: { Args: never; Returns: undefined }
+      cleanup_old_audit_logs: { Args: never; Returns: undefined }
       create_default_categories: {
         Args: { p_user_id: string }
         Returns: undefined
