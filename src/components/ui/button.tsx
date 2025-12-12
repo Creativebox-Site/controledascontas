@@ -9,16 +9,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-z1 hover:shadow-z2 hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground shadow-z1 hover:shadow-z2 hover:bg-destructive/90",
-        outline: "border border-border bg-background hover:bg-muted hover:text-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-muted hover:text-foreground",
+        default: "bg-primary text-primary-foreground shadow-z1 hover:shadow-z2 hover:opacity-90 active:opacity-80",
+        destructive: "bg-destructive text-destructive-foreground shadow-z1 hover:shadow-z2 hover:opacity-90 active:opacity-80",
+        outline: "border border-border bg-background hover:bg-muted active:bg-muted/80",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70",
+        ghost: "hover:bg-muted active:bg-muted/80",
         link: "text-foreground underline-offset-4 hover:underline",
         /* Variantes financeiras */
-        income: "bg-income text-income-foreground shadow-z1 hover:shadow-z2 hover:bg-income/90",
-        expense: "bg-expense text-expense-foreground shadow-z1 hover:shadow-z2 hover:bg-expense/90",
-        investment: "bg-investment text-investment-foreground shadow-z1 hover:shadow-z2 hover:bg-investment/90",
+        income: "bg-income text-white shadow-z1 hover:shadow-z2 hover:opacity-90 active:opacity-80",
+        expense: "bg-expense text-white shadow-z1 hover:shadow-z2 hover:opacity-90 active:opacity-80",
+        investment: "bg-investment text-white shadow-z1 hover:shadow-z2 hover:opacity-90 active:opacity-80",
       },
       size: {
         default: "h-10 px-4 py-2",

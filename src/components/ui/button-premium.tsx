@@ -7,11 +7,11 @@ const buttonPremiumVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:outline-primary",
-        success: "bg-income text-income-foreground hover:bg-income/90 focus-visible:outline-income",
-        expense: "bg-expense text-expense-foreground hover:bg-expense/90 focus-visible:outline-expense",
-        investment: "bg-investment text-investment-foreground hover:bg-investment/90 focus-visible:outline-investment",
-        glass: "bg-secondary text-secondary-foreground border border-border hover:bg-muted focus-visible:outline-primary",
+        primary: "bg-primary text-primary-foreground hover:opacity-90 active:opacity-80 focus-visible:outline-primary",
+        success: "bg-income text-white hover:opacity-90 active:opacity-80 focus-visible:outline-income",
+        expense: "bg-expense text-white hover:opacity-90 active:opacity-80 focus-visible:outline-expense",
+        investment: "bg-investment text-white hover:opacity-90 active:opacity-80 focus-visible:outline-investment",
+        glass: "bg-secondary text-secondary-foreground border border-border hover:bg-muted active:bg-muted/80 focus-visible:outline-primary",
       },
       size: {
         sm: "px-3 py-2 text-xs rounded-md",
@@ -21,7 +21,7 @@ const buttonPremiumVariants = cva(
       effect: {
         default: "hover:-translate-y-px active:translate-y-0",
         strong: "hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-100",
-        subtle: "hover:opacity-90",
+        subtle: "",
       },
     },
     defaultVariants: {
