@@ -83,13 +83,13 @@ export const AppearanceSettings = ({
       const filePath = `${resolvedUserId}/${fileName}`;
       const {
         error: uploadError
-      } = await supabase.storage.from("avatars").upload(filePath, croppedBlob);
+      } = await supabase.storage.from("profiles").upload(filePath, croppedBlob);
       if (uploadError) throw uploadError;
       const {
         data: {
           publicUrl
         }
-      } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      } = supabase.storage.from("profiles").getPublicUrl(filePath);
       const {
         error: updateError
       } = await supabase.from("profiles").update({
