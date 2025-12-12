@@ -23,7 +23,7 @@ export const QuickActionsWidget = () => {
             effect="strong"
             className="h-14 w-14 rounded-full shadow-glow-primary"
           >
-            <Plus className={`h-6 w-6 transition-transform ${isOpen ? 'rotate-45' : ''}`} />
+            <Plus className={`h-6 w-6 text-white transition-transform ${isOpen ? 'rotate-45' : ''}`} />
           </ButtonPremium>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 bg-background">
